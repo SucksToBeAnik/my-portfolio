@@ -1,0 +1,89 @@
+import { getProjects } from "@/actions/projects";
+import { ProjectLink } from "@/components/ProjectLink";
+import { Heart } from "@phosphor-icons/react/dist/ssr";
+import { Breadcrumb } from "@/components/Breadcrumb";
+
+export const metadata = {
+  title: "Projects — Suckstobeanik",
+};
+
+function formatDate(date: string) {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return date;
+  return d.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+export default async function ProjectsPage() {
+  const items = await getProjects();
+
+  return (
+    <div className="space-y-12">
+      <div className="mb-16">
+        <Breadcrumb crumbs={[{ label: "Projects" }]} />
+      </div>
+
+      {items.length === 0 && (
+        <p className="text-sm text-muted">Nothing here yet.</p>
+      )}
+
+      {items.map((project) => (
+        <article
+          key={project.id}
+          className="grid grid-cols-[100px_1fr] gap-6"
+        >
+          <div className="flex flex-col justify-between text-xs text-muted text-right">
+            <div className="space-y-4">
+              {project.workedOn && (
+                <p>{formatDate(project.workedOn)}</p>
+              )}
+              <button
+                type="button"
+                className="inline-flex flex-row-reverse items-center gap-1.5 text-muted hover:text-fg transition-colors cursor-pointer"
+              >
+                <Heart weight="thin" className="w-3.5 h-3.5" />
+                <span>42</span>
+              </button>
+            </div>
+            <div className="space-y-1">
+              {project.url && (
+                <ProjectLink url={project.url} label="Website" />
+              )}
+              {project.githubUrl && (
+                <ProjectLink url={project.githubUrl} label="GitHub" />
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-[1fr_1fr] gap-4 min-h-0">
+            {project.imageUrl ? (
+              <div className="overflow-hidden rounded-lg max-h-[220px]">
+                <img
+                  src={project.imageUrl}
+                  alt={project.title}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+            ) : (
+              <div className="bg-hover-bg rounded-lg max-h-[220px]" />
+            )}
+            <div className="overflow-y-auto max-h-[220px] space-y-2 pr-1">
+              <h2 className="text-xl font-heading leading-snug">
+                {project.title}
+              </h2>
+              {project.description && (
+                <div
+                  className="text-xs text-fg/80 prose-content"
+                  dangerouslySetInnerHTML={{ __html: project.description }}
+                />
+              )}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}

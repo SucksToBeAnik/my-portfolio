@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Inter } from "next/font/google";
+import { Space_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { PageShell } from "@/components/PageShell";
 import { BottomNav } from "@/components/BottomNav";
 import { ThemeProvider } from "@/lib/ThemeProvider";
 import { SessionProvider } from "next-auth/react";
 
-const geist = Geist({
+const spaceMono = Space_Mono({
   subsets: ["latin"],
-  variable: "--font-geist-heading",
+  weight: ["400", "700"],
+  variable: "--font-heading",
 });
 
 const inter = Inter({
@@ -29,7 +30,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${inter.variable}`}
+      className={`${spaceMono.variable} ${inter.variable}`}
       data-theme="dark"
     >
       <head>

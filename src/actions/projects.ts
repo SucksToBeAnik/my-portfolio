@@ -9,11 +9,11 @@ import { eq } from "drizzle-orm"
 const schema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
-  techStack: z.string().optional(),
   imageUrl: z.string().optional(),
   videoUrl: z.string().optional(),
   url: z.string().optional(),
   githubUrl: z.string().optional(),
+  workedOn: z.string().optional(),
   featured: z.boolean().optional(),
   sortOrder: z.number().optional(),
 })

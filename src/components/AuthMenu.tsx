@@ -68,7 +68,7 @@ export function AuthMenu() {
       <button
         type="button"
         onClick={toggle}
-        className="flex items-center justify-center w-7 h-7 rounded-full text-nav-text hover:text-nav-text-hover hover:bg-nav-hover-bg transition-colors cursor-pointer"
+        className="flex items-center justify-center w-7 h-7 rounded-full text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 cursor-pointer"
         aria-label="User menu"
       >
         {isLoggedIn ? (

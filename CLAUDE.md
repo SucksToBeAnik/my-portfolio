@@ -69,11 +69,11 @@ All tables defined in `src/db/schema.ts`.
 - `id` integer PK
 - `title` text
 - `description` text
-- `techStack` text (JSON array stored as text)
 - `imageUrl` text nullable (project screenshot)
 - `videoUrl` text nullable (demo video link)
 - `url` text nullable
 - `githubUrl` text nullable
+- `workedOn` text nullable (ISO date string — when the project was worked on; defaults to current date)
 - `featured` integer (boolean)
 - `sortOrder` integer
 - `createdAt` timestamp

@@ -32,7 +32,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 flex justify-center pb-4 pointer-events-none z-50">
-      <div className="flex items-center justify-center w-full max-w-[680px] mx-4 px-2 py-2 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
+      <div className="flex items-center justify-center w-full max-w-[680px] mx-4 px-2 py-2 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto overflow-visible">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -41,13 +41,9 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${
-                isActive
-                  ? "bg-nav-active-bg text-nav-active-text"
-                  : "text-nav-text hover:text-nav-text-hover hover:bg-nav-hover-bg"
-              }`}
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200"
             >
-              <Icon weight="thin" className="w-4 h-4" />
+              <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4" />
               <span>{item.label}</span>
             </Link>
           );
@@ -59,7 +55,7 @@ export function BottomNav() {
         <button
           type="button"
           onClick={toggleTheme}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-nav-text hover:text-nav-text-hover hover:bg-nav-hover-bg transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 cursor-pointer"
           aria-label="Toggle theme"
         >
           {theme === "dark" ? (

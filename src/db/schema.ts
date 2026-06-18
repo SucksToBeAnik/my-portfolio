@@ -14,11 +14,11 @@ export const projects = sqliteTable("projects", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  techStack: text("tech_stack"),
   imageUrl: text("image_url"),
   videoUrl: text("video_url"),
   url: text("url"),
   githubUrl: text("github_url"),
+  workedOn: text("worked_on"),
   featured: integer("featured", { mode: "boolean" }).default(false),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })

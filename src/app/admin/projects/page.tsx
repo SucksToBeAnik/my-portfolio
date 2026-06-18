@@ -16,19 +16,19 @@ interface Project {
   id: number;
   title: string;
   description: string;
-  techStack: string | null;
   imageUrl: string | null;
   videoUrl: string | null;
   url: string | null;
   githubUrl: string | null;
+  workedOn: string | null;
   featured: boolean | null;
   sortOrder: number | null;
   updatedAt: Date | null;
 }
 
 const empty = {
-  title: "", description: "", techStack: "", imageUrl: "", videoUrl: "",
-  url: "", githubUrl: "", featured: false,
+  title: "", description: "", imageUrl: "", videoUrl: "",
+  url: "", githubUrl: "", workedOn: "", featured: false,
 };
 
 export default function ProjectsPage() {
@@ -192,10 +192,6 @@ export default function ProjectsPage() {
               <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />
               <p className={errCls("title")}>{errors.title}</p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Tech Stack (comma separated)</label>
-              <input value={f("techStack")} onChange={(e) => s("techStack", e.target.value)} className={inputCls} />
-            </div>
             <ImageUpload
               currentUrl={f("imageUrl")}
               onUpload={(url) => s("imageUrl", url)}
@@ -215,6 +211,10 @@ export default function ProjectsPage() {
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">GitHub URL</label>
               <input value={f("githubUrl")} onChange={(e) => s("githubUrl", e.target.value)} className={inputCls} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Worked On</label>
+              <input type="date" value={f("workedOn")} onChange={(e) => s("workedOn", e.target.value)} className={inputCls} />
             </div>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="featured" checked={form.featured ?? false} onChange={(e) => s("featured", e.target.checked)} className="accent-fg" />

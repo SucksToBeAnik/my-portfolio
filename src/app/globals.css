@@ -44,7 +44,7 @@
   --color-nav-hover-bg: var(--nav-hover-bg);
   --color-nav-active-bg: var(--nav-active-bg);
   --color-nav-active-text: var(--nav-active-text);
-  --font-heading: var(--font-geist-heading);
+  --font-heading: var(--font-heading);
   --font-sans: var(--font-sans);
 }
 
@@ -52,6 +52,30 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans), sans-serif;
+}
+
+/* Custom thin scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) transparent;
 }
 
 /* Tiptap editor content styles */
@@ -105,5 +129,51 @@ body {
 }
 
 .ProseMirror strong {
+  font-weight: 600;
+}
+
+/* Rendered Tiptap HTML content on public pages */
+.prose-content h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+}
+
+.prose-content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.4em;
+}
+
+.prose-content p {
+  margin: 0.5em 0;
+}
+
+.prose-content ul,
+.prose-content ol {
+  padding-left: 1.25em;
+  margin: 0.5em 0;
+}
+
+.prose-content li {
+  margin: 0.2em 0;
+}
+
+.prose-content a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1em 0;
+}
+
+.prose-content strong {
   font-weight: 600;
 }
