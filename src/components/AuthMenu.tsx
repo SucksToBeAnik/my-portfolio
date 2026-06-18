@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { UserCircle } from "@phosphor-icons/react";
+import { UserCircle, Envelope, Lock, SquaresFour, SignOut } from "@phosphor-icons/react";
 
 export function AuthMenu() {
   const { data: session, status } = useSession();
@@ -72,7 +72,7 @@ export function AuthMenu() {
         aria-label="User menu"
       >
         {isLoggedIn ? (
-          <span className="w-full h-full rounded-full bg-white text-black flex items-center justify-center text-[10px] font-medium">
+          <span className="w-full h-full rounded-full bg-nav-active-bg text-nav-active-text flex items-center justify-center text-[10px] font-medium">
             A
           </span>
         ) : (
@@ -81,37 +81,49 @@ export function AuthMenu() {
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-[#0d1117] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-nav-bg backdrop-blur-xl border border-nav-border rounded-xl shadow-2xl overflow-hidden z-50">
           {isLoggedIn ? (
             <div className="p-2 space-y-0.5">
-              <p className="px-3 py-2 text-xs text-white/50">
+              <p className="px-3 py-2 text-[11px] text-nav-text">
                 {session?.user?.email}
               </p>
               <Link
                 href="/admin/dashboard"
                 onClick={() => setOpen(false)}
-                className="block w-full px-3 py-2 text-sm text-left text-white hover:bg-white/5 rounded-lg transition-colors"
+                className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left text-nav-text hover:text-nav-text-hover hover:bg-nav-hover-bg rounded-lg transition-colors"
               >
+                <SquaresFour weight="thin" className="w-3.5 h-3.5" />
                 Admin Dashboard
               </Link>
               <button
                 type="button"
                 onClick={() => signOut()}
-                className="block w-full px-3 py-2 text-sm text-left text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left text-nav-text hover:text-nav-text-hover hover:bg-nav-hover-bg rounded-lg transition-colors"
               >
+                <SignOut weight="thin" className="w-3.5 h-3.5" />
                 Logout
               </button>
             </div>
           ) : (
-            <form onSubmit={handleLogin} className="p-4 space-y-3">
-              <div className="space-y-2">
+            <form onSubmit={handleLogin} className="p-3 space-y-2.5">
+              <div className="relative">
+                <Envelope
+                  weight="thin"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-nav-text pointer-events-none"
+                />
                 <input
                   type="email"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full pl-7 pr-2.5 py-1.5 text-xs bg-nav-hover-bg border border-nav-border rounded-lg text-fg placeholder-nav-text/50 focus:outline-none focus:border-nav-text transition-colors"
+                />
+              </div>
+              <div className="relative">
+                <Lock
+                  weight="thin"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-nav-text pointer-events-none"
                 />
                 <input
                   type="password"
@@ -119,16 +131,16 @@ export function AuthMenu() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full pl-7 pr-2.5 py-1.5 text-xs bg-nav-hover-bg border border-nav-border rounded-lg text-fg placeholder-nav-text/50 focus:outline-none focus:border-nav-text transition-colors"
                 />
               </div>
               {error && (
-                <p className="text-xs text-red-400">{error}</p>
+                <p className="text-[11px] text-red-400">{error}</p>
               )}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-white/90 disabled:opacity-50 transition-colors"
+                className="w-full py-1.5 text-xs font-medium bg-nav-active-bg text-nav-active-text rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
               >
                 {loading ? "Logging in..." : "Login"}
               </button>
