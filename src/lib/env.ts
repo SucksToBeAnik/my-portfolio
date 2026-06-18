@@ -8,4 +8,17 @@ export const env = cleanEnv(process.env, {
   TURSO_AUTH_TOKEN: str({
     docs: "https://docs.turso.tech/sdk/ts/quickstart",
   }),
+  AUTH_SECRET: str({
+    docs: "https://authjs.dev/reference/core/errors#missingsecret",
+    desc: "NextAuth.js encryption secret",
+  }),
+  XAI_API_KEY: str({
+    desc: "xAI API key for Grok chat",
+  }),
+  ADMIN_EMAIL: str({
+    desc: "Admin login email",
+  }),
+  ADMIN_PASSWORD: str({
+    desc: "Admin login password",
+  }),
 })

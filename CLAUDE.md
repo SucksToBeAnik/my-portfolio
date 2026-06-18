@@ -70,6 +70,8 @@ All tables defined in `src/db/schema.ts`.
 - `title` text
 - `description` text
 - `techStack` text (JSON array stored as text)
+- `imageUrl` text nullable (project screenshot)
+- `videoUrl` text nullable (demo video link)
 - `url` text nullable
 - `githubUrl` text nullable
 - `featured` integer (boolean)
@@ -101,6 +103,7 @@ All tables defined in `src/db/schema.ts`.
 - `id` integer PK
 - `title` text
 - `content` text
+- `imageUrl` text nullable
 - `published` integer (boolean)
 - `publishedAt` timestamp nullable
 - `createdAt` timestamp
@@ -110,16 +113,10 @@ All tables defined in `src/db/schema.ts`.
 - `id` integer PK
 - `name` text
 - `description` text
+- `imageUrl` text nullable
 - `url` text nullable
 - `category` text
 - `sortOrder` integer
-- `createdAt` timestamp
-
-**profile_data** (knowledge base for the AI chat)
-- `id` integer PK
-- `question` text (e.g. "What programming languages do you know?")
-- `answer` text
-- `category` text (skills, experience, education, etc.)
 - `createdAt` timestamp
 
 ### Migrations
@@ -140,8 +137,8 @@ All tables defined in `src/db/schema.ts`.
 - Use the `ai` package from Vercel (AI SDK)
 - xAI provider via `@ai-sdk/openai` with a custom base URL pointing to
   `https://api.x.ai/v1` (OpenAI-compatible endpoint)
-- System prompt constructed from `profile_data` table rows (all Q&A pairs
-  injected as context)
+- System prompt constructed from `src/content/profile.md` (a markdown file with
+  all personal information, read at build/runtime)
 - Streaming response rendered token by token
 - Chat UI: simple scrollable message list + text input at bottom
 - No conversation history stored (stateless per session, or use
@@ -181,7 +178,6 @@ All components in `src/components/`:
 - `/admin/books` — list + CRUD
 - `/admin/microblogs` — list + CRUD
 - `/admin/tools` — list + CRUD
-- `/admin/profile-data` — manage AI knowledge base entries
 
 ## Server Actions (`src/actions/`)
 
@@ -192,7 +188,6 @@ Grouped by domain:
 - `books.ts` — CRUD actions
 - `microblogs.ts` — CRUD actions
 - `tools.ts` — CRUD actions
-- `profile-data.ts` — CRUD actions
 
 ## Dependencies to Add
 

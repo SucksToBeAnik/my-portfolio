@@ -4,6 +4,7 @@ import "./globals.css";
 import { PageShell } from "@/components/PageShell";
 import { BottomNav } from "@/components/BottomNav";
 import { ThemeProvider } from "@/lib/ThemeProvider";
+import { SessionProvider } from "next-auth/react";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -46,10 +47,12 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <ThemeProvider>
-          <PageShell>{children}</PageShell>
-          <BottomNav />
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider>
+            <PageShell>{children}</PageShell>
+            <BottomNav />
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

@@ -13,6 +13,7 @@ import {
   Moon,
 } from "@phosphor-icons/react";
 import { useTheme } from "@/lib/ThemeProvider";
+import { AuthMenu } from "@/components/AuthMenu";
 
 const navItems = [
   { href: "/projects", label: "Projects", icon: FolderOpen },
@@ -50,6 +51,8 @@ export function BottomNav() {
           );
         })}
         <div className="w-px h-5 mx-3 bg-nav-border" />
+
+        <AuthMenu />
 
         <button
           type="button"
