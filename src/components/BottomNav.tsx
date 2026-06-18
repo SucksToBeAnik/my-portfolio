@@ -1,0 +1,69 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  FolderOpen,
+  Heart,
+  BookOpenText,
+  Quotes,
+  Wrench,
+  ChatCircleDots,
+  SunDim,
+  Moon,
+} from "@phosphor-icons/react";
+import { useTheme } from "@/lib/ThemeProvider";
+
+const navItems = [
+  { href: "/projects", label: "Projects", icon: FolderOpen },
+  { href: "/life", label: "Life", icon: Heart },
+  { href: "/books", label: "Books", icon: BookOpenText },
+  { href: "/microblog", label: "Microblog", icon: Quotes },
+  { href: "/tools", label: "Tools", icon: Wrench },
+  { href: "/ask", label: "Ask", icon: ChatCircleDots },
+];
+
+export function BottomNav() {
+  const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 flex justify-center pb-4 pointer-events-none z-50">
+      <div className="flex items-center justify-center w-full max-w-[680px] mx-4 px-2 py-2 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${
+                isActive
+                  ? "bg-nav-active-bg text-nav-active-text"
+                  : "text-nav-text hover:text-nav-text-hover hover:bg-nav-hover-bg"
+              }`}
+            >
+              <Icon weight="thin" className="w-4 h-4" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+        <div className="w-px h-5 mx-3 bg-nav-border" />
+
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-nav-text hover:text-nav-text-hover hover:bg-nav-hover-bg transition-colors cursor-pointer"
+          aria-label="Toggle theme"
+        >
+          {theme === "dark" ? (
+            <SunDim weight="thin" className="w-4 h-4" />
+          ) : (
+            <Moon weight="thin" className="w-4 h-4" />
+          )}
+        </button>
+      </div>
+    </nav>
+  );
+}

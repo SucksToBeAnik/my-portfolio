@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #000000;
+  --fg: #ffffff;
+  --muted: #888888;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --nav-bg: rgba(255, 255, 255, 0.1);
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --nav-text: rgba(255, 255, 255, 0.75);
+  --nav-text-hover: rgb(255, 255, 255);
+  --nav-hover-bg: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgb(255, 255, 255);
+  --nav-active-text: rgb(0, 0, 0);
+}
+
+[data-theme="light"] {
+  --bg: #FFCBC0;
+  --fg: #000000;
+  --muted: #6b6b6b;
+  --hairline: rgba(0, 0, 0, 0.1);
+  --nav-bg: rgba(0, 0, 0, 0.08);
+  --nav-border: rgba(0, 0, 0, 0.1);
+  --nav-text: rgba(0, 0, 0, 0.8);
+  --nav-text-hover: rgb(0, 0, 0);
+  --nav-hover-bg: rgba(0, 0, 0, 0.08);
+  --nav-active-bg: rgb(0, 0, 0);
+  --nav-active-text: rgb(255, 255, 255);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-hairline: var(--hairline);
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-border: var(--nav-border);
+  --color-nav-text: var(--nav-text);
+  --color-nav-text-hover: var(--nav-text-hover);
+  --color-nav-hover-bg: var(--nav-hover-bg);
+  --color-nav-active-bg: var(--nav-active-bg);
+  --color-nav-active-text: var(--nav-active-text);
+  --font-heading: var(--font-geist-heading);
+  --font-sans: var(--font-sans);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans), sans-serif;
+}
