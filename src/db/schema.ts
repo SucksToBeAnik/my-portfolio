@@ -84,6 +84,16 @@ export const microblogs = sqliteTable("microblogs", {
     .$defaultFn(() => new Date()),
 })
 
+export const hearts = sqliteTable("hearts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  entityType: text("entity_type").notNull(),
+  entityId: integer("entity_id").notNull(),
+  visitorId: text("visitor_id").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})
+
 export const tools = sqliteTable("tools", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),

@@ -159,7 +159,7 @@ export default function MicroblogsPage() {
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No posts yet.</p>}
 
       <Drawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setErrors({}); }} title={editId ? "Edit Post" : "Add Post"}>
-        <form onSubmit={(e) => { e.preventDefault(); setErrors({}); const data = { ...form, publishedAt: form.publishedAt || null }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form as any }); else createMut.mutate(form as any); }} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>

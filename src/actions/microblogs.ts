@@ -20,7 +20,10 @@ export async function getMicroblogs() {
 
 export async function createMicroblog(data: z.infer<typeof schema>) {
   const parsed = schema.parse(data)
-  await db.insert(microblogs).values(parsed)
+  await db.insert(microblogs).values({
+    ...parsed,
+    publishedAt: parsed.published && !parsed.publishedAt ? new Date() : parsed.publishedAt,
+  })
   revalidatePath("/admin/microblogs")
 }
 
@@ -28,7 +31,13 @@ export async function updateMicroblog(id: number, data: z.infer<typeof schema>) 
   const parsed = schema.parse(data)
   await db
     .update(microblogs)
-    .set({ ...parsed, updatedAt: new Date() })
+    .set({
+      ...parsed,
+      updatedAt: new Date(),
+      publishedAt: parsed.published
+        ? (parsed.publishedAt || new Date())
+        : null,
+    })
     .where(eq(microblogs.id, id))
   revalidatePath("/admin/microblogs")
 }

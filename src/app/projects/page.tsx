@@ -1,6 +1,7 @@
 import { getProjects } from "@/actions/projects";
 import { ProjectLink } from "@/components/ProjectLink";
-import { Heart } from "@phosphor-icons/react/dist/ssr";
+import { HeartButton } from "@/components/HeartButton";
+import { getHeartsForEntities } from "@/actions/hearts";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { ClickableImage } from "@/components/ClickableImage";
 
@@ -20,6 +21,10 @@ function formatDate(date: string) {
 
 export default async function ProjectsPage() {
   const items = await getProjects();
+  const heartsMap = await getHeartsForEntities(
+    "project",
+    items.map((p) => p.id),
+  );
 
   return (
     <div className="space-y-12">
@@ -31,7 +36,9 @@ export default async function ProjectsPage() {
         <p className="text-sm text-muted">Nothing here yet.</p>
       )}
 
-      {items.map((project) => (
+      {items.map((project) => {
+        const heart = heartsMap[project.id] ?? { count: 0, hearted: false };
+        return (
         <article
           key={project.id}
           className="grid grid-cols-[100px_1fr] gap-6"
@@ -41,13 +48,12 @@ export default async function ProjectsPage() {
               {project.workedOn && (
                 <p>{formatDate(project.workedOn)}</p>
               )}
-              <button
-                type="button"
-                className="inline-flex flex-row-reverse items-center gap-1.5 text-muted hover:text-fg transition-colors cursor-pointer"
-              >
-                <Heart weight="thin" className="w-3.5 h-3.5" />
-                <span>42</span>
-              </button>
+              <HeartButton
+                entityType="project"
+                entityId={project.id}
+                initialCount={heart.count}
+                initialHearted={heart.hearted}
+              />
             </div>
             <div className="space-y-1">
               {project.url && (
@@ -82,7 +88,8 @@ export default async function ProjectsPage() {
             </div>
           </div>
         </article>
-      ))}
+        );
+      })}
     </div>
   );
 }

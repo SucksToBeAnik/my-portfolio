@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  House,
   FolderOpen,
   Heart,
   BookOpenText,
@@ -16,6 +17,7 @@ import { useTheme } from "@/lib/ThemeProvider";
 import { AuthMenu } from "@/components/AuthMenu";
 
 const navItems = [
+  { href: "/", label: "Home", icon: House },
   { href: "/projects", label: "Projects", icon: FolderOpen },
   { href: "/life", label: "Life", icon: Heart },
   { href: "/books", label: "Books", icon: BookOpenText },
