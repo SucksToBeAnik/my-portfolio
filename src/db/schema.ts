@@ -35,6 +35,8 @@ export const lifeEvents = sqliteTable("life_events", {
   startDate: text("start_date").notNull(),
   endDate: text("end_date"),
   description: text("description").notNull(),
+  imageUrl: text("image_url"),
+  url: text("url"),
   type: text("type").notNull(),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })

@@ -41,7 +41,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200"
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200"
             >
               <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4" />
               <span>{item.label}</span>

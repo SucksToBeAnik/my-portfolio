@@ -2,6 +2,7 @@ import { getProjects } from "@/actions/projects";
 import { ProjectLink } from "@/components/ProjectLink";
 import { Heart } from "@phosphor-icons/react/dist/ssr";
 import { Breadcrumb } from "@/components/Breadcrumb";
+import { ClickableImage } from "@/components/ClickableImage";
 
 export const metadata = {
   title: "Projects — Suckstobeanik",
@@ -60,13 +61,11 @@ export default async function ProjectsPage() {
 
           <div className="grid grid-cols-[1fr_1fr] gap-4 min-h-0">
             {project.imageUrl ? (
-              <div className="overflow-hidden rounded-lg max-h-[220px]">
-                <img
-                  src={project.imageUrl}
-                  alt={project.title}
-                  className="object-cover w-full h-full"
-                />
-              </div>
+              <ClickableImage
+                src={project.imageUrl}
+                alt={project.title}
+                className="overflow-hidden rounded-lg max-h-[220px] cursor-pointer hover:opacity-80 transition-opacity"
+              />
             ) : (
               <div className="bg-hover-bg rounded-lg max-h-[220px]" />
             )}

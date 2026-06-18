@@ -11,6 +11,8 @@ const schema = z.object({
   startDate: z.string().min(1),
   endDate: z.string().optional().nullable(),
   description: z.string().min(1),
+  imageUrl: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
   type: z.string().min(1),
   sortOrder: z.number().optional(),
 })

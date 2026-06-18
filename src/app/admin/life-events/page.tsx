@@ -10,6 +10,7 @@ import { getLifeEvents, createLifeEvent, updateLifeEvent, deleteLifeEvent, reord
 import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { Drawer } from "@/components/Drawer";
+import { ImageUpload } from "@/components/ImageUpload";
 
 interface Item {
   id: number;
@@ -17,12 +18,16 @@ interface Item {
   startDate: string;
   endDate: string | null;
   description: string;
+  imageUrl: string | null;
+  url: string | null;
   type: string;
   sortOrder: number | null;
   updatedAt: Date | null;
 }
 
-const empty = { title: "", startDate: "", endDate: "", description: "", type: "milestone" };
+const empty = { title: "", startDate: "", endDate: "", description: "", imageUrl: "", url: "", type: "education" };
+
+const types = ["education", "work", "travel", "milestone"];
 
 export default function LifeEventsPage() {
   const qc = useQueryClient();
@@ -167,7 +172,7 @@ export default function LifeEventsPage() {
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No life events yet.</p>}
 
       <Drawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setErrors({}); }} title={editId ? "Edit Event" : "Add Event"}>
-        <form onSubmit={(e) => { e.preventDefault(); setErrors({}); const data = { ...form, endDate: form.endDate || null }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); setErrors({}); const data = { ...form, endDate: form.endDate || null, imageUrl: form.imageUrl || null, url: form.url || null }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
@@ -177,10 +182,7 @@ export default function LifeEventsPage() {
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Type</label>
               <select value={f("type")} onChange={(e) => s("type", e.target.value)} className={selectCls}>
-                <option value="milestone">Milestone</option>
-                <option value="achievement">Achievement</option>
-                <option value="travel">Travel</option>
-                <option value="other">Other</option>
+                {types.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
               </select>
             </div>
             <div className="space-y-1.5">
@@ -191,6 +193,11 @@ export default function LifeEventsPage() {
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">End Date <span className="text-fg/20">(leave empty = ongoing)</span></label>
               <input type="date" value={f("endDate")} onChange={(e) => s("endDate", e.target.value)} className={inputCls} />
+            </div>
+            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">URL <span className="text-fg/20">(institution/company)</span></label>
+              <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} />
             </div>
           </div>
           <div className="space-y-1.5">
