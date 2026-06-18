@@ -12,6 +12,8 @@ const schema = z.object({
   coverUrl: z.string().optional(),
   rating: z.number().min(1).max(5).optional().nullable(),
   review: z.string().optional(),
+  quote: z.string().optional(),
+  category: z.string().optional(),
   status: z.enum(["reading", "read", "want_to_read"]),
   sortOrder: z.number().optional(),
 })

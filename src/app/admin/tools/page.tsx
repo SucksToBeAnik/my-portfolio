@@ -180,7 +180,7 @@ export default function ToolsPage() {
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Description</label>
-            <ContentEditor content={f("description")} onChange={(html) => s("description", html)} />
+            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("description")} onChange={(html) => s("description", html)} />
             <p className={errCls("description")}>{errors.description}</p>
           </div>
           <div className="flex gap-2 pt-2">

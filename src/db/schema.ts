@@ -54,6 +54,8 @@ export const books = sqliteTable("books", {
   coverUrl: text("cover_url"),
   rating: integer("rating"),
   review: text("review"),
+  quote: text("quote"),
+  category: text("category"),
   status: text("status", { enum: ["reading", "read", "want_to_read"] })
     .notNull()
     .default("want_to_read"),

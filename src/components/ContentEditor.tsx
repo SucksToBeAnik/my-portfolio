@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import LinkExtension from "@tiptap/extension-link";
@@ -45,18 +45,10 @@ export function ContentEditor({
     editorProps: {
       attributes: {
         class:
-          "prose prose-invert max-w-none focus:outline-none min-h-[200px] px-4 py-3 text-sm text-fg",
+          "editor-content focus:outline-none min-h-[200px] px-4 py-3 text-sm text-fg",
       },
     },
   });
-
-  const lastContent = useRef(content);
-  useEffect(() => {
-    if (editor && content !== lastContent.current) {
-      lastContent.current = content;
-      editor.commands.setContent(content, { emitUpdate: false });
-    }
-  }, [content, editor]);
 
   const handleImageInserted = useCallback(
     (url: string) => {

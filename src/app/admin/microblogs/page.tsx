@@ -174,7 +174,7 @@ export default function MicroblogsPage() {
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Content</label>
-            <ContentEditor content={f("content")} onChange={(html) => s("content", html)} />
+            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("content")} onChange={(html) => s("content", html)} />
             <p className={errCls("content")}>{errors.content}</p>
           </div>
           <div className="flex gap-2 pt-2">

@@ -5,12 +5,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { PencilSimple, Trash, DotsSixVertical, Plus } from "@phosphor-icons/react";
+import { PencilSimple, Trash, DotsSixVertical, Plus, Star } from "@phosphor-icons/react";
 import { getBooks, createBook, updateBook, deleteBook, reorderBooks } from "@/actions/books";
 import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Drawer } from "@/components/Drawer";
+
+const categories = ["fiction", "non-fiction", "sci-fi", "fantasy", "self-help", "business", "biography", "history", "philosophy", "poetry"];
 
 interface Item {
   id: number;
@@ -19,12 +21,14 @@ interface Item {
   coverUrl: string | null;
   rating: number | null;
   review: string | null;
+  quote: string | null;
+  category: string | null;
   status: "reading" | "read" | "want_to_read";
   sortOrder: number | null;
   updatedAt: Date | null;
 }
 
-const empty = { title: "", author: "", coverUrl: "", rating: null, review: "", status: "want_to_read" as const };
+const empty = { title: "", author: "", coverUrl: "", rating: null, review: "", quote: "", category: "", status: "want_to_read" as const };
 
 export default function BooksPage() {
   const qc = useQueryClient();
@@ -177,10 +181,20 @@ export default function BooksPage() {
             <ImageUpload currentUrl={f("coverUrl")} onUpload={(url) => s("coverUrl", url)} onRemove={() => s("coverUrl", "")} />
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Rating</label>
-              <select value={f("rating")} onChange={(e) => s("rating", e.target.value ? Number(e.target.value) : null)} className={selectCls}>
-                <option value="">None</option>
-                {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => s("rating", (form.rating ?? 0) === n ? null : n)}
+                    className={`p-1 rounded transition-colors cursor-pointer hover:text-fg ${
+                      (form.rating ?? 0) >= n ? "text-fg" : "text-fg/30"
+                    }`}
+                  >
+                    <Star weight="fill" className="w-4 h-4" />
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Status</label>
@@ -192,8 +206,36 @@ export default function BooksPage() {
             </div>
           </div>
           <div className="space-y-1.5">
+            <label className="text-xs text-fg/50">Category</label>
+            <div className="flex flex-wrap gap-1.5">
+              {categories.map((cat) => {
+                const selected = (f("category") as string).split(",").map((c: string) => c.trim()).includes(cat);
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => {
+                      const current = (f("category") as string).split(",").map((c: string) => c.trim()).filter(Boolean);
+                      const next = selected ? current.filter((c: string) => c !== cat) : [...current, cat];
+                      s("category", next.join(", "));
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] transition-colors cursor-pointer ${
+                      selected ? "bg-fg text-bg" : "bg-hover-bg text-fg/60 hover:text-fg"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs text-fg/50">Quote</label>
+            <input value={f("quote")} onChange={(e) => s("quote", e.target.value)} className={inputCls} />
+          </div>
+          <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Review</label>
-            <ContentEditor content={f("review")} onChange={(html) => s("review", html)} />
+            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("review")} onChange={(html) => s("review", html)} />
           </div>
           <div className="flex gap-2 pt-2">
             <button type="submit" disabled={isPending} className="px-4 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
