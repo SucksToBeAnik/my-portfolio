@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { GithubLogo, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo, LinkedinLogo, XLogo } from "@phosphor-icons/react/dist/ssr";
 import { LinkPreview } from "@/components/LinkPreview";
 
 const articles = [
@@ -49,14 +49,26 @@ export default function Home() {
               <GithubLogo weight="thin" className="w-5 h-5" />
             </Link>
           </LinkPreview>
-          <Link
-            href="https://youtube.com"
-            target="_blank"
-            className="flex items-center gap-1.5 hover:text-fg transition-colors"
-            aria-label="YouTube"
-          >
-            <YoutubeLogo weight="thin" className="w-5 h-5" />
-          </Link>
+          <LinkPreview url="https://www.linkedin.com/in/al-jami-islam-anik-485758285">
+            <Link
+              href="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
+              target="_blank"
+              className="flex items-center gap-1.5 hover:text-fg transition-colors"
+              aria-label="LinkedIn"
+            >
+              <LinkedinLogo weight="thin" className="w-5 h-5" />
+            </Link>
+          </LinkPreview>
+          <LinkPreview url="https://x.com/suckstobeanik">
+            <Link
+              href="https://x.com/suckstobeanik"
+              target="_blank"
+              className="flex items-center gap-1.5 hover:text-fg transition-colors"
+              aria-label="X / Twitter"
+            >
+              <XLogo weight="thin" className="w-5 h-5" />
+            </Link>
+          </LinkPreview>
         </div>
       </section>
 

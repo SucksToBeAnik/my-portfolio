@@ -3,6 +3,7 @@ import { Space_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { PageShell } from "@/components/PageShell";
 import { BottomNav } from "@/components/BottomNav";
+import { SearchOverlay } from "@/components/SearchOverlay";
 import { ThemeProvider } from "@/lib/ThemeProvider";
 import { SessionProvider } from "next-auth/react";
 
@@ -52,6 +53,7 @@ export default function RootLayout({
           <ThemeProvider>
             <PageShell>{children}</PageShell>
             <BottomNav />
+            <SearchOverlay />
           </ThemeProvider>
         </SessionProvider>
       </body>

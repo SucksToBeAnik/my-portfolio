@@ -12,8 +12,8 @@ export const env = cleanEnv(process.env, {
     docs: "https://authjs.dev/reference/core/errors#missingsecret",
     desc: "NextAuth.js encryption secret",
   }),
-  XAI_API_KEY: str({
-    desc: "xAI API key for Grok chat",
+  GROQ_API_KEY: str({
+    desc: "Groq API key for AI chat",
   }),
   ADMIN_EMAIL: str({
     desc: "Admin login email",

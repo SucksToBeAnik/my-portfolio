@@ -17,6 +17,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^3.0.42",
+    "@ai-sdk/openai": "^3.0.73",
     "@hello-pangea/dnd": "^18.0.1",
     "@libsql/client": "^0.17.4",
     "@phosphor-icons/react": "^2.1.10",
@@ -26,6 +28,7 @@
     "@tiptap/extension-placeholder": "^3.27.0",
     "@tiptap/react": "^3.27.0",
     "@tiptap/starter-kit": "^3.27.0",
+    "ai": "^6.0.207",
     "bcryptjs": "^3.0.3",
     "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.2",
@@ -34,6 +37,9 @@
     "next-auth": "5.0.0-beta.31",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-markdown": "^10.1.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
     "zod": "^4.4.3"
   },
