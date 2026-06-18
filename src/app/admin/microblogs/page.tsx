@@ -30,7 +30,9 @@ export default function MicroblogsPage() {
   const [form, setForm] = useState<Partial<Item>>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { data: items = [] } = useQuery({ queryKey: ["microblogs"], queryFn: getMicroblogs });
+  const { data: items = [], isLoading } = useQuery({ queryKey: ["microblogs"], queryFn: getMicroblogs });
+
+  if (isLoading) return <div className="flex items-center justify-center py-16"><div className="w-5 h-5 border-2 border-fg/30 border-t-fg rounded-full animate-spin" /></div>;
 
   const parseErrors = useCallback((err: unknown) => {
     if (err && typeof err === "object" && "issues" in err) {

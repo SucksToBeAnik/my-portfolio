@@ -18,8 +18,6 @@ interface ImageUploadProps {
 
 type Tab = "upload" | "url";
 
-const tabLabels: Record<Tab, string> = { upload: "Upload", url: "URL" };
-
 export function ImageUpload({
   onUpload,
   onRemove,
@@ -32,7 +30,7 @@ export function ImageUpload({
   const [urlInput, setUrlInput] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>(currentUrl ? "upload" : "upload");
+  const [tab, setTab] = useState<Tab>("upload");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const validate = useCallback(
@@ -76,17 +74,6 @@ export function ImageUpload({
     [onUpload, validate, resourceType]
   );
 
-  const handleTabChange = useCallback(
-    (newTab: Tab) => {
-      if (newTab === tab) return;
-      if (currentUrl) onRemove?.();
-      setUrlInput("");
-      setError(null);
-      setTab(newTab);
-    },
-    [tab, currentUrl, onRemove]
-  );
-
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -116,21 +103,29 @@ export function ImageUpload({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-3 border-b border-hairline pb-2">
-        {(Object.keys(tabLabels) as Tab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => handleTabChange(t)}
-            className={`text-xs transition-colors cursor-pointer ${
-              tab === t
-                ? "text-fg font-medium"
-                : "text-fg/40 hover:text-fg/60"
-            }`}
-          >
-            {tabLabels[t]}
-          </button>
-        ))}
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={() => { setTab("upload"); setError(null); }}
+          className={`text-xs transition-colors cursor-pointer pb-0.5 border-b ${
+            tab === "upload"
+              ? "text-fg font-medium border-fg"
+              : "text-fg/40 hover:text-fg/60 border-transparent"
+          }`}
+        >
+          Upload
+        </button>
+        <button
+          type="button"
+          onClick={() => { setTab("url"); setError(null); setUrlInput(""); }}
+          className={`text-xs transition-colors cursor-pointer pb-0.5 border-b ${
+            tab === "url"
+              ? "text-fg font-medium border-fg"
+              : "text-fg/40 hover:text-fg/60 border-transparent"
+          }`}
+        >
+          URL
+        </button>
       </div>
 
       {tab === "upload" ? (
@@ -206,7 +201,6 @@ export function ImageUpload({
               <p className="text-xs text-nav-text text-center">
                 Drop a file here or click to browse
               </p>
-              {error && <p className="text-xs text-red-400">{error}</p>}
             </>
           )}
           <input
@@ -217,10 +211,24 @@ export function ImageUpload({
             className="hidden"
           />
         </div>
+      ) : currentUrl ? (
+        <div className="flex items-center justify-between px-3 py-2 bg-hover-bg rounded-lg">
+          <span className="text-[11px] text-fg/60 truncate flex-1 mr-2 break-all">{currentUrl}</span>
+          {onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300 transition-colors shrink-0 ml-2"
+            >
+              <Trash weight="thin" className="w-3 h-3" />
+              Remove
+            </button>
+          )}
+        </div>
       ) : (
         <div className="flex gap-2">
           <input
-            type="url"
+            type="text"
             placeholder={
               resourceType === "video"
                 ? "Paste video URL"
@@ -246,19 +254,7 @@ export function ImageUpload({
         </div>
       )}
 
-      {tab === "url" && error && <p className="text-xs text-red-400">{error}</p>}
-      {tab === "url" && currentUrl && (
-        <p className="text-[11px] text-fg/50">
-          Current:{" "}
-          <button
-            type="button"
-            onClick={() => onRemove?.()}
-            className="underline hover:text-fg transition-colors"
-          >
-            remove
-          </button>
-        </p>
-      )}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }

@@ -37,10 +37,12 @@ export default function ProjectsPage() {
   const [form, setForm] = useState<Partial<Project>>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { data: items = [] } = useQuery({
+  const { data: items = [], isLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: getProjects,
   });
+
+  if (isLoading) return <div className="flex items-center justify-center py-16"><div className="w-5 h-5 border-2 border-fg/30 border-t-fg rounded-full animate-spin" /></div>;
 
   const parseErrors = useCallback((err: unknown) => {
     if (err && typeof err === "object" && "issues" in err) {
