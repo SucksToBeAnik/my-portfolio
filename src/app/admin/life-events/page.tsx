@@ -8,6 +8,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { PencilSimple, Trash, DotsSixVertical, Plus } from "@phosphor-icons/react";
 import { getLifeEvents, createLifeEvent, updateLifeEvent, deleteLifeEvent, reorderLifeEvents } from "@/actions/life-events";
 import { ContentEditor } from "@/components/ContentEditor";
+import { Spinner } from "@/components/Spinner";
 import { Drawer } from "@/components/Drawer";
 
 interface Item {
@@ -31,8 +32,6 @@ export default function LifeEventsPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["life-events"], queryFn: getLifeEvents });
-
-  if (isLoading) return <div className="flex items-center justify-center py-16"><div className="w-5 h-5 border-2 border-fg/30 border-t-fg rounded-full animate-spin" /></div>;
 
   const parseErrors = useCallback((err: unknown) => {
     if (err && typeof err === "object" && "issues" in err) {
@@ -124,6 +123,8 @@ export default function LifeEventsPage() {
     else s += " — Present";
     return s;
   }
+
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="space-y-6">

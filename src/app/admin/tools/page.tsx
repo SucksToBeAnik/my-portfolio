@@ -8,6 +8,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { PencilSimple, Trash, DotsSixVertical, Plus } from "@phosphor-icons/react";
 import { getTools, createTool, updateTool, deleteTool, reorderTools } from "@/actions/tools";
 import { ContentEditor } from "@/components/ContentEditor";
+import { Spinner } from "@/components/Spinner";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Drawer } from "@/components/Drawer";
 
@@ -32,8 +33,6 @@ export default function ToolsPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["tools"], queryFn: getTools });
-
-  if (isLoading) return <div className="flex items-center justify-center py-16"><div className="w-5 h-5 border-2 border-fg/30 border-t-fg rounded-full animate-spin" /></div>;
 
   const parseErrors = useCallback((err: unknown) => {
     if (err && typeof err === "object" && "issues" in err) {
@@ -117,6 +116,8 @@ export default function ToolsPage() {
   const s = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
   const inputCls = "w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors";
   const errCls = (k: string) => errors[k] ? "text-xs text-red-400 mt-1" : "hidden";
+
+  if (isLoading) return <Spinner />;
 
   return (
     <div className="space-y-6">
