@@ -164,7 +164,7 @@ export function ContentEditor({
 
       <dialog
         ref={imageDialogRef}
-        className="bg-transparent backdrop:bg-black/60"
+        className="bg-transparent backdrop:bg-bg/60"
       >
         <div className="w-80 bg-bg border border-nav-border rounded-xl shadow-2xl p-4">
           <p className="text-xs font-medium text-fg mb-3">Insert Image</p>

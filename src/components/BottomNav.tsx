@@ -28,6 +28,8 @@ export function BottomNav() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
 
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 flex justify-center pb-4 pointer-events-none z-50">
       <div className="flex items-center justify-center w-full max-w-[680px] mx-4 px-2 py-2 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">

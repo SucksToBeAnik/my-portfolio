@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #000000;
+  --bg: #121212;
   --fg: #ffffff;
   --muted: #888888;
   --hairline: rgba(255, 255, 255, 0.08);
+  --hover-bg: rgba(255, 255, 255, 0.08);
   --nav-bg: rgba(255, 255, 255, 0.1);
   --nav-border: rgba(255, 255, 255, 0.1);
   --nav-text: rgba(255, 255, 255, 0.75);
@@ -15,10 +16,11 @@
 }
 
 [data-theme="light"] {
-  --bg: #FFCBC0;
+  --bg: #FAFAFA;
   --fg: #000000;
   --muted: #6b6b6b;
   --hairline: rgba(0, 0, 0, 0.1);
+  --hover-bg: rgba(0, 0, 0, 0.08);
   --nav-bg: rgba(0, 0, 0, 0.08);
   --nav-border: rgba(0, 0, 0, 0.1);
   --nav-text: rgba(0, 0, 0, 0.8);
@@ -33,6 +35,8 @@
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-hairline: var(--hairline);
+  --color-border: var(--hairline);
+  --color-hover-bg: var(--hover-bg);
   --color-nav-bg: var(--nav-bg);
   --color-nav-border: var(--nav-border);
   --color-nav-text: var(--nav-text);

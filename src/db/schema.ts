@@ -32,11 +32,15 @@ export const projects = sqliteTable("projects", {
 export const lifeEvents = sqliteTable("life_events", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
-  date: text("date").notNull(),
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date"),
   description: text("description").notNull(),
   type: text("type").notNull(),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
 })
@@ -55,6 +59,9 @@ export const books = sqliteTable("books", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 })
 
 export const microblogs = sqliteTable("microblogs", {
@@ -64,6 +71,7 @@ export const microblogs = sqliteTable("microblogs", {
   imageUrl: text("image_url"),
   published: integer("published", { mode: "boolean" }).default(false),
   publishedAt: integer("published_at", { mode: "timestamp" }),
+  sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -81,6 +89,9 @@ export const tools = sqliteTable("tools", {
   category: text("category").notNull(),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
 })
