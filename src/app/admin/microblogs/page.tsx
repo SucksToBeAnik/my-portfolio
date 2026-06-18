@@ -163,10 +163,7 @@ export default function MicroblogsPage() {
               <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />
               <p className={errCls("title")}>{errors.title}</p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Image</label>
-              <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
-            </div>
+            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
             <div className="flex items-center gap-2">
               <input type="checkbox" id="published" checked={form.published ?? false} onChange={(e) => s("published", e.target.checked)} className="accent-fg" />
               <label htmlFor="published" className="text-xs text-fg/50">Published</label>

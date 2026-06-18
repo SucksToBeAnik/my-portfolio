@@ -169,10 +169,7 @@ export default function ToolsPage() {
               <input value={f("category")} onChange={(e) => s("category", e.target.value)} className={inputCls} required />
               <p className={errCls("category")}>{errors.category}</p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Image</label>
-              <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
-            </div>
+            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Tool URL</label>
               <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} />

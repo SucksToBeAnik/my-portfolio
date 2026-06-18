@@ -16,6 +16,10 @@ interface ImageUploadProps {
   resourceType?: "image" | "video";
 }
 
+type Tab = "upload" | "url";
+
+const tabLabels: Record<Tab, string> = { upload: "Upload", url: "URL" };
+
 export function ImageUpload({
   onUpload,
   onRemove,
@@ -26,9 +30,9 @@ export function ImageUpload({
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [urlInput, setUrlInput] = useState("");
-  const [showUrlInput, setShowUrlInput] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>(currentUrl ? "upload" : "upload");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const validate = useCallback(
@@ -61,7 +65,6 @@ export function ImageUpload({
       try {
         const url = await uploadToCloudinary(file, resourceType);
         onUpload(url);
-        setError(null);
       } catch {
         setError("Upload failed. Try again.");
       } finally {
@@ -71,6 +74,17 @@ export function ImageUpload({
       }
     },
     [onUpload, validate, resourceType]
+  );
+
+  const handleTabChange = useCallback(
+    (newTab: Tab) => {
+      if (newTab === tab) return;
+      if (currentUrl) onRemove?.();
+      setUrlInput("");
+      setError(null);
+      setTab(newTab);
+    },
+    [tab, currentUrl, onRemove]
   );
 
   const handleDrop = useCallback(
@@ -91,22 +105,35 @@ export function ImageUpload({
     [handleFile]
   );
 
-  const handleUrlSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (urlInput) {
-        setError(null);
-        onUpload(urlInput);
-      }
-    },
-    [urlInput, onUpload]
-  );
+  const handleUrlSubmit = useCallback(() => {
+    if (urlInput) {
+      setError(null);
+      onUpload(urlInput);
+    }
+  }, [urlInput, onUpload]);
 
   const hasMedia = currentUrl || preview;
 
   return (
     <div className="space-y-2">
-      {!showUrlInput ? (
+      <div className="flex items-center gap-3 border-b border-hairline pb-2">
+        {(Object.keys(tabLabels) as Tab[]).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => handleTabChange(t)}
+            className={`text-xs transition-colors cursor-pointer ${
+              tab === t
+                ? "text-fg font-medium"
+                : "text-fg/40 hover:text-fg/60"
+            }`}
+          >
+            {tabLabels[t]}
+          </button>
+        ))}
+      </div>
+
+      {tab === "upload" ? (
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -114,9 +141,11 @@ export function ImageUpload({
           }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
-          onClick={() => !hasMedia && inputRef.current?.click()}
-          className={`relative flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl transition-colors overflow-hidden ${
-            hasMedia ? "p-0" : "p-6 cursor-pointer"
+          onClick={() => {
+            if (!hasMedia && !uploading) inputRef.current?.click();
+          }}
+          className={`relative flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl transition-colors overflow-hidden cursor-pointer ${
+            hasMedia ? "p-0" : "p-6"
           } ${
             dragOver
               ? "border-fg bg-fg/5"
@@ -177,6 +206,7 @@ export function ImageUpload({
               <p className="text-xs text-nav-text text-center">
                 Drop a file here or click to browse
               </p>
+              {error && <p className="text-xs text-red-400">{error}</p>}
             </>
           )}
           <input
@@ -188,52 +218,46 @@ export function ImageUpload({
           />
         </div>
       ) : (
-        <form onSubmit={handleUrlSubmit} className="flex gap-2">
+        <div className="flex gap-2">
           <input
             type="url"
-            placeholder="Paste image URL"
+            placeholder={
+              resourceType === "video"
+                ? "Paste video URL"
+                : "Paste image URL"
+            }
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleUrlSubmit();
+              }
+            }}
             className="flex-1 px-3 py-1.5 text-xs bg-nav-hover-bg border border-nav-border rounded-lg text-fg placeholder-nav-text/50 focus:outline-none focus:border-nav-text transition-colors"
           />
           <button
-            type="submit"
+            type="button"
+            onClick={handleUrlSubmit}
             className="px-3 py-1.5 text-xs font-medium bg-nav-active-bg text-nav-active-text rounded-lg hover:opacity-90 transition-opacity"
           >
             Add
           </button>
-        </form>
+        </div>
       )}
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
-
-      {(hasMedia || !showUrlInput) && (
-        <div className="flex items-center gap-3">
-          {hasMedia && (
-            <button
-              type="button"
-              onClick={() => {
-                setShowUrlInput(false);
-                inputRef.current?.click();
-              }}
-              className="flex items-center gap-1.5 text-[11px] text-nav-text hover:text-nav-text-hover transition-colors"
-            >
-              <Upload weight="thin" className="w-3 h-3" />
-              Upload from device
-            </button>
-          )}
+      {tab === "url" && error && <p className="text-xs text-red-400">{error}</p>}
+      {tab === "url" && currentUrl && (
+        <p className="text-[11px] text-fg/50">
+          Current:{" "}
           <button
             type="button"
-            onClick={() => {
-              setShowUrlInput(!showUrlInput);
-              setUrlInput("");
-            }}
-            className="flex items-center gap-1.5 text-[11px] text-nav-text hover:text-nav-text-hover transition-colors"
+            onClick={() => onRemove?.()}
+            className="underline hover:text-fg transition-colors"
           >
-            <LinkIcon weight="thin" className="w-3 h-3" />
-            {showUrlInput ? "Upload from device instead" : "Or paste a URL instead"}
+            remove
           </button>
-        </div>
+        </p>
       )}
     </div>
   );

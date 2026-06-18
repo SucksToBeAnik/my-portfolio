@@ -193,24 +193,18 @@ export default function ProjectsPage() {
               <label className="text-xs text-fg/50">Tech Stack (comma separated)</label>
               <input value={f("techStack")} onChange={(e) => s("techStack", e.target.value)} className={inputCls} />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Image</label>
-              <ImageUpload
-                currentUrl={f("imageUrl")}
-                onUpload={(url) => s("imageUrl", url)}
-                onRemove={() => s("imageUrl", "")}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Video</label>
-              <ImageUpload
-                currentUrl={f("videoUrl")}
-                onUpload={(url) => s("videoUrl", url)}
-                onRemove={() => s("videoUrl", "")}
-                accept="video/*"
-                resourceType="video"
-              />
-            </div>
+            <ImageUpload
+              currentUrl={f("imageUrl")}
+              onUpload={(url) => s("imageUrl", url)}
+              onRemove={() => s("imageUrl", "")}
+            />
+            <ImageUpload
+              currentUrl={f("videoUrl")}
+              onUpload={(url) => s("videoUrl", url)}
+              onRemove={() => s("videoUrl", "")}
+              accept="video/*"
+              resourceType="video"
+            />
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Project URL</label>
               <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} />

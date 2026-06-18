@@ -171,10 +171,7 @@ export default function BooksPage() {
               <input value={f("author")} onChange={(e) => s("author", e.target.value)} className={inputCls} required />
               <p className={errCls("author")}>{errors.author}</p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Cover</label>
-              <ImageUpload currentUrl={f("coverUrl")} onUpload={(url) => s("coverUrl", url)} onRemove={() => s("coverUrl", "")} />
-            </div>
+            <ImageUpload currentUrl={f("coverUrl")} onUpload={(url) => s("coverUrl", url)} onRemove={() => s("coverUrl", "")} />
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Rating</label>
               <select value={f("rating")} onChange={(e) => s("rating", e.target.value ? Number(e.target.value) : null)} className={selectCls}>
