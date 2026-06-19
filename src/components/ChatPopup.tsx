@@ -228,7 +228,7 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
 
         <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-hairline px-4 py-2.5">
           {remaining < 50 && (
-            <span className="text-[10px] text-muted shrink-0">{remaining}/50</span>
+            <span className="text-[10px] font-medium text-fg/50 bg-hover-bg px-1.5 py-0.5 rounded-full shrink-0">{remaining}/50</span>
           )}
           <input
             ref={inputRef}
