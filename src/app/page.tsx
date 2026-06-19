@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { GithubLogo, LinkedinLogo, XLogo, FolderOpen } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo, LinkedinLogo, XLogo, FolderOpen, Wrench, BookOpenText } from "@phosphor-icons/react/dist/ssr";
 import { LinkPreview } from "@/components/LinkPreview";
 import { AskPrompt } from "@/components/AskPrompt";
 import { db } from "@/db";
@@ -99,8 +99,8 @@ export default async function Home() {
 
       {(workingOn || reading) && (
         <div className="text-xs text-fg/50 text-right space-y-1">
-          {workingOn && <p>Working on <span className="font-medium text-fg/60">{workingOn}</span></p>}
-          {reading && <p>Reading <span className="font-medium text-fg/60">{reading.title}</span> by {reading.author}</p>}
+          {workingOn && <p><Wrench weight="thin" className="w-3 h-3 inline-block mr-1 align-text-top" />Working on <span className="font-medium text-fg/60">{workingOn}</span></p>}
+          {reading && <p><BookOpenText weight="thin" className="w-3 h-3 inline-block mr-1 align-text-top" />Reading <span className="font-medium text-fg/60">{reading.title}</span> by {reading.author}</p>}
         </div>
       )}
 
