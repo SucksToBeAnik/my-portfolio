@@ -4,7 +4,7 @@ import { GithubLogo, LinkedinLogo, XLogo, FolderOpen } from "@phosphor-icons/rea
 import { LinkPreview } from "@/components/LinkPreview";
 import { AskPrompt } from "@/components/AskPrompt";
 import { db } from "@/db";
-import { microblogs, projects } from "@/db/schema";
+import { microblogs, projects, books, siteConfig } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 
 export const revalidate = 3600;
@@ -19,7 +19,7 @@ function stripHtml(html: string) {
 }
 
 export default async function Home() {
-  const [recentPosts, featuredProjects] = await Promise.all([
+  const [recentPosts, featuredProjects, readingBooks, workingOnRow] = await Promise.all([
     db
       .select({ id: microblogs.id, title: microblogs.title })
       .from(microblogs)
@@ -31,7 +31,16 @@ export default async function Home() {
       .from(projects)
       .where(eq(projects.featured, true))
       .orderBy(desc(projects.sortOrder)),
+    db
+      .select({ title: books.title, author: books.author })
+      .from(books)
+      .where(eq(books.status, "reading"))
+      .limit(1),
+    db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
   ]);
+
+  const reading = readingBooks[0] ?? null;
+  const workingOn = workingOnRow[0]?.value ?? null;
 
   return (
     <div className="space-y-16">
@@ -87,6 +96,13 @@ export default async function Home() {
           </LinkPreview>
         </div>
       </section>
+
+      {(workingOn || reading) && (
+        <div className="space-y-2 text-xs text-fg/50">
+          {workingOn && <p>Working on <span className="text-fg">{workingOn}</span></p>}
+          {reading && <p>Reading <span className="text-fg">{reading.title}</span> by {reading.author}</p>}
+        </div>
+      )}
 
       {/* Blogs & Projects */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">

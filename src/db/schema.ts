@@ -119,3 +119,8 @@ export const sites = sqliteTable("sites", {
     .notNull()
     .$defaultFn(() => new Date()),
 })
+
+export const siteConfig = sqliteTable("site_config", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+})
