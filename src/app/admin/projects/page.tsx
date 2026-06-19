@@ -156,7 +156,7 @@ export default function ProjectsPage() {
                         snapshot.isDragging ? "border-hairline bg-hover-bg shadow-lg" : "border-hairline hover:bg-hover-bg"
                       }`}
                     >
-                      <div {...provided.dragHandleProps} className="mr-3 flex items-center shrink-0 p-1.5 -ml-1.5 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing">
+                      <div {...provided.dragHandleProps} className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing">
                         <DotsSixVertical weight="thin" className="w-4 h-4 text-fg/50" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -169,8 +169,8 @@ export default function ProjectsPage() {
                         )}
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
-                        <button onClick={() => openEdit(item)} className="p-2 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-                        <button onClick={() => deleteMut.mutate(item.id)} className="p-2 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+                        <button onClick={() => openEdit(item)} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
+                        <button onClick={() => deleteMut.mutate(item.id)} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
                       </div>
                     </div>
                   )}
@@ -186,7 +186,7 @@ export default function ProjectsPage() {
 
       <Drawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setErrors({}); }} title={editId ? "Edit Project" : "Add Project"}>
         <form onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
               <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />

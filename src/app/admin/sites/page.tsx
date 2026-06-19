@@ -71,8 +71,8 @@ function SiteRow({ site, onDelete, onEdit }: { site: Site; onDelete: (id: number
         <p className="text-[11px] text-fg/30 mt-0.5">{formatDistanceToNow(new Date(site.createdAt), { addSuffix: true })}</p>
       </div>
       <div className="flex gap-1.5 shrink-0 ml-3">
-        <button onClick={() => onEdit(site)} className="p-2 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-        <button onClick={() => onDelete(site.id)} className="p-2 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+        <button onClick={() => onEdit(site)} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
+        <button onClick={() => onDelete(site.id)} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
       </div>
     </div>
   );

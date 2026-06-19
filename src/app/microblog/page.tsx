@@ -38,7 +38,7 @@ export default async function MicroblogPage() {
 
   return (
     <div>
-      <div className="mb-16">
+      <div className="mb-8 md:mb-16">
         <Breadcrumb crumbs={[{ label: "Microblog" }]} />
       </div>
 

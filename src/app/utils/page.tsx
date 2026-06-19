@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getStacks } from "@/actions/stacks";
 import { getSites } from "@/actions/sites";
-import { PageShell } from "@/components/PageShell";
 import { Spinner } from "@/components/Spinner";
 import { LinkPreview } from "@/components/LinkPreview";
 import { Wrench, Link as LinkIcon, House } from "@phosphor-icons/react";
@@ -32,8 +31,8 @@ export default function UtilsPage() {
   const [tab, setTab] = useState<Tab>("stacks");
 
   return (
-    <PageShell>
-      <div className="flex items-center justify-between mb-6">
+    <>
+      <div className="flex items-center justify-between mb-8 md:mb-16">
         <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
           <House weight="thin" className="w-3.5 h-3.5" />
           <span className="text-fg/20">/</span>
@@ -63,7 +62,7 @@ export default function UtilsPage() {
 
       {tab === "stacks" && <StacksContent />}
       {tab === "sites" && <SitesContent />}
-    </PageShell>
+    </>
   );
 }
 

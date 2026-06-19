@@ -28,7 +28,7 @@ export default async function ProjectsPage() {
 
   return (
     <div className="space-y-12">
-      <div className="mb-16">
+      <div className="mb-8 md:mb-16">
         <Breadcrumb crumbs={[{ label: "Projects" }]} />
       </div>
 
@@ -41,10 +41,10 @@ export default async function ProjectsPage() {
         return (
         <article
           key={project.id}
-          className="grid grid-cols-[100px_1fr] gap-6"
+          className="space-y-6 sm:grid sm:grid-cols-[100px_1fr] sm:gap-6"
         >
-          <div className="flex flex-col justify-between text-xs text-muted text-right">
-            <div className="space-y-4">
+          <div className="flex sm:flex-col justify-between sm:justify-start items-start gap-4 sm:gap-0 text-xs text-muted text-right">
+            <div className="flex sm:block items-center gap-4 sm:space-y-4">
               {project.workedOn && (
                 <p>{formatDate(project.workedOn)}</p>
               )}
@@ -55,7 +55,7 @@ export default async function ProjectsPage() {
                 initialHearted={heart.hearted}
               />
             </div>
-            <div className="space-y-1">
+            <div className="flex sm:block gap-2 sm:space-y-1">
               {project.url && (
                 <ProjectLink url={project.url} label="Website" />
               )}
@@ -65,7 +65,7 @@ export default async function ProjectsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-[1fr_1fr] gap-4 min-h-0">
+          <div className="space-y-4 sm:grid sm:grid-cols-[1fr_1fr] sm:gap-4 min-h-0">
             {project.imageUrl ? (
               <ClickableImage
                 src={project.imageUrl}

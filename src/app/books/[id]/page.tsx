@@ -25,7 +25,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
   if (!book) notFound();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       <Link
         href="/books"
         className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
@@ -34,7 +34,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
         Books
       </Link>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col sm:flex-row gap-6">
         {book.coverUrl ? (
           <div className="w-28 shrink-0">
             <img src={book.coverUrl} alt={book.title} className="w-full rounded-lg" />

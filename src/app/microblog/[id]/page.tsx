@@ -45,7 +45,7 @@ export default async function MicroblogPostPage({ params }: { params: Promise<{ 
   )[0] ?? null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       <Link
         href="/microblog"
         className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"

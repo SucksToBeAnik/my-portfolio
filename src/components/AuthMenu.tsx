@@ -81,7 +81,7 @@ export function AuthMenu() {
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-nav-bg backdrop-blur-xl border border-nav-border rounded-xl shadow-2xl overflow-hidden z-50">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-bg/95 backdrop-blur-xl border border-hairline rounded-xl shadow-2xl overflow-hidden z-[100]">
           {isLoggedIn ? (
             <div className="p-2 space-y-0.5">
               <p className="px-3 py-2 text-[11px] text-nav-text">

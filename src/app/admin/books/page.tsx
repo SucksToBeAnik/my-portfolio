@@ -141,7 +141,7 @@ export default function BooksPage() {
                   {(provided, snapshot) => (
                     <div ref={provided.innerRef} {...provided.draggableProps}
                       className={`flex items-center px-4 py-3 border rounded-xl transition-colors ${snapshot.isDragging ? "border-hairline bg-hover-bg shadow-lg" : "border-hairline hover:bg-hover-bg"}`}>
-                      <div {...provided.dragHandleProps} className="mr-3 flex items-center shrink-0 p-1.5 -ml-1.5 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing">
+                      <div {...provided.dragHandleProps} className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing">
                         <DotsSixVertical weight="thin" className="w-4 h-4 text-fg/50" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -150,8 +150,8 @@ export default function BooksPage() {
                         {item.updatedAt && <p className="text-[11px] text-fg/40 mt-0.5">edited {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</p>}
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
-                        <button onClick={() => { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }} className="p-2 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-                        <button onClick={() => deleteMut.mutate(item.id)} className="p-2 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+                        <button onClick={() => { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
+                        <button onClick={() => deleteMut.mutate(item.id)} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
                       </div>
                     </div>
                   )}
@@ -167,7 +167,7 @@ export default function BooksPage() {
 
       <Drawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setErrors({}); }} title={editId ? "Edit Book" : "Add Book"}>
         <form onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
               <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />
@@ -187,7 +187,7 @@ export default function BooksPage() {
                     key={n}
                     type="button"
                     onClick={() => s("rating", (form.rating ?? 0) === n ? null : n)}
-                    className={`p-1 rounded transition-colors cursor-pointer hover:text-fg ${
+                    className={`p-1.5 rounded transition-colors cursor-pointer hover:text-fg ${
                       (form.rating ?? 0) >= n ? "text-fg" : "text-fg/30"
                     }`}
                   >
@@ -219,7 +219,7 @@ export default function BooksPage() {
                       const next = selected ? current.filter((c: string) => c !== cat) : [...current, cat];
                       s("category", next.join(", "));
                     }}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] transition-colors cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-lg text-[11px] transition-colors cursor-pointer ${
                       selected ? "bg-fg text-bg" : "bg-hover-bg text-fg/60 hover:text-fg"
                     }`}
                   >

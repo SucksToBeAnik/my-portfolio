@@ -54,8 +54,33 @@ export default async function AdminLayout({
           </nav>
         </aside>
 
-        <main className="flex-1 min-w-0 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 min-w-0 overflow-y-auto px-4 py-5 pb-24 md:p-6">
+          {/* Mobile admin nav */}
+          <div className="md:hidden mb-6">
+            <AdminBreadcrumb />
+          </div>
+
+          {children}
+        </main>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden flex items-center justify-around px-2 py-2 bg-bg/95 backdrop-blur-xl border-t border-hairline overflow-x-auto">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] text-fg/50 hover:text-fg transition-colors shrink-0"
+            >
+              <Icon weight="thin" className="w-4 h-4" />
+              <span className="hidden sm:inline">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
       <Toaster
         position="bottom-center"
         toastOptions={{
