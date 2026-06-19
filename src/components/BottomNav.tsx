@@ -55,11 +55,11 @@ function NavItem({
   icon: React.ElementType;
   isActive: boolean;
 }) {
-  const router = useRouter();
   const tabs = subTabs[href];
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const router = useRouter();
 
   // close on click outside
   useEffect(() => {
@@ -114,14 +114,13 @@ function NavItem({
           ))}
         </div>
       )}
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0 cursor-pointer select-none"
+      <Link
+        href={href}
+        className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0 select-none"
       >
         <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
         <span className="hidden sm:inline">{label}</span>
-      </button>
+      </Link>
     </div>
   );
 }
