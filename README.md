@@ -64,4 +64,4 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
 
 Connected to Vercel via GitHub — every push to `main` auto-deploys.
 
-Production: https://portfolio-suckstobeaniks-projects.vercel.app
+Production: https://suckstobeanik.vercel.app
