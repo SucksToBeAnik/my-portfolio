@@ -157,12 +157,12 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh]"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[8vh] sm:pt-[12vh]"
       onClick={onClose}
     >
       <div className="fixed inset-0 bg-bg/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-[480px] mx-4 bg-bg border border-hairline rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[520px]"
+        className="relative w-full max-w-[480px] mx-4 bg-bg border border-hairline rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[480px] sm:max-h-[520px]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
