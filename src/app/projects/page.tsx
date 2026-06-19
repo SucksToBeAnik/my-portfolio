@@ -1,7 +1,7 @@
 import { getProjects } from "@/actions/projects";
+import { getHeartsCounts } from "@/actions/heart-counts";
 import { ProjectLink } from "@/components/ProjectLink";
 import { HeartButton } from "@/components/HeartButton";
-import { getHeartsForEntities } from "@/actions/hearts";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { ClickableImage } from "@/components/ClickableImage";
 import { VideoEmbed } from "@/components/VideoEmbed";
@@ -10,6 +10,8 @@ export const metadata = {
   title: "Projects — Suckstobeanik",
   description: "Things I've built — side projects, open source, and experiments.",
 };
+
+export const revalidate = 3600;
 
 function formatDate(date: string) {
   const d = new Date(date);
@@ -23,10 +25,8 @@ function formatDate(date: string) {
 
 export default async function ProjectsPage() {
   const items = await getProjects();
-  const heartsMap = await getHeartsForEntities(
-    "project",
-    items.map((p) => p.id),
-  );
+  const projectIds = items.map((p) => p.id);
+  const heartsMap = await getHeartsCounts("project", projectIds);
 
   return (
     <div className="space-y-12">
@@ -39,7 +39,7 @@ export default async function ProjectsPage() {
       )}
 
       {items.map((project) => {
-        const heart = heartsMap[project.id] ?? { count: 0, hearted: false };
+        const heartCount = heartsMap[project.id] ?? 0;
         return (
         <article
           key={project.id}
@@ -53,8 +53,7 @@ export default async function ProjectsPage() {
               <HeartButton
                 entityType="project"
                 entityId={project.id}
-                initialCount={heart.count}
-                initialHearted={heart.hearted}
+                initialCount={heartCount}
               />
             </div>
             <div className="flex sm:block gap-2 sm:space-y-1">

@@ -42,6 +42,21 @@ export async function getHeartData(entityType: string, entityId: number) {
   };
 }
 
+export async function getHeartCount(entityType: string, entityId: number, visitorId: string | null) {
+  const result = await db
+    .select({
+      count: sql<number>`count(*)`.mapWith(Number),
+      userHearted: sql<number>`sum(case when visitor_id = ${visitorId ?? ""} then 1 else 0 end)`.mapWith(Number),
+    })
+    .from(hearts)
+    .where(and(eq(hearts.entityType, entityType), eq(hearts.entityId, entityId)));
+
+  return {
+    count: result[0]?.count ?? 0,
+    hearted: (result[0]?.userHearted ?? 0) > 0,
+  };
+}
+
 export async function getHeartsForEntities(entityType: string, entityIds: number[]) {
   if (entityIds.length === 0) return {};
   const visitorId = (await cookies()).get("visitor_id")?.value;

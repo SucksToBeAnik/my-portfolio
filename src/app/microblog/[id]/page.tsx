@@ -5,7 +5,9 @@ import { microblogs } from "@/db/schema";
 import { eq, lt, gt, desc, asc, and } from "drizzle-orm";
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { HeartButton } from "@/components/HeartButton";
-import { getHeartData } from "@/actions/hearts";
+import { getHeartsCounts } from "@/actions/heart-counts";
+
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,7 +28,10 @@ export default async function MicroblogPostPage({ params }: { params: Promise<{ 
   const post = (await db.select().from(microblogs).where(eq(microblogs.id, Number(id))).limit(1))[0];
   if (!post) notFound();
 
-  const heartData = await getHeartData("microblog", post.id);
+  const [heartCounts] = await Promise.all([
+    getHeartsCounts("microblog", [post.id]),
+  ]);
+  const heartCount = heartCounts[post.id] ?? 0;
 
   const prev = (
     await db
@@ -80,8 +85,7 @@ export default async function MicroblogPostPage({ params }: { params: Promise<{ 
         <HeartButton
           entityType="microblog"
           entityId={post.id}
-          initialCount={heartData.count}
-          initialHearted={heartData.hearted}
+          initialCount={heartCount}
         />
       </article>
 

@@ -4,11 +4,13 @@ import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { HeartButton } from "@/components/HeartButton";
-import { getHeartsForEntities } from "@/actions/hearts";
+import { getHeartsCounts } from "@/actions/heart-counts";
 
 export const metadata = {
   title: "Microblog — Suckstobeanik",
 };
+
+export const revalidate = 3600;
 
 function stripHtml(html: string) {
   return html.replace(/<[^>]*>/g, "");
@@ -31,10 +33,7 @@ export default async function MicroblogPage() {
     .where(eq(microblogs.published, true))
     .orderBy(desc(microblogs.publishedAt));
 
-  const heartsMap = await getHeartsForEntities(
-    "microblog",
-    items.map((p) => p.id),
-  );
+  const heartsMap = await getHeartsCounts("microblog", items.map((p) => p.id));
 
   return (
     <div>
@@ -48,8 +47,7 @@ export default async function MicroblogPage() {
 
       <div>
         {items.map((post) => {
-          const heart = heartsMap[post.id] ?? { count: 0, hearted: false };
-
+          const heartCount = heartsMap[post.id] ?? 0;
           return (
             <div key={post.id}>
               <article className="pb-8">
@@ -75,8 +73,7 @@ export default async function MicroblogPage() {
                   <HeartButton
                     entityType="microblog"
                     entityId={post.id}
-                    initialCount={heart.count}
-                    initialHearted={heart.hearted}
+                    initialCount={heartCount}
                   />
                 </div>
               </article>
