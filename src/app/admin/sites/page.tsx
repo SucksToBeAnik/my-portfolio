@@ -167,6 +167,19 @@ export default function SitesPage() {
             </button>
           </div>
         }
+        footer={
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setEditSite(null)} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button
+              type="submit"
+              form="site-form"
+              disabled={updateMut.isPending}
+              className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+            >
+              Save
+            </button>
+          </div>
+        }
       >
         <form id="site-form" onSubmit={(e) => { e.preventDefault(); editSite && updateMut.mutate({ id: editSite.id, url: editUrl, tags: editTags }); }} className="space-y-4">
           <div className="space-y-1.5">

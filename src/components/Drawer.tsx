@@ -8,9 +8,10 @@ interface DrawerProps {
   title: string;
   children: React.ReactNode;
   headerActions?: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
-export function Drawer({ open, onClose, title, children, headerActions }: DrawerProps) {
+export function Drawer({ open, onClose, title, children, headerActions, footer }: DrawerProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,25 +33,30 @@ export function Drawer({ open, onClose, title, children, headerActions }: Drawer
     <>
       {open && (
         <div
-          className="fixed inset-0 bg-bg/60 z-40"
+          className="fixed inset-0 bg-bg/60 z-[60]"
           onClick={onClose}
         />
       )}
 
       <div
         ref={ref}
-        className={`fixed bottom-0 left-0 right-0 z-50 bg-bg border-t border-hairline rounded-t-2xl shadow-2xl transition-transform duration-300 ease-out max-h-[85vh] flex flex-col ${
+        className={`fixed bottom-0 left-0 right-0 z-[70] bg-bg border-t border-hairline rounded-t-2xl shadow-2xl transition-transform duration-300 ease-out max-h-[85vh] flex flex-col ${
           open ? "translate-y-0" : "translate-y-full"
         }`}
         style={{ pointerEvents: open ? "auto" : "none" }}
       >
         <div className="flex items-center justify-between shrink-0 px-5 py-3 border-b border-hairline">
           <h2 className="text-sm font-heading text-fg">{title}</h2>
-          {headerActions}
+          <div className="hidden sm:flex items-center gap-2">{headerActions}</div>
         </div>
         <div className="flex-1 overflow-y-auto p-5">
           {children}
         </div>
+        {footer && (
+          <div className="flex items-center gap-2 shrink-0 px-5 py-3 border-t border-hairline sm:hidden">
+            {footer}
+          </div>
+        )}
       </div>
     </>
   );
