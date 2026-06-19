@@ -78,6 +78,13 @@ body {
   scrollbar-color: var(--hairline) transparent;
 }
 
+/* Prevent iOS auto-zoom on input focus — inputs < 16px trigger Safari zoom */
+@media (hover: none) and (pointer: coarse) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
 /* Tiptap editor content styles */
 .ProseMirror p.is-editor-empty:first-child::before {
   color: var(--nav-text);

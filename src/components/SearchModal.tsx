@@ -78,11 +78,11 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 h-dvh z-[100] flex items-start justify-center pt-20 sm:pt-[15vh]"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]"
       onClick={onClose}
       onKeyDown={handleKeyDown}
     >
-      <div className="fixed top-0 left-0 right-0 h-dvh bg-bg/60 backdrop-blur-sm" />
+      <div className="fixed inset-0 bg-bg/60 backdrop-blur-sm" />
       <div
         className="relative w-full max-w-[520px] mx-4 bg-bg border border-hairline rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -102,7 +102,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
           </kbd>
         </div>
 
-        <div className="max-h-[50dvh] overflow-y-auto">
+        <div className="max-h-[50vh] overflow-y-auto">
           {!loaded && query && (
             <div className="flex items-center justify-center py-8 text-xs text-muted">Loading...</div>
           )}
