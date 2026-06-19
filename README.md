@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio
+
+Personal portfolio for [@suckstobeanik](https://github.com/SucksToBeAnik) — a minimal black-and-white website with a phone-like centered layout, glass navigation, and admin content management.
+
+Built with [Next.js](https://nextjs.org), [Turso](https://turso.tech) + [Drizzle](https://orm.drizzle.team), and deployed on [Vercel](https://vercel.com).
+
+## Features
+
+- Projects, books, microblog, life timeline, and tools showcase
+- AI-powered "Ask About Me" chat (powered by Groq)
+- Admin dashboard with full CRUD and drag-and-drop sorting
+- Global search (Cmd+K)
+- Dark/light theme with persistent preference
+- Heart/like system for projects
+- YouTube lite embeds and link previews
+- Responsive — works on mobile and desktop
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Database:** Turso (SQLite) via Drizzle ORM
+- **Auth:** NextAuth v5 (Credentials)
+- **AI:** Vercel AI SDK + Groq
+- **Styling:** Tailwind CSS v4
+- **Icons:** Phosphor Icons (thin weight)
+- **Rich Text:** Tiptap
+- **File Upload:** Cloudinary
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local` and fill in:
 
-## Learn More
+```
+TURSO_DATABASE_URL=
+TURSO_AUTH_TOKEN=
+AUTH_SECRET=
+GROQ_API_KEY=
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Production build |
+| `pnpm check` | Lint with Biome |
+| `pnpm db:push` | Push schema to Turso |
+| `pnpm db:generate` | Generate migrations |
+| `pnpm db:migrate` | Run migrations |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+Connected to Vercel via GitHub — every push to `main` auto-deploys.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Production: https://portfolio-suckstobeaniks-projects.vercel.app
