@@ -1,12 +1,12 @@
 "use client";
 
+import { House } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getMicroblogs } from "@/actions/microblogs";
 import { getTilsPublic } from "@/actions/tils";
-import { Breadcrumb } from "@/components/Breadcrumb";
 import { HeartButton } from "@/components/HeartButton";
 import { Spinner } from "@/components/Spinner";
 
@@ -43,29 +43,32 @@ export default function WritingsPage() {
 
   return (
     <>
-      <div className="mb-8 md:mb-16">
-        <Breadcrumb crumbs={[{ label: tab === "til" ? "Today I Learned" : "Writings" }]} />
-      </div>
-
-      <div className="flex gap-3 mb-8">
-        <button
-          onClick={() => switchTab("microblog")}
-          className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
-            tab === "microblog"
-              ? "border-fg text-fg"
-              : "border-transparent text-fg/50 hover:text-fg"
-          }`}
-        >
-          Microblog
-        </button>
-        <button
-          onClick={() => switchTab("til")}
-          className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
-            tab === "til" ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"
-          }`}
-        >
-          TIL
-        </button>
+      <div className="flex items-center justify-between mb-8 md:mb-16">
+        <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
+          <House weight="thin" className="w-3.5 h-3.5" />
+          <span className="text-fg/20">/</span>
+          <span className="text-fg/60">writings</span>
+        </div>
+        <div className="flex gap-3 shrink-0">
+          <button
+            onClick={() => switchTab("microblog")}
+            className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
+              tab === "microblog"
+                ? "border-fg text-fg"
+                : "border-transparent text-fg/50 hover:text-fg"
+            }`}
+          >
+            Microblog
+          </button>
+          <button
+            onClick={() => switchTab("til")}
+            className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
+              tab === "til" ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"
+            }`}
+          >
+            TIL
+          </button>
+        </div>
       </div>
 
       {tab === "microblog" && <MicroblogContent />}
