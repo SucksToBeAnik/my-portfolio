@@ -88,7 +88,7 @@ export default function Home() {
           {articles.map((article) => (
             <Link
               key={article.slug}
-              href={`/microblog/${article.slug}`}
+              href="/microblog"
               className="block py-2.5 text-base text-fg hover:text-muted transition-colors"
             >
               {article.title}

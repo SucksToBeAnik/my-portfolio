@@ -2,16 +2,17 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { MagnifyingGlass, FolderOpen, BookOpenText, Quotes, Heart, Wrench } from "@phosphor-icons/react";
+import { MagnifyingGlass, Compass, FolderOpen, BookOpenText, Quotes, Heart, Wrench } from "@phosphor-icons/react";
 import { getSearchItems, invalidateSearchCache } from "@/lib/search-index";
 import type { SearchIndexItem } from "@/actions/search";
 
 const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
+  page: { icon: Compass, label: "Pages" },
   project: { icon: FolderOpen, label: "Projects" },
   book: { icon: BookOpenText, label: "Books" },
   microblog: { icon: Quotes, label: "Microblog" },
   lifeEvent: { icon: Heart, label: "Life" },
-  tool: { icon: Wrench, label: "Tools" },
+  stack: { icon: Wrench, label: "Stacks" },
 };
 
 export function SearchModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -38,7 +39,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
     return acc;
   }, {});
 
-  const typeOrder = ["project", "book", "microblog", "lifeEvent", "tool"];
+  const typeOrder = ["page", "project", "book", "microblog", "lifeEvent", "stack"];
 
   useEffect(() => {
     if (open) {
@@ -91,7 +92,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search projects, books, posts..."
+            placeholder="Search pages, projects, books..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1 text-sm bg-transparent text-fg placeholder-fg/30 focus:outline-none"
