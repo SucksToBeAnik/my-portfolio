@@ -13,8 +13,15 @@ export function SearchOverlay() {
         setOpen((p) => !p);
       }
     }
+    function handleOpenSearch() {
+      setOpen((p) => !p);
+    }
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("opensearch", handleOpenSearch);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("opensearch", handleOpenSearch);
+    };
   }, []);
 
   return <SearchModal open={open} onClose={() => setOpen(false)} />;

@@ -1,23 +1,30 @@
 import Link from "next/link";
 import Image from "next/image";
-import { GithubLogo, LinkedinLogo, XLogo } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo, LinkedinLogo, XLogo, FolderOpen } from "@phosphor-icons/react/dist/ssr";
 import { LinkPreview } from "@/components/LinkPreview";
+import { db } from "@/db";
+import { microblogs, projects } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 
-const articles = [
-  { title: "Building a minimalist portfolio in 2025", slug: "minimal-portfolio" },
-  { title: "Why I switched to Turso for side projects", slug: "turso-side-projects" },
-  { title: "The art of intentional constraint", slug: "intentional-constraint" },
-  { title: "Lessons from 5 years of freelancing", slug: "freelance-lessons" },
-  { title: "Designing for the 680px column", slug: "680px-column" },
-];
+function stripHtml(html: string) {
+  return html.replace(/<[^>]*>/g, "");
+}
 
-const featuredProjects = [
-  { name: "HN", description: "A minimal Hacker News reader" },
-  { name: "Rippled", description: "Ambient soundscapes for focus" },
-  { name: "Ping", description: "Uptime monitoring for small teams" },
-];
+export default async function Home() {
+  const [recentPosts, featuredProjects] = await Promise.all([
+    db
+      .select({ id: microblogs.id, title: microblogs.title })
+      .from(microblogs)
+      .where(eq(microblogs.published, true))
+      .orderBy(desc(microblogs.publishedAt))
+      .limit(3),
+    db
+      .select({ id: projects.id, title: projects.title, description: projects.description })
+      .from(projects)
+      .where(eq(projects.featured, true))
+      .orderBy(desc(projects.sortOrder)),
+  ]);
 
-export default function Home() {
   return (
     <div className="space-y-16">
       {/* Hero */}
@@ -72,52 +79,68 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Writing */}
-      <section className="space-y-4">
-        <Link
-          href="/microblog"
-          className="group flex items-center gap-2 text-sm text-muted hover:text-fg transition-colors"
-        >
-          <span>Writing</span>
-          <span className="group-hover:translate-x-0.5 transition-transform">
-            &rarr;
-          </span>
-        </Link>
-
-        <div className="space-y-0">
-          {articles.map((article) => (
+      {/* Blogs & Projects */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {/* Blogs */}
+        {recentPosts.length > 0 && (
+          <section className="space-y-4">
             <Link
-              key={article.slug}
               href="/microblog"
-              className="block py-2.5 text-base text-fg hover:text-muted transition-colors"
+              className="group inline-flex items-center gap-2 text-sm text-muted hover:text-fg transition-colors"
             >
-              {article.title}
+              <span>Blogs</span>
+              <span className="group-hover:translate-x-0.5 transition-transform">
+                &rarr;
+              </span>
             </Link>
-          ))}
-        </div>
-      </section>
 
-      {/* Projects */}
-      <section className="space-y-4">
-        <Link
-          href="/projects"
-          className="group flex items-center gap-2 text-sm text-muted hover:text-fg transition-colors"
-        >
-          <span>Projects</span>
-          <span className="group-hover:translate-x-0.5 transition-transform">
-            &rarr;
-          </span>
-        </Link>
-
-        <div className="space-y-4">
-          {featuredProjects.map((project) => (
-            <div key={project.name} className="space-y-0.5">
-              <h3 className="text-base font-medium">{project.name}</h3>
-              <p className="text-sm text-muted">{project.description}</p>
+            <div className="space-y-0">
+              {recentPosts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/microblog/${post.id}`}
+                  className="block py-2.5 text-sm text-fg hover:text-muted transition-colors"
+                >
+                  {post.title}
+                </Link>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
+        )}
+
+        {/* Projects */}
+        {featuredProjects.length > 0 && (
+          <section className="space-y-4">
+            <Link
+              href="/projects"
+              className="group inline-flex items-center gap-2 text-sm text-muted hover:text-fg transition-colors"
+            >
+              <span>Projects</span>
+              <span className="group-hover:translate-x-0.5 transition-transform">
+                &rarr;
+              </span>
+            </Link>
+
+            <div className="space-y-3">
+              {featuredProjects.map((project) => (
+                <Link
+                  key={project.id}
+                  href="/projects"
+                  className="flex items-start gap-3 py-1.5 text-fg hover:text-muted transition-colors"
+                >
+                  <FolderOpen weight="thin" className="w-4 h-4 text-muted shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="text-sm">{project.title}</p>
+                    {project.description && (
+                      <p className="text-xs text-muted line-clamp-1">{stripHtml(project.description)}</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }
