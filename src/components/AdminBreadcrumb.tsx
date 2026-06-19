@@ -1,8 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { House } from "@phosphor-icons/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const labels: Record<string, string> = {
   dashboard: "Dashboard",
@@ -19,7 +19,7 @@ export function AdminBreadcrumb() {
   const segments = pathname.split("/").filter(Boolean);
 
   const slug = segments.length > 1 ? segments[1] : null;
-  const pageLabel = slug ? (labels[slug] || slug) : null;
+  const pageLabel = slug ? labels[slug] || slug : null;
 
   return (
     <div className="flex items-center gap-1.5 text-xs font-heading text-muted mb-4 shrink-0">

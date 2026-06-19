@@ -1,17 +1,18 @@
-import Link from "next/link";
-import Image from "next/image";
-import { GithubLogo, LinkedinLogo, XLogo, FolderOpen } from "@phosphor-icons/react/dist/ssr";
-import { LinkPreview } from "@/components/LinkPreview";
-import { AskPrompt } from "@/components/AskPrompt";
-import { db } from "@/db";
-import { microblogs, projects, books, siteConfig } from "@/db/schema";
+import { FolderOpen, GithubLogo, LinkedinLogo, XLogo } from "@phosphor-icons/react/dist/ssr";
 import { desc, eq } from "drizzle-orm";
+import Image from "next/image";
+import Link from "next/link";
+import { AskPrompt } from "@/components/AskPrompt";
+import { LinkPreview } from "@/components/LinkPreview";
+import { db } from "@/db";
+import { books, microblogs, projects, siteConfig } from "@/db/schema";
 
 export const revalidate = 3600;
 
 export const metadata = {
   title: "Suckstobeanik",
-  description: "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
+  description:
+    "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
 };
 
 function stripHtml(html: string) {
@@ -56,11 +57,13 @@ export default async function Home() {
 
         <div className="space-y-3">
           <h1 className="text-4xl font-heading">@suckstobeanik</h1>
-            <p className="text-base leading-relaxed text-fg/80 max-w-lg">
-              I&apos;m a software engineer who loves building simple solutions.
-              Here, I share a little bit of everything that interests me.
-              <span className="block"><AskPrompt /></span>
-            </p>
+          <p className="text-base leading-relaxed text-fg/80 max-w-lg">
+            I&apos;m a software engineer who loves building simple solutions. Here, I share a little
+            bit of everything that interests me.
+            <span className="block">
+              <AskPrompt />
+            </span>
+          </p>
         </div>
 
         <div className="flex items-center gap-2 text-fg/60">
@@ -74,7 +77,10 @@ export default async function Home() {
               <GithubLogo weight="thin" className="w-5 h-5" />
             </Link>
           </LinkPreview>
-          <LinkPreview url="https://www.linkedin.com/in/al-jami-islam-anik-485758285" position="bottom">
+          <LinkPreview
+            url="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
+            position="bottom"
+          >
             <Link
               href="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
               target="_blank"
@@ -99,8 +105,17 @@ export default async function Home() {
 
       {(workingOn || reading) && (
         <div className="text-xs text-fg/50 text-right space-y-1">
-          {workingOn && <p>Working on <span className="font-medium text-fg/60">{workingOn}</span></p>}
-          {reading && <p>Reading <span className="font-medium text-fg/60">{reading.title}</span> by {reading.author}</p>}
+          {workingOn && (
+            <p>
+              Working on <span className="font-medium text-fg/60">{workingOn}</span>
+            </p>
+          )}
+          {reading && (
+            <p>
+              Reading <span className="font-medium text-fg/60">{reading.title}</span> by{" "}
+              {reading.author}
+            </p>
+          )}
         </div>
       )}
 
@@ -114,9 +129,7 @@ export default async function Home() {
               className="group inline-flex items-center gap-2 text-sm text-muted hover:text-fg transition-colors"
             >
               <span>Blogs</span>
-              <span className="group-hover:translate-x-0.5 transition-transform">
-                &rarr;
-              </span>
+              <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
             </Link>
 
             <div className="space-y-0">
@@ -141,9 +154,7 @@ export default async function Home() {
               className="group inline-flex items-center gap-2 text-sm text-muted hover:text-fg transition-colors"
             >
               <span>Projects</span>
-              <span className="group-hover:translate-x-0.5 transition-transform">
-                &rarr;
-              </span>
+              <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
             </Link>
 
             <div className="space-y-3">
@@ -157,7 +168,9 @@ export default async function Home() {
                   <div className="min-w-0">
                     <p className="text-sm">{project.title}</p>
                     {project.description && (
-                      <p className="text-xs text-muted line-clamp-1">{stripHtml(project.description)}</p>
+                      <p className="text-xs text-muted line-clamp-1">
+                        {stripHtml(project.description)}
+                      </p>
                     )}
                   </div>
                 </Link>

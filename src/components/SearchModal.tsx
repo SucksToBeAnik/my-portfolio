@@ -1,10 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  BookOpenText,
+  Compass,
+  FolderOpen,
+  Heart,
+  MagnifyingGlass,
+  Quotes,
+  Wrench,
+} from "@phosphor-icons/react";
 import { usePathname, useRouter } from "next/navigation";
-import { MagnifyingGlass, Compass, FolderOpen, BookOpenText, Quotes, Heart, Wrench } from "@phosphor-icons/react";
-import { getSearchItems, invalidateSearchCache } from "@/lib/search-index";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { SearchIndexItem } from "@/actions/search";
+import { getSearchItems, invalidateSearchCache } from "@/lib/search-index";
 
 const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
   page: { icon: Compass, label: "Pages" },
@@ -21,15 +29,12 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
   const [loaded, setLoaded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const pathname = usePathname();
+  const _pathname = usePathname();
 
   const activeItems = query
     ? items.filter((i) => {
         const q = query.toLowerCase();
-        return (
-          i.title.toLowerCase().includes(q) ||
-          i.subtitle.toLowerCase().includes(q)
-        );
+        return i.title.toLowerCase().includes(q) || i.subtitle.toLowerCase().includes(q);
       })
     : [];
 
@@ -55,7 +60,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
 
   useEffect(() => {
     invalidateSearchCache();
-  }, [pathname]);
+  }, []);
 
   const handleSelect = useCallback(
     (url: string) => {
@@ -104,39 +109,47 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
 
         <div className="max-h-[50vh] overflow-y-auto">
           {!loaded && query && (
-            <div className="flex items-center justify-center py-8 text-xs text-muted">Loading...</div>
+            <div className="flex items-center justify-center py-8 text-xs text-muted">
+              Loading...
+            </div>
           )}
 
           {loaded && query && activeItems.length === 0 && (
-            <div className="flex items-center justify-center py-8 text-xs text-muted">No results found.</div>
+            <div className="flex items-center justify-center py-8 text-xs text-muted">
+              No results found.
+            </div>
           )}
 
-          {loaded && query && typeOrder.map((type) => {
-            const groupItems = grouped[type];
-            if (!groupItems || groupItems.length === 0) return null;
-            const config = typeConfig[type];
+          {loaded &&
+            query &&
+            typeOrder.map((type) => {
+              const groupItems = grouped[type];
+              if (!groupItems || groupItems.length === 0) return null;
+              const config = typeConfig[type];
 
-            return (
-              <div key={type} className="px-2 py-2">
-                <p className="px-2 text-[10px] uppercase tracking-wider text-muted mb-1">{config.label}</p>
-                {groupItems.map((item) => (
-                  <button
-                    key={`${item.type}-${item.id}`}
-                    onClick={() => handleSelect(item.url)}
-                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left hover:bg-hover-bg transition-colors cursor-pointer"
-                  >
-                    <config.icon weight="thin" className="w-4 h-4 text-muted shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm truncate">{item.title}</p>
-                      {item.subtitle && (
-                        <p className="text-xs text-muted truncate">{item.subtitle}</p>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            );
-          })}
+              return (
+                <div key={type} className="px-2 py-2">
+                  <p className="px-2 text-[10px] uppercase tracking-wider text-muted mb-1">
+                    {config.label}
+                  </p>
+                  {groupItems.map((item) => (
+                    <button
+                      key={`${item.type}-${item.id}`}
+                      onClick={() => handleSelect(item.url)}
+                      className="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left hover:bg-hover-bg transition-colors cursor-pointer"
+                    >
+                      <config.icon weight="thin" className="w-4 h-4 text-muted shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm truncate">{item.title}</p>
+                        {item.subtitle && (
+                          <p className="text-xs text-muted truncate">{item.subtitle}</p>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              );
+            })}
         </div>
       </div>
     </div>

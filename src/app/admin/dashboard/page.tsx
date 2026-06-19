@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { db } from "@/db";
-import { projects, lifeEvents, books, microblogs, stacks, sites, siteConfig } from "@/db/schema";
 import { count, eq } from "drizzle-orm";
+import Link from "next/link";
 import { updateWorkingOn } from "@/actions/site-config";
+import { db } from "@/db";
+import { books, lifeEvents, microblogs, projects, siteConfig, sites, stacks } from "@/db/schema";
 
 export const metadata = {
   title: "Dashboard — Admin — Suckstobeanik",
@@ -16,7 +16,12 @@ export default async function DashboardPage() {
   const [stackCount] = await db.select({ c: count() }).from(stacks);
   const [siteCount] = await db.select({ c: count() }).from(sites);
 
-  const workingOn = await db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1).then(r => r[0]?.value ?? "");
+  const workingOn = await db
+    .select()
+    .from(siteConfig)
+    .where(eq(siteConfig.key, "working_on"))
+    .limit(1)
+    .then((r) => r[0]?.value ?? "");
 
   const sections = [
     { label: "Projects", count: projectCount.c, href: "/admin/projects" },
@@ -52,7 +57,12 @@ export default async function DashboardPage() {
           placeholder="e.g. Building X with Y..."
           className="w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors"
         />
-        <button type="submit" className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 transition-all cursor-pointer">Save</button>
+        <button
+          type="submit"
+          className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 transition-all cursor-pointer"
+        >
+          Save
+        </button>
       </form>
     </div>
   );

@@ -26,17 +26,14 @@ export function Drawer({ open, onClose, title, children, headerActions, footer }
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
   return (
     <>
-      {open && (
-        <div
-          className="fixed inset-0 bg-bg/60 z-[60]"
-          onClick={onClose}
-        />
-      )}
+      {open && <div className="fixed inset-0 bg-bg/60 z-[60]" onClick={onClose} />}
 
       <div
         ref={ref}
@@ -49,9 +46,7 @@ export function Drawer({ open, onClose, title, children, headerActions, footer }
           <h2 className="text-sm font-heading text-fg">{title}</h2>
           <div className="hidden sm:flex items-center gap-2">{headerActions}</div>
         </div>
-        <div className="flex-1 overflow-y-auto p-5">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto p-5">{children}</div>
         {footer && (
           <div className="flex items-center gap-2 shrink-0 px-5 py-3 border-t border-hairline sm:hidden">
             {footer}

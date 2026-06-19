@@ -9,7 +9,7 @@
 - **LinkedIn:** [linkedin.com/in/al-jami-islam-anik-485758285](https://www.linkedin.com/in/al-jami-islam-anik-485758285)
 
 ## Bio
-I am Al Jami Islam Anik, a software engineer from Dhaka, Bangladesh. I have built frontend systems from scratch orchastrating from project structure to full fledged apps used by live users. I am also a huge enthusiast for AI/ML, both theoritcal and applied. I love to watch series and movies on my free time. I also love to travel whenever I get the opportunity.
+I am Al Jami Islam Anik, a software engineer from Dhaka, Bangladesh. I have built frontend systems from scratch orchestrating from project structure to full fledged apps used by live users. I am also a huge enthusiast for AI/ML, both theoretical and applied. I love to watch series and movies on my free time. I also love to travel whenever I get the opportunity.
 
 ## Skills
 - **Languages:** TypeScript, JavaScript, Python
@@ -19,7 +19,7 @@ I am Al Jami Islam Anik, a software engineer from Dhaka, Bangladesh. I have buil
 - **Databases:** PostgreSQL, SQLite, Turso
 
 ## Experience
-- **Software Engineer** at AskTuring.ai — Worked on RAG systems and built mutiple frontend systems from scratch
+- **Software Engineer** at AskTuring.ai — Worked on RAG systems and built multiple frontend systems from scratch
 - **Open Source** — Building CLI tools, AI agents, and developer utilities
 
 ## Education

@@ -7,14 +7,15 @@ function getYouTubeId(url: string) {
 
 function LiteYouTube({ id, title }: { id: string; title: string }) {
   return (
-      <div
-          className="relative aspect-video overflow-hidden rounded-lg bg-black cursor-pointer group max-h-[400px]"
-          onClick={(e) => {
+    <div
+      className="relative aspect-video overflow-hidden rounded-lg bg-black cursor-pointer group max-h-[400px]"
+      onClick={(e) => {
         const target = e.currentTarget;
         const iframe = document.createElement("iframe");
         iframe.className = "absolute inset-0 w-full h-full";
         iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0`;
-        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        iframe.allow =
+          "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         iframe.allowFullscreen = true;
         target.innerHTML = "";
         target.appendChild(iframe);
@@ -45,12 +46,10 @@ export function VideoEmbed({ url, title }: { url: string; title: string }) {
   }
 
   return (
-    <video
-      src={url}
-      controls
-      className="w-full max-h-[400px] rounded-lg object-contain bg-black"
-    >
-      <a href={url} className="text-xs underline">Watch video</a>
+    <video src={url} controls className="w-full max-h-[400px] rounded-lg object-contain bg-black">
+      <a href={url} className="text-xs underline">
+        Watch video
+      </a>
     </video>
   );
 }

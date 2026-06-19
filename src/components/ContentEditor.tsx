@@ -1,18 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import LinkExtension from "@tiptap/extension-link";
+import { Image, LinkSimple, ListBullets, ListNumbers, Sparkle } from "@phosphor-icons/react";
 import ImageExtension from "@tiptap/extension-image";
+import LinkExtension from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import {
-  ListBullets,
-  ListNumbers,
-  LinkSimple,
-  Image,
-  Sparkle,
-} from "@phosphor-icons/react";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { useCallback, useRef, useState } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
@@ -49,8 +43,7 @@ export function ContentEditor({
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class:
-          "editor-content focus:outline-none min-h-[200px] px-4 py-3 text-sm text-fg",
+        class: "editor-content focus:outline-none min-h-[200px] px-4 py-3 text-sm text-fg",
       },
     },
   });
@@ -60,7 +53,7 @@ export function ContentEditor({
       editor?.chain().focus().setImage({ src: url }).run();
       imageDialogRef.current?.close();
     },
-    [editor]
+    [editor],
   );
 
   const handleFileUpload = useCallback(
@@ -74,7 +67,7 @@ export function ContentEditor({
         // silently fail
       }
     },
-    [editor]
+    [editor],
   );
 
   const addLink = useCallback(() => {
@@ -112,11 +105,7 @@ export function ContentEditor({
 
   if (!editor) return null;
 
-  const btn = (
-    active: boolean | undefined,
-    onClick: () => void,
-    label: string
-  ) => (
+  const btn = (active: boolean | undefined, onClick: () => void, label: string) => (
     <button
       type="button"
       onClick={onClick}
@@ -134,7 +123,7 @@ export function ContentEditor({
     active: boolean | undefined,
     onClick: () => void,
     label: string,
-    Icon: typeof ListBullets
+    Icon: typeof ListBullets,
   ) => (
     <button
       type="button"
@@ -161,12 +150,12 @@ export function ContentEditor({
         {btn(
           editor.isActive("heading", { level: 2 }),
           () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
-          "H2"
+          "H2",
         )}
         {btn(
           editor.isActive("heading", { level: 3 }),
           () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
-          "H3"
+          "H3",
         )}
 
         <div className="w-px h-4 mx-1 bg-nav-border" />
@@ -175,29 +164,19 @@ export function ContentEditor({
           editor.isActive("bulletList"),
           () => editor.chain().focus().toggleBulletList().run(),
           "Bullet list",
-          ListBullets
+          ListBullets,
         )}
         {iconBtn(
           editor.isActive("orderedList"),
           () => editor.chain().focus().toggleOrderedList().run(),
           "Ordered list",
-          ListNumbers
+          ListNumbers,
         )}
 
         <div className="w-px h-4 mx-1 bg-nav-border" />
 
-        {iconBtn(
-          editor.isActive("link"),
-          addLink,
-          "Link",
-          LinkSimple
-        )}
-        {iconBtn(
-          false,
-          () => imageDialogRef.current?.showModal(),
-          "Image",
-          Image
-        )}
+        {iconBtn(editor.isActive("link"), addLink, "Link", LinkSimple)}
+        {iconBtn(false, () => imageDialogRef.current?.showModal(), "Image", Image)}
 
         {generateContext && (
           <>
@@ -218,10 +197,7 @@ export function ContentEditor({
 
       <EditorContent editor={editor} />
 
-      <dialog
-        ref={imageDialogRef}
-        className="bg-transparent backdrop:bg-bg/60"
-      >
+      <dialog ref={imageDialogRef} className="bg-transparent backdrop:bg-bg/60">
         <div className="w-80 bg-bg border border-nav-border rounded-xl shadow-2xl p-4">
           <p className="text-xs font-medium text-fg mb-3">Insert Image</p>
           <ImageUpload onChange={handleImageInserted} onFilePending={handleFileUpload} />

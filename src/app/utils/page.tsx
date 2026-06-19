@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { getStacks } from "@/actions/stacks";
-import { getSites } from "@/actions/sites";
-import { Spinner } from "@/components/Spinner";
-import { LinkPreview } from "@/components/LinkPreview";
 import { House } from "@phosphor-icons/react";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { getSites } from "@/actions/sites";
+import { getStacks } from "@/actions/stacks";
+import { LinkPreview } from "@/components/LinkPreview";
+import { Spinner } from "@/components/Spinner";
 
 type Tab = "stacks" | "sites";
 
@@ -48,30 +48,30 @@ export default function UtilsPage() {
   return (
     <>
       <div className="flex items-center justify-between mb-8 md:mb-16">
-          <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
-            <House weight="thin" className="w-3.5 h-3.5" />
-            <span className="text-fg/20">/</span>
-            <span className="text-fg/60">utils</span>
-          </div>
-          <div className="flex gap-3 shrink-0">
-            <button
-              onClick={() => switchTab("stacks")}
-              className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
-                tab === "stacks" ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"
-              }`}
-            >
-              Stacks
-            </button>
-            <button
-              onClick={() => switchTab("sites")}
-              className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
-                tab === "sites" ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"
-              }`}
-            >
-              Sites
-            </button>
-          </div>
+        <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
+          <House weight="thin" className="w-3.5 h-3.5" />
+          <span className="text-fg/20">/</span>
+          <span className="text-fg/60">utils</span>
         </div>
+        <div className="flex gap-3 shrink-0">
+          <button
+            onClick={() => switchTab("stacks")}
+            className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
+              tab === "stacks" ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"
+            }`}
+          >
+            Stacks
+          </button>
+          <button
+            onClick={() => switchTab("sites")}
+            className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
+              tab === "sites" ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"
+            }`}
+          >
+            Sites
+          </button>
+        </div>
+      </div>
 
       {tab === "stacks" && <StacksContent />}
       {tab === "sites" && <SitesContent />}
@@ -103,13 +103,20 @@ function StacksContent() {
         >
           {stack.imageUrl && (
             <div className="w-10 h-10 shrink-0 rounded-lg bg-hover-bg overflow-hidden flex items-center justify-center">
-              <img src={stack.imageUrl} alt={stack.name} loading="lazy" className="w-8 h-8 object-contain" />
+              <img
+                src={stack.imageUrl}
+                alt={stack.name}
+                loading="lazy"
+                className="w-8 h-8 object-contain"
+              />
             </div>
           )}
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-medium">{stack.name}</h3>
             {stack.platform && (
-              <span className="inline-block mt-1 px-1.5 py-0.5 text-[10px] bg-hover-bg rounded text-fg/50">{stack.platform}</span>
+              <span className="inline-block mt-1 px-1.5 py-0.5 text-[10px] bg-hover-bg rounded text-fg/50">
+                {stack.platform}
+              </span>
             )}
             {stack.description && (
               <p className="text-xs text-fg/50 mt-1 leading-relaxed">{stack.description}</p>
@@ -171,14 +178,21 @@ function SiteItem({ url, tags, createdAt }: { url: string; tags: string | null; 
           src={displayFavicon}
           alt=""
           className="w-5 h-5 rounded shrink-0"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = "none";
+          }}
         />
         <div className="min-w-0 flex-1">
           <p className="text-sm truncate">{meta?.title || domain}</p>
           {tags && (
             <div className="flex flex-wrap gap-1 mt-1">
               {tags.split(",").map((tag) => (
-                <span key={tag.trim()} className="px-1.5 py-0.5 text-[10px] bg-hover-bg rounded text-fg/50">{tag.trim()}</span>
+                <span
+                  key={tag.trim()}
+                  className="px-1.5 py-0.5 text-[10px] bg-hover-bg rounded text-fg/50"
+                >
+                  {tag.trim()}
+                </span>
               ))}
             </div>
           )}

@@ -1,15 +1,9 @@
-import { db } from "@/db";
-import { lifeEvents } from "@/db/schema";
+import { Briefcase, GraduationCap, MapPin, PushPin, Star } from "@phosphor-icons/react/dist/ssr";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { LifeImage } from "@/components/LifeImage";
 import { LinkPreview } from "@/components/LinkPreview";
-import {
-  Briefcase,
-  GraduationCap,
-  Star,
-  MapPin,
-  PushPin,
-} from "@phosphor-icons/react/dist/ssr";
+import { db } from "@/db";
+import { lifeEvents } from "@/db/schema";
 
 export const metadata = {
   title: "Life — Suckstobeanik",
@@ -20,7 +14,7 @@ export const revalidate = 3600;
 
 function formatDate(date: string) {
   const d = new Date(date);
-  if (isNaN(d.getTime())) return date;
+  if (Number.isNaN(d.getTime())) return date;
   return d.toLocaleDateString("en-US", {
     month: "short",
     year: "numeric",
@@ -42,10 +36,7 @@ const typeIcons: Record<string, React.ReactNode> = {
 };
 
 export default async function LifePage() {
-  const items = await db
-    .select()
-    .from(lifeEvents)
-    .orderBy(lifeEvents.sortOrder);
+  const items = await db.select().from(lifeEvents).orderBy(lifeEvents.sortOrder);
 
   return (
     <div className="space-y-12">
@@ -53,9 +44,7 @@ export default async function LifePage() {
         <Breadcrumb crumbs={[{ label: "Life" }]} />
       </div>
 
-      {items.length === 0 && (
-        <p className="text-sm text-muted">Nothing here yet.</p>
-      )}
+      {items.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
 
       <div className="relative pl-8 space-y-10 before:absolute before:left-[15.5px] before:top-0 before:bottom-2 before:w-px before:bg-hairline">
         {items.map((event) => (
@@ -70,22 +59,29 @@ export default async function LifePage() {
                 <div className="w-16 h-16 shrink-0" />
               )}
               <div>
-                  <p className="text-xs text-muted mb-0.5">{dateRange(event.startDate, event.endDate, event.current)}</p>
-                  {event.location && (
-                    <a
-                      href={`https://www.google.com/maps?q=${encodeURIComponent(event.location)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-fg transition-colors"
-                    >
-                      <PushPin weight="fill" className="w-3 h-3" />
-                      {event.location}
-                    </a>
-                  )}
+                <p className="text-xs text-muted mb-0.5">
+                  {dateRange(event.startDate, event.endDate, event.current)}
+                </p>
+                {event.location && (
+                  <a
+                    href={`https://www.google.com/maps?q=${encodeURIComponent(event.location)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-fg transition-colors"
+                  >
+                    <PushPin weight="fill" className="w-3 h-3" />
+                    {event.location}
+                  </a>
+                )}
                 <h2 className="text-base font-heading leading-snug mb-2">
                   {event.url ? (
                     <LinkPreview url={event.url}>
-                      <a href={event.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                      <a
+                        href={event.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
                         {event.title}
                       </a>
                     </LinkPreview>

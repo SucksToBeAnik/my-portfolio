@@ -19,7 +19,7 @@ managed through an admin dashboard with login.
 - Background outside the centered column: solid black in both modes
 
 ### Typography
-- **Headings:** Instrument Serif via `next/font` — editorial, refined
+- **Headings:** Space Mono via `next/font` — monospace, editorial
 - **Body:** Inter via `next/font` — clean, legible
 - Font size scale: `text-sm` (nav), `text-base` (body), `text-2xl` (section
   titles), `text-4xl` (page headings)

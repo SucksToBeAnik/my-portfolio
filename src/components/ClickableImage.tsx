@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { ImageViewer } from "@/components/ImageViewer";
 
-export function ClickableImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+export function ClickableImage({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -11,9 +19,7 @@ export function ClickableImage({ src, alt, className }: { src: string; alt: stri
       <button type="button" onClick={() => setOpen(true)} className={className}>
         <img src={src} alt={alt} loading="lazy" className="object-cover w-full h-full" />
       </button>
-      {open && (
-        <ImageViewer src={src} alt={alt} onClose={() => setOpen(false)} />
-      )}
+      {open && <ImageViewer src={src} alt={alt} onClose={() => setOpen(false)} />}
     </>
   );
 }

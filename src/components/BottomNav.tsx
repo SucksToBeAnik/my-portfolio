@@ -1,25 +1,27 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
-  House,
+  BookOpenText,
+  ChatCircleDots,
   FolderOpen,
   Heart,
-  BookOpenText,
-  Quotes,
-  Wrench,
-  ChatCircleDots,
-  SunDim,
-  Moon,
+  House,
   MagnifyingGlass,
+  Moon,
+  Quotes,
+  SunDim,
+  Wrench,
 } from "@phosphor-icons/react";
 import dynamic from "next/dynamic";
-import { useTheme } from "@/lib/ThemeProvider";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { AuthMenu } from "@/components/AuthMenu";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useTheme } from "@/lib/ThemeProvider";
 
-const ChatPopup = dynamic(() => import("@/components/ChatPopup").then((m) => m.ChatPopup), { ssr: false });
+const ChatPopup = dynamic(() => import("@/components/ChatPopup").then((m) => m.ChatPopup), {
+  ssr: false,
+});
 
 const navItems = [
   { href: "/", label: "Home", icon: House },
@@ -43,7 +45,7 @@ export function BottomNav() {
   }, []);
   const utilsTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const isUtils = pathname === "/utils";
+  const _isUtils = pathname === "/utils";
 
   function startUtilsHover() {
     clearTimeout(utilsTimeout.current);
@@ -68,21 +70,40 @@ export function BottomNav() {
 
               if (item.href === "/utils") {
                 return (
-                  <div key={item.href} className="relative" onMouseEnter={startUtilsHover} onMouseLeave={endUtilsHover}>
+                  <div
+                    key={item.href}
+                    className="relative"
+                    onMouseEnter={startUtilsHover}
+                    onMouseLeave={endUtilsHover}
+                  >
                     <Link
                       href="/utils"
                       className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0"
                     >
-                      <Icon weight={isActive || utilsHover ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
+                      <Icon
+                        weight={isActive || utilsHover ? "fill" : "thin"}
+                        className="w-4 h-4 shrink-0"
+                      />
                       <span className="hidden sm:inline">{item.label}</span>
                     </Link>
                     {utilsHover && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex gap-1 bg-bg/95 backdrop-blur-xl border border-hairline rounded-lg shadow-2xl p-1 z-[100] whitespace-nowrap"
+                      <div
+                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex gap-1 bg-bg/95 backdrop-blur-xl border border-hairline rounded-lg shadow-2xl p-1 z-[100] whitespace-nowrap"
                         onMouseEnter={startUtilsHover}
                         onMouseLeave={endUtilsHover}
                       >
-                        <Link href="/utils?tab=stacks" className="px-2.5 py-1.5 text-xs text-fg/60 hover:text-fg hover:bg-hover-bg rounded-md transition-colors">Stacks</Link>
-                        <Link href="/utils?tab=sites" className="px-2.5 py-1.5 text-xs text-fg/60 hover:text-fg hover:bg-hover-bg rounded-md transition-colors">Sites</Link>
+                        <Link
+                          href="/utils?tab=stacks"
+                          className="px-2.5 py-1.5 text-xs text-fg/60 hover:text-fg hover:bg-hover-bg rounded-md transition-colors"
+                        >
+                          Stacks
+                        </Link>
+                        <Link
+                          href="/utils?tab=sites"
+                          className="px-2.5 py-1.5 text-xs text-fg/60 hover:text-fg hover:bg-hover-bg rounded-md transition-colors"
+                        >
+                          Sites
+                        </Link>
                       </div>
                     )}
                   </div>

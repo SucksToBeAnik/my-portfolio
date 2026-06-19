@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
 import { ChatCircleDots, PaperPlaneRight, X } from "@phosphor-icons/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   role: "user" | "assistant";
@@ -44,14 +44,14 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
       const val = getCookie("query_remaining");
       if (val) {
         const n = parseInt(val, 10);
-        if (!isNaN(n)) setRemaining(n);
+        if (!Number.isNaN(n)) setRemaining(n);
       }
     }
   }, [open]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+  }, []);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -86,7 +86,10 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
           const body = await res.json();
           setMessages((prev) => [
             ...prev.slice(0, -1),
-            { role: "assistant", content: body.error || "You've reached your daily limit. Come back tomorrow!" },
+            {
+              role: "assistant",
+              content: body.error || "You've reached your daily limit. Come back tomorrow!",
+            },
           ]);
           setIsLoading(false);
           return;
@@ -106,7 +109,7 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
 
         const decoder = new TextDecoder();
         let accumulated = "";
-        let streamOk = true;
+        const streamOk = true;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -210,7 +213,9 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
                     m.content
                   ) : (
                     <div className="prose prose-invert prose-xs max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:bg-fg/5 [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_code]:text-fg [&_code]:text-[10px] [&_strong]:text-fg [&_a]:text-fg/70 [&_a]:underline [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:text-fg/80 [&_p]:text-fg/80 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0">
-                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{m.content}</ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                        {m.content}
+                      </ReactMarkdown>
                     </div>
                   )
                 ) : (
@@ -225,9 +230,14 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-hairline px-4 py-2.5">
+        <form
+          onSubmit={handleSubmit}
+          className="flex items-center gap-2 border-t border-hairline px-4 py-2.5"
+        >
           {remaining < 50 && (
-            <span className="text-[10px] font-medium text-fg/50 bg-hover-bg px-1.5 py-0.5 rounded-full shrink-0">{remaining}/50</span>
+            <span className="text-[10px] font-medium text-fg/50 bg-hover-bg px-1.5 py-0.5 rounded-full shrink-0">
+              {remaining}/50
+            </span>
           )}
           <input
             ref={inputRef}

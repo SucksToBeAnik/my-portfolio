@@ -16,7 +16,7 @@
 }
 
 [data-theme="light"] {
-  --bg: #FAFAFA;
+  --bg: #fafafa;
   --fg: #000000;
   --muted: #6b6b6b;
   --hairline: rgba(0, 0, 0, 0.1);
@@ -80,8 +80,11 @@ body {
 
 /* Prevent iOS auto-zoom on input focus — inputs < 16px trigger Safari zoom */
 @media (hover: none) and (pointer: coarse) {
-  input, textarea, select, [contenteditable] {
-    font-size: 16px !important;
+  input,
+  textarea,
+  select,
+  [contenteditable] {
+    font-size: 16px;
   }
 }
 

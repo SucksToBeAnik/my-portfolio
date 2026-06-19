@@ -1,17 +1,16 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 import {
-  SquaresFour,
-  FolderOpen,
-  Heart,
   BookOpenText,
-  Quotes,
-  Wrench,
-  Link as LinkIcon,
+  FolderOpen,
   Globe,
+  Heart,
+  Quotes,
+  SquaresFour,
+  Wrench,
 } from "@phosphor-icons/react/dist/ssr";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: SquaresFour },

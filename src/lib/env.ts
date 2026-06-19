@@ -1,4 +1,4 @@
-import { cleanEnv, str } from "envalid"
+import { cleanEnv, str } from "envalid";
 
 export const env = cleanEnv(process.env, {
   TURSO_DATABASE_URL: str({
@@ -21,4 +21,4 @@ export const env = cleanEnv(process.env, {
   ADMIN_PASSWORD: str({
     desc: "Admin login password",
   }),
-})
+});

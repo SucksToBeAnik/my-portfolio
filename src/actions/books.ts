@@ -1,10 +1,10 @@
-"use server"
+"use server";
 
-import { revalidatePath } from "next/cache"
-import { db } from "@/db"
-import { books } from "@/db/schema"
-import { z } from "zod"
-import { eq } from "drizzle-orm"
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { db } from "@/db";
+import { books } from "@/db/schema";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -16,36 +16,36 @@ const schema = z.object({
   category: z.string().optional(),
   status: z.enum(["reading", "read", "want_to_read"]),
   sortOrder: z.number().optional(),
-})
+});
 
 export async function getBooks() {
-  return db.select().from(books).orderBy(books.sortOrder)
+  return db.select().from(books).orderBy(books.sortOrder);
 }
 
 export async function createBook(data: z.infer<typeof schema>) {
-  const parsed = schema.parse(data)
-  await db.insert(books).values(parsed)
-  revalidatePath("/admin/books")
-  revalidatePath("/books")
+  const parsed = schema.parse(data);
+  await db.insert(books).values(parsed);
+  revalidatePath("/admin/books");
+  revalidatePath("/books");
 }
 
 export async function updateBook(id: number, data: z.infer<typeof schema>) {
-  const parsed = schema.parse(data)
+  const parsed = schema.parse(data);
   await db
     .update(books)
     .set({ ...parsed, updatedAt: new Date() })
-    .where(eq(books.id, id))
-  revalidatePath("/admin/books")
-  revalidatePath("/books")
+    .where(eq(books.id, id));
+  revalidatePath("/admin/books");
+  revalidatePath("/books");
 }
 
 export async function deleteBook(id: number) {
-  await db.delete(books).where(eq(books.id, id))
-  revalidatePath("/admin/books")
+  await db.delete(books).where(eq(books.id, id));
+  revalidatePath("/admin/books");
 }
 
 export async function reorderBooks(
-  items: { id: number; sortOrder: number; status?: "reading" | "read" | "want_to_read" }[]
+  items: { id: number; sortOrder: number; status?: "reading" | "read" | "want_to_read" }[],
 ) {
   for (const item of items) {
     await db
@@ -54,8 +54,8 @@ export async function reorderBooks(
         sortOrder: item.sortOrder,
         ...(item.status ? { status: item.status } : {}),
       })
-      .where(eq(books.id, item.id))
+      .where(eq(books.id, item.id));
   }
-  revalidatePath("/admin/books")
-  revalidatePath("/books")
+  revalidatePath("/admin/books");
+  revalidatePath("/books");
 }

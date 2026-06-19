@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export function ImageViewer({
   src,
@@ -21,7 +21,7 @@ export function ImageViewer({
     (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
     },
-    []
+    [close],
   );
 
   function close() {
@@ -41,7 +41,10 @@ export function ImageViewer({
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center cursor-pointer transition-all duration-200"
-      style={{ background: open ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0)", backdropFilter: open ? "blur(4px)" : "none" }}
+      style={{
+        background: open ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0)",
+        backdropFilter: open ? "blur(4px)" : "none",
+      }}
       onClick={close}
     >
       <div

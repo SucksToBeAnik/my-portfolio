@@ -1,14 +1,10 @@
-import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AdminBreadcrumb } from "@/components/AdminBreadcrumb";
 import { AdminNav } from "@/components/AdminNav";
 import { ResponsiveToaster } from "@/components/ResponsiveToaster";
+import { auth } from "@/lib/auth";
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session) redirect("/");
 
@@ -34,6 +30,6 @@ export default async function AdminLayout({
       <AdminNav variant="bottom" />
 
       <ResponsiveToaster />
-      </main>
+    </main>
   );
 }

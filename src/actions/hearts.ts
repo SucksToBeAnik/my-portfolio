@@ -1,10 +1,10 @@
-"use server"
+"use server";
 
-import { revalidatePath } from "next/cache"
-import { cookies } from "next/headers"
-import { db } from "@/db"
-import { hearts } from "@/db/schema"
-import { eq, and, sql, inArray } from "drizzle-orm"
+import { and, eq, inArray, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { db } from "@/db";
+import { hearts } from "@/db/schema";
 
 export async function toggleHeart(entityType: string, entityId: number) {
   const visitorId = (await cookies()).get("visitor_id")?.value;
@@ -13,7 +13,13 @@ export async function toggleHeart(entityType: string, entityId: number) {
   const existing = await db
     .select()
     .from(hearts)
-    .where(and(eq(hearts.entityType, entityType), eq(hearts.entityId, entityId), eq(hearts.visitorId, visitorId)))
+    .where(
+      and(
+        eq(hearts.entityType, entityType),
+        eq(hearts.entityId, entityId),
+        eq(hearts.visitorId, visitorId),
+      ),
+    )
     .limit(1);
 
   if (existing.length > 0) {
@@ -31,7 +37,10 @@ export async function getHeartData(entityType: string, entityId: number) {
   const result = await db
     .select({
       count: sql<number>`count(*)`.mapWith(Number),
-      userHearted: sql<number>`sum(case when visitor_id = ${visitorId ?? ""} then 1 else 0 end)`.mapWith(Number),
+      userHearted:
+        sql<number>`sum(case when visitor_id = ${visitorId ?? ""} then 1 else 0 end)`.mapWith(
+          Number,
+        ),
     })
     .from(hearts)
     .where(and(eq(hearts.entityType, entityType), eq(hearts.entityId, entityId)));
@@ -42,11 +51,18 @@ export async function getHeartData(entityType: string, entityId: number) {
   };
 }
 
-export async function getHeartCount(entityType: string, entityId: number, visitorId: string | null) {
+export async function getHeartCount(
+  entityType: string,
+  entityId: number,
+  visitorId: string | null,
+) {
   const result = await db
     .select({
       count: sql<number>`count(*)`.mapWith(Number),
-      userHearted: sql<number>`sum(case when visitor_id = ${visitorId ?? ""} then 1 else 0 end)`.mapWith(Number),
+      userHearted:
+        sql<number>`sum(case when visitor_id = ${visitorId ?? ""} then 1 else 0 end)`.mapWith(
+          Number,
+        ),
     })
     .from(hearts)
     .where(and(eq(hearts.entityType, entityType), eq(hearts.entityId, entityId)));
@@ -65,10 +81,13 @@ export async function getHeartsForEntities(entityType: string, entityIds: number
     .select({
       entityId: hearts.entityId,
       count: sql<number>`count(*)`.mapWith(Number),
-      userHearted: sql<number>`sum(case when visitor_id = ${visitorId ?? ""} then 1 else 0 end)`.mapWith(Number),
+      userHearted:
+        sql<number>`sum(case when visitor_id = ${visitorId ?? ""} then 1 else 0 end)`.mapWith(
+          Number,
+        ),
     })
     .from(hearts)
-      .where(and(eq(hearts.entityType, entityType), inArray(hearts.entityId, entityIds)))
+    .where(and(eq(hearts.entityType, entityType), inArray(hearts.entityId, entityIds)))
     .groupBy(hearts.entityId);
 
   const map: Record<number, { count: number; hearted: boolean }> = {};

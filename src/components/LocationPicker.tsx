@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
 import { MapPin } from "@phosphor-icons/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface NominatimResult {
   display_name: string;
@@ -36,7 +36,7 @@ export function LocationPicker({ location, latitude, longitude, onSelect }: Loca
       try {
         const res = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
-          { headers: { "User-Agent": "portfolio/1.0" } }
+          { headers: { "User-Agent": "portfolio/1.0" } },
         );
         const data: NominatimResult[] = await res.json();
         setResults(data);
@@ -97,7 +97,7 @@ export function LocationPicker({ location, latitude, longitude, onSelect }: Loca
       setQuery("");
       setShowResults(false);
     },
-    [onSelect]
+    [onSelect],
   );
 
   useEffect(() => {
@@ -118,7 +118,11 @@ export function LocationPicker({ location, latitude, longitude, onSelect }: Loca
           placeholder="Search a location..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); } }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+            }
+          }}
           className="w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors"
         />
         {searching && (
@@ -156,7 +160,13 @@ export function LocationPicker({ location, latitude, longitude, onSelect }: Loca
         </div>
       )}
 
-      {location && <div ref={mapRef} className="w-full max-w-sm aspect-video rounded-lg overflow-hidden" style={{ background: "var(--hover-bg)" }} />}
+      {location && (
+        <div
+          ref={mapRef}
+          className="w-full max-w-sm aspect-video rounded-lg overflow-hidden"
+          style={{ background: "var(--hover-bg)" }}
+        />
+      )}
     </div>
   );
 }

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { Envelope, Lock, SignOut, SquaresFour, UserCircle } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { UserCircle, Envelope, Lock, SquaresFour, SignOut } from "@phosphor-icons/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function AuthMenu() {
   const { data: session, status } = useSession();
@@ -84,9 +84,7 @@ export function AuthMenu() {
         <div className="absolute bottom-full right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 mb-3 w-56 bg-bg/95 backdrop-blur-xl border border-hairline rounded-xl shadow-2xl overflow-hidden z-[100]">
           {isLoggedIn ? (
             <div className="p-2 space-y-0.5">
-              <p className="px-3 py-2 text-[11px] text-nav-text">
-                {session?.user?.email}
-              </p>
+              <p className="px-3 py-2 text-[11px] text-nav-text">{session?.user?.email}</p>
               <Link
                 href="/admin/dashboard"
                 onClick={() => setOpen(false)}
@@ -134,9 +132,7 @@ export function AuthMenu() {
                   className="w-full pl-7 pr-2.5 py-1.5 text-xs bg-nav-hover-bg border border-nav-border rounded-lg text-fg placeholder-nav-text/50 focus:outline-none focus:border-nav-text transition-colors"
                 />
               </div>
-              {error && (
-                <p className="text-[11px] text-red-400">{error}</p>
-              )}
+              {error && <p className="text-[11px] text-red-400">{error}</p>}
               <button
                 type="submit"
                 disabled={loading}

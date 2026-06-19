@@ -1,23 +1,47 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { DragDropContext, Draggable, Droppable, type DropResult } from "@hello-pangea/dnd";
+import {
+  BookBookmark,
+  BookOpenText,
+  Books,
+  DotsSixVertical,
+  PencilSimple,
+  Plus,
+  Star,
+  Trash,
+} from "@phosphor-icons/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
-import { PencilSimple, Trash, DotsSixVertical, Plus, Star, BookOpenText, BookBookmark, Books } from "@phosphor-icons/react";
-import { getBooks, createBook, updateBook, deleteBook, reorderBooks } from "@/actions/books";
-import { ContentEditor } from "@/components/ContentEditor";
-import { Spinner } from "@/components/Spinner";
-import { ImageUpload } from "@/components/ImageUpload";
-import { Drawer } from "@/components/Drawer";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
+import { createBook, deleteBook, getBooks, reorderBooks, updateBook } from "@/actions/books";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { ContentEditor } from "@/components/ContentEditor";
+import { Drawer } from "@/components/Drawer";
+import { ImageUpload } from "@/components/ImageUpload";
+import { Spinner } from "@/components/Spinner";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
-const categories = ["fiction", "non-fiction", "sci-fi", "fantasy", "self-help", "business", "biography", "history", "philosophy", "poetry"];
+const categories = [
+  "fiction",
+  "non-fiction",
+  "sci-fi",
+  "fantasy",
+  "self-help",
+  "business",
+  "biography",
+  "history",
+  "philosophy",
+  "poetry",
+];
 
 const groups = ["reading", "read", "want_to_read"] as const;
-const groupLabels: Record<string, string> = { reading: "Reading", read: "Read", want_to_read: "Want to Read" };
+const groupLabels: Record<string, string> = {
+  reading: "Reading",
+  read: "Read",
+  want_to_read: "Want to Read",
+};
 const groupIcons: Record<string, React.ReactNode> = {
   reading: <BookOpenText weight="thin" className="w-4 h-4" />,
   read: <BookBookmark weight="thin" className="w-4 h-4" />,
@@ -38,7 +62,16 @@ interface Item {
   updatedAt: Date | null;
 }
 
-const empty = { title: "", author: "", coverUrl: "", rating: null, review: "", quote: "", category: "", status: "want_to_read" as const };
+const empty = {
+  title: "",
+  author: "",
+  coverUrl: "",
+  rating: null,
+  review: "",
+  quote: "",
+  category: "",
+  status: "want_to_read" as const,
+};
 
 export default function BooksPage() {
   const qc = useQueryClient();
@@ -68,16 +101,26 @@ export default function BooksPage() {
     onMutate: async (data) => {
       await qc.cancelQueries({ queryKey: ["books"] });
       const prev = qc.getQueryData<Item[]>(["books"]);
-      qc.setQueryData<Item[]>(["books"], (old) => [...(old || []), { ...data, id: -Date.now() } as Item]);
+      qc.setQueryData<Item[]>(["books"], (old) => [
+        ...(old || []),
+        { ...data, id: -Date.now() } as Item,
+      ]);
       return { prev };
     },
     onError: (err, _data, ctx) => {
       if (ctx?.prev) qc.setQueryData(["books"], ctx.prev);
       const fe = parseErrors(err);
-      if (fe) { setErrors(fe); return; }
+      if (fe) {
+        setErrors(fe);
+        return;
+      }
       toast.error("Failed to create");
     },
-    onSuccess: () => { setErrors({}); toast.success("Book created"); setDrawerOpen(false); },
+    onSuccess: () => {
+      setErrors({});
+      toast.success("Book created");
+      setDrawerOpen(false);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["books"] }),
   });
 
@@ -86,16 +129,25 @@ export default function BooksPage() {
     onMutate: async ({ id, data }) => {
       await qc.cancelQueries({ queryKey: ["books"] });
       const prev = qc.getQueryData<Item[]>(["books"]);
-      qc.setQueryData<Item[]>(["books"], (old) => old?.map((item) => (item.id === id ? { ...item, ...data } : item)));
+      qc.setQueryData<Item[]>(["books"], (old) =>
+        old?.map((item) => (item.id === id ? { ...item, ...data } : item)),
+      );
       return { prev };
     },
     onError: (err, _data, ctx) => {
       if (ctx?.prev) qc.setQueryData(["books"], ctx.prev);
       const fe = parseErrors(err);
-      if (fe) { setErrors(fe); return; }
+      if (fe) {
+        setErrors(fe);
+        return;
+      }
       toast.error("Failed to update");
     },
-    onSuccess: () => { setErrors({}); toast.success("Book updated"); setDrawerOpen(false); },
+    onSuccess: () => {
+      setErrors({});
+      toast.success("Book updated");
+      setDrawerOpen(false);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["books"] }),
   });
 
@@ -107,7 +159,10 @@ export default function BooksPage() {
       qc.setQueryData<Item[]>(["books"], (old) => old?.filter((item) => item.id !== id));
       return { prev };
     },
-    onError: (_err, _id, ctx) => { if (ctx?.prev) qc.setQueryData(["books"], ctx.prev); toast.error("Failed to delete"); },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["books"], ctx.prev);
+      toast.error("Failed to delete");
+    },
     onSuccess: () => toast.success("Book deleted"),
     onSettled: () => qc.invalidateQueries({ queryKey: ["books"] }),
   });
@@ -127,7 +182,9 @@ export default function BooksPage() {
 
     const grouped: Record<string, Item[]> = {};
     for (const g of groups) {
-      grouped[g] = items.filter((i) => i.status === g).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+      grouped[g] = items
+        .filter((i) => i.status === g)
+        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
     }
 
     const [movedItem] = grouped[sourceGroup].splice(source.index, 1);
@@ -135,7 +192,11 @@ export default function BooksPage() {
     grouped[destGroup].splice(destination.index, 0, movedItem);
 
     let sortOrder = 0;
-    const updates: { id: number; sortOrder: number; status?: "reading" | "read" | "want_to_read" }[] = [];
+    const updates: {
+      id: number;
+      sortOrder: number;
+      status?: "reading" | "read" | "want_to_read";
+    }[] = [];
     const newItems: Item[] = [];
     for (const g of groups) {
       for (const item of grouped[g]) {
@@ -143,7 +204,9 @@ export default function BooksPage() {
         updates.push({
           id: item.id,
           sortOrder: sortOrder,
-          ...(isMoved && destGroup !== sourceGroup ? { status: destGroup as "reading" | "read" | "want_to_read" } : {}),
+          ...(isMoved && destGroup !== sourceGroup
+            ? { status: destGroup as "reading" | "read" | "want_to_read" }
+            : {}),
         });
         newItems.push({ ...item, sortOrder });
         sortOrder++;
@@ -157,9 +220,10 @@ export default function BooksPage() {
   const isPending = createMut.isPending || updateMut.isPending;
   const f = (k: string) => (form as any)?.[k] ?? "";
   const s = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
-  const inputCls = "w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors";
+  const inputCls =
+    "w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors";
   const selectCls = `${inputCls} appearance-none h-[34px]`;
-  const errCls = (k: string) => errors[k] ? "text-xs text-red-400 mt-1" : "hidden";
+  const errCls = (k: string) => (errors[k] ? "text-xs text-red-400 mt-1" : "hidden");
 
   if (isLoading) return <Spinner />;
 
@@ -167,12 +231,24 @@ export default function BooksPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-heading">Books</h1>
-        <button onClick={() => { setForm(empty); setEditId(null); setErrors({}); setDrawerOpen(true); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-fg text-bg border border-hairline cursor-pointer hover:opacity-90 transition-all"><Plus weight="bold" className="w-4 h-4" /></button>
+        <button
+          onClick={() => {
+            setForm(empty);
+            setEditId(null);
+            setErrors({});
+            setDrawerOpen(true);
+          }}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-fg text-bg border border-hairline cursor-pointer hover:opacity-90 transition-all"
+        >
+          <Plus weight="bold" className="w-4 h-4" />
+        </button>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
         {groups.map((g) => {
-          const groupItems = items.filter((i) => i.status === g).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+          const groupItems = items
+            .filter((i) => i.status === g)
+            .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
           if (groupItems.length === 0) return null;
           return (
             <div key={g} className="space-y-2">
@@ -186,19 +262,50 @@ export default function BooksPage() {
                     {groupItems.map((item, index) => (
                       <Draggable key={item.id} draggableId={`${g}-${item.id}`} index={index}>
                         {(provided, snapshot) => (
-                          <div ref={provided.innerRef} {...provided.draggableProps}
-                            className={`flex items-center px-4 py-3 border rounded-xl transition-colors ${snapshot.isDragging ? "border-hairline bg-hover-bg shadow-lg" : "border-hairline hover:bg-hover-bg"}`}>
-                            <div {...provided.dragHandleProps} className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing">
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={`flex items-center px-4 py-3 border rounded-xl transition-colors ${snapshot.isDragging ? "border-hairline bg-hover-bg shadow-lg" : "border-hairline hover:bg-hover-bg"}`}
+                          >
+                            <div
+                              {...provided.dragHandleProps}
+                              className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing"
+                            >
                               <DotsSixVertical weight="thin" className="w-4 h-4 text-fg/50" />
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium truncate">{item.title}</p>
                               <p className="text-xs text-fg/50">{item.author}</p>
-                              {item.updatedAt && <p className="text-[11px] text-fg/40 mt-0.5">edited {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</p>}
+                              {item.updatedAt && (
+                                <p className="text-[11px] text-fg/40 mt-0.5">
+                                  edited{" "}
+                                  {formatDistanceToNow(new Date(item.updatedAt), {
+                                    addSuffix: true,
+                                  })}
+                                </p>
+                              )}
                             </div>
                             <div className="flex gap-1.5 shrink-0 ml-3">
-                              <button onClick={() => { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-                              <button onClick={() => { setDrawerOpen(false); setConfirmId(item.id); }} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+                              <button
+                                onClick={() => {
+                                  setForm(item);
+                                  setEditId(item.id);
+                                  setErrors({});
+                                  setDrawerOpen(true);
+                                }}
+                                className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"
+                              >
+                                <PencilSimple weight="thin" className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setDrawerOpen(false);
+                                  setConfirmId(item.id);
+                                }}
+                                className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                              >
+                                <Trash weight="thin" className="w-4 h-4" />
+                              </button>
                             </div>
                           </div>
                         )}
@@ -215,103 +322,205 @@ export default function BooksPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No books yet.</p>}
 
-      {confirmId === null && (<Drawer
-        open={drawerOpen}
-         onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
-        title={editId ? "Edit Book" : "Add Book"}
-        headerActions={
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
-            <button type="submit" form="book-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-          </div>
-        }
-        footer={
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
-            <button type="submit" form="book-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-          </div>
-        }
-      >
-        <form id="book-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let coverUrl = form.coverUrl; if (pendingFile) { try { coverUrl = await uploadToCloudinary(pendingFile); s("coverUrl", coverUrl); } catch { toast.error("Upload failed"); return; } } if (editId) updateMut.mutate({ id: editId, data: { ...form, coverUrl } }); else createMut.mutate({ ...form, coverUrl }); }} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Title</label>
-              <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />
-              <p className={errCls("title")}>{errors.title}</p>
+      {confirmId === null && (
+        <Drawer
+          open={drawerOpen}
+          onClose={() => {
+            setForm(empty);
+            setEditId(null);
+            setDrawerOpen(false);
+            setErrors({});
+          }}
+          title={editId ? "Edit Book" : "Add Book"}
+          headerActions={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setForm(empty);
+                  setEditId(null);
+                  setDrawerOpen(false);
+                  setErrors({});
+                }}
+                className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="book-form"
+                disabled={isPending}
+                className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                {editId ? "Update" : "Create"}
+              </button>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Author</label>
-              <input value={f("author")} onChange={(e) => s("author", e.target.value)} className={inputCls} required />
-              <p className={errCls("author")}>{errors.author}</p>
+          }
+          footer={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setForm(empty);
+                  setEditId(null);
+                  setDrawerOpen(false);
+                  setErrors({});
+                }}
+                className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="book-form"
+                disabled={isPending}
+                className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                {editId ? "Update" : "Create"}
+              </button>
             </div>
-            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("coverUrl")} onChange={(url) => s("coverUrl", url)} onRemove={() => s("coverUrl", "")} onFilePending={setPendingFile} />
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Status</label>
-              <select value={f("status")} onChange={(e) => s("status", e.target.value)} className={selectCls}>
-                <option value="want_to_read">Want to Read</option>
-                <option value="reading">Reading</option>
-                <option value="read">Read</option>
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Rating</label>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => s("rating", (form.rating ?? 0) === n ? null : n)}
-                    className={`p-1.5 rounded transition-colors cursor-pointer hover:text-fg ${
-                      (form.rating ?? 0) >= n ? "text-fg" : "text-fg/30"
-                    }`}
-                  >
-                    <Star weight="fill" className="w-4 h-4" />
-                  </button>
-                ))}
+          }
+        >
+          <form
+            id="book-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setErrors({});
+              let coverUrl = form.coverUrl;
+              if (pendingFile) {
+                try {
+                  coverUrl = await uploadToCloudinary(pendingFile);
+                  s("coverUrl", coverUrl);
+                } catch {
+                  toast.error("Upload failed");
+                  return;
+                }
+              }
+              if (editId) updateMut.mutate({ id: editId, data: { ...form, coverUrl } });
+              else createMut.mutate({ ...form, coverUrl });
+            }}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Title</label>
+                <input
+                  value={f("title")}
+                  onChange={(e) => s("title", e.target.value)}
+                  className={inputCls}
+                  required
+                />
+                <p className={errCls("title")}>{errors.title}</p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Author</label>
+                <input
+                  value={f("author")}
+                  onChange={(e) => s("author", e.target.value)}
+                  className={inputCls}
+                  required
+                />
+                <p className={errCls("author")}>{errors.author}</p>
+              </div>
+              <ImageUpload
+                key={drawerOpen ? (editId ?? "new") : "closed"}
+                value={f("coverUrl")}
+                onChange={(url) => s("coverUrl", url)}
+                onRemove={() => s("coverUrl", "")}
+                onFilePending={setPendingFile}
+              />
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Status</label>
+                <select
+                  value={f("status")}
+                  onChange={(e) => s("status", e.target.value)}
+                  className={selectCls}
+                >
+                  <option value="want_to_read">Want to Read</option>
+                  <option value="reading">Reading</option>
+                  <option value="read">Read</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Rating</label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => s("rating", (form.rating ?? 0) === n ? null : n)}
+                      className={`p-1.5 rounded transition-colors cursor-pointer hover:text-fg ${
+                        (form.rating ?? 0) >= n ? "text-fg" : "text-fg/30"
+                      }`}
+                    >
+                      <Star weight="fill" className="w-4 h-4" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Quote</label>
+                <input
+                  value={f("quote")}
+                  onChange={(e) => s("quote", e.target.value)}
+                  className={inputCls}
+                />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Quote</label>
-              <input value={f("quote")} onChange={(e) => s("quote", e.target.value)} className={inputCls} />
+              <label className="text-xs text-fg/50">Category</label>
+              <div className="flex flex-wrap gap-1.5">
+                {categories.map((cat) => {
+                  const selected = (f("category") as string)
+                    .split(",")
+                    .map((c: string) => c.trim())
+                    .includes(cat);
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => {
+                        const current = (f("category") as string)
+                          .split(",")
+                          .map((c: string) => c.trim())
+                          .filter(Boolean);
+                        const next = selected
+                          ? current.filter((c: string) => c !== cat)
+                          : [...current, cat];
+                        s("category", next.join(", "));
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-[11px] transition-colors cursor-pointer ${
+                        selected ? "bg-fg text-bg" : "bg-hover-bg text-fg/60 hover:text-fg"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-fg/50">Category</label>
-            <div className="flex flex-wrap gap-1.5">
-              {categories.map((cat) => {
-                const selected = (f("category") as string).split(",").map((c: string) => c.trim()).includes(cat);
-                return (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => {
-                      const current = (f("category") as string).split(",").map((c: string) => c.trim()).filter(Boolean);
-                      const next = selected ? current.filter((c: string) => c !== cat) : [...current, cat];
-                      s("category", next.join(", "));
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-[11px] transition-colors cursor-pointer ${
-                      selected ? "bg-fg text-bg" : "bg-hover-bg text-fg/60 hover:text-fg"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                );
-              })}
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Review</label>
+              <ContentEditor
+                key={drawerOpen ? (editId ?? "new") : "closed"}
+                content={f("review")}
+                onChange={(html) => s("review", html)}
+                generateContext={{ title: f("title"), type: "book" }}
+              />
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-fg/50">Review</label>
-            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("review")} onChange={(html) => s("review", html)} generateContext={{ title: f("title"), type: "book" }} />
-          </div>
-        </form>
-      </Drawer>)}
+          </form>
+        </Drawer>
+      )}
 
       <ConfirmModal
         open={confirmId !== null}
         title="Delete book"
         message="Are you sure you want to delete this book? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (confirmId !== null) deleteMut.mutate(confirmId); setConfirmId(null); }}
+        onConfirm={() => {
+          if (confirmId !== null) deleteMut.mutate(confirmId);
+          setConfirmId(null);
+        }}
         onCancel={() => setConfirmId(null)}
       />
     </div>

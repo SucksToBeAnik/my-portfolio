@@ -1,7 +1,7 @@
 "use client";
 
+import { GithubLogo, Globe } from "@phosphor-icons/react";
 import { LinkPreview } from "@/components/LinkPreview";
-import { Globe, GithubLogo } from "@phosphor-icons/react";
 
 const iconMap: Record<string, typeof Globe> = {
   Website: Globe,

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { House } from "@phosphor-icons/react/dist/ssr";
+import Link from "next/link";
 
 export function Breadcrumb({ crumbs }: { crumbs: { label: string; href?: string }[] }) {
   return (

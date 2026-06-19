@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { Upload, Link as LinkIcon, Image as ImageIcon, Video, Trash } from "@phosphor-icons/react";
+import { Image as ImageIcon, Trash, Video } from "@phosphor-icons/react";
+import { useCallback, useRef, useState } from "react";
 
 const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"];
 const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/ogg"];
@@ -43,7 +43,7 @@ export function ImageUpload({
       }
       return null;
     },
-    [resourceType]
+    [resourceType],
   );
 
   const handleFile = useCallback(
@@ -59,7 +59,7 @@ export function ImageUpload({
       setPreview(objectUrl);
       onFilePending?.(file);
     },
-    [validate, onFilePending]
+    [validate, onFilePending],
   );
 
   const handleDrop = useCallback(
@@ -69,7 +69,7 @@ export function ImageUpload({
       const file = e.dataTransfer.files?.[0];
       if (file) handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   const handleChange = useCallback(
@@ -77,7 +77,7 @@ export function ImageUpload({
       const file = e.target.files?.[0];
       if (file) handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   const handleRemove = useCallback(() => {
@@ -107,7 +107,10 @@ export function ImageUpload({
       <div className="flex items-center gap-4">
         <button
           type="button"
-          onClick={() => { setTab("upload"); setError(null); }}
+          onClick={() => {
+            setTab("upload");
+            setError(null);
+          }}
           className={`text-xs transition-colors cursor-pointer pb-0.5 border-b ${
             tab === "upload"
               ? "text-fg font-medium border-fg"
@@ -118,7 +121,11 @@ export function ImageUpload({
         </button>
         <button
           type="button"
-          onClick={() => { setTab("url"); setError(null); setUrlInput(value); }}
+          onClick={() => {
+            setTab("url");
+            setError(null);
+            setUrlInput(value);
+          }}
           className={`text-xs transition-colors cursor-pointer pb-0.5 border-b ${
             tab === "url"
               ? "text-fg font-medium border-fg"
@@ -131,17 +138,18 @@ export function ImageUpload({
 
       {tab === "upload" ? (
         <div
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
-          onClick={() => { if (!hasMedia && !hasPending) inputRef.current?.click(); }}
+          onClick={() => {
+            if (!hasMedia && !hasPending) inputRef.current?.click();
+          }}
           className={`relative flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl transition-colors overflow-hidden cursor-pointer ${
             hasMedia || hasPending ? "p-0" : "p-6"
-          } ${
-            dragOver
-              ? "border-fg bg-fg/5"
-              : "border-nav-border hover:border-nav-text"
-          }`}
+          } ${dragOver ? "border-fg bg-fg/5" : "border-nav-border hover:border-nav-text"}`}
         >
           {hasPending ? (
             <div className="relative w-full">
@@ -164,7 +172,10 @@ export function ImageUpload({
               <div className="absolute inset-0 bg-bg/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-lg">
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    inputRef.current?.click();
+                  }}
                   className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 transition-all"
                 >
                   Replace
@@ -172,7 +183,10 @@ export function ImageUpload({
                 {onRemove && (
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); handleRemove(); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove();
+                    }}
                     className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-red-500/80 text-white rounded-lg hover:bg-red-500 transition-all"
                   >
                     <Trash weight="thin" className="w-3 h-3" />
@@ -223,7 +237,10 @@ export function ImageUpload({
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") { e.preventDefault(); handleUrlCommit(); }
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleUrlCommit();
+              }
             }}
             onBlur={handleUrlCommit}
             className="flex-1 px-3 py-1.5 text-xs bg-nav-hover-bg border border-nav-border rounded-lg text-fg placeholder-nav-text/50 focus:outline-none focus:border-nav-text transition-colors"

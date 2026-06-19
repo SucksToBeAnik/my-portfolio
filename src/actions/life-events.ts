@@ -1,10 +1,10 @@
-"use server"
+"use server";
 
-import { revalidatePath } from "next/cache"
-import { db } from "@/db"
-import { lifeEvents } from "@/db/schema"
-import { z } from "zod"
-import { eq } from "drizzle-orm"
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { db } from "@/db";
+import { lifeEvents } from "@/db/schema";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -19,44 +19,42 @@ const schema = z.object({
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
   sortOrder: z.number().optional(),
-})
+});
 
 export async function getLifeEvents() {
-  return db.select().from(lifeEvents).orderBy(lifeEvents.sortOrder)
+  return db.select().from(lifeEvents).orderBy(lifeEvents.sortOrder);
 }
 
 export async function createLifeEvent(data: z.infer<typeof schema>) {
-  const parsed = schema.parse(data)
-  await db.insert(lifeEvents).values(parsed)
-  revalidatePath("/admin/life-events")
-  revalidatePath("/life")
+  const parsed = schema.parse(data);
+  await db.insert(lifeEvents).values(parsed);
+  revalidatePath("/admin/life-events");
+  revalidatePath("/life");
 }
 
 export async function updateLifeEvent(id: number, data: z.infer<typeof schema>) {
-  const parsed = schema.parse(data)
+  const parsed = schema.parse(data);
   await db
     .update(lifeEvents)
     .set({ ...parsed, updatedAt: new Date() })
-    .where(eq(lifeEvents.id, id))
-  revalidatePath("/admin/life-events")
-  revalidatePath("/life")
+    .where(eq(lifeEvents.id, id));
+  revalidatePath("/admin/life-events");
+  revalidatePath("/life");
 }
 
 export async function deleteLifeEvent(id: number) {
-  await db.delete(lifeEvents).where(eq(lifeEvents.id, id))
-  revalidatePath("/admin/life-events")
-  revalidatePath("/life")
+  await db.delete(lifeEvents).where(eq(lifeEvents.id, id));
+  revalidatePath("/admin/life-events");
+  revalidatePath("/life");
 }
 
-export async function reorderLifeEvents(
-  items: { id: number; sortOrder: number }[]
-) {
+export async function reorderLifeEvents(items: { id: number; sortOrder: number }[]) {
   for (const item of items) {
     await db
       .update(lifeEvents)
       .set({ sortOrder: item.sortOrder })
-      .where(eq(lifeEvents.id, item.id))
+      .where(eq(lifeEvents.id, item.id));
   }
-  revalidatePath("/admin/life-events")
-  revalidatePath("/life")
+  revalidatePath("/admin/life-events");
+  revalidatePath("/life");
 }

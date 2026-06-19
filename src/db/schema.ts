@@ -1,4 +1,4 @@
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const adminUsers = sqliteTable("admin_users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -8,7 +8,7 @@ export const adminUsers = sqliteTable("admin_users", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-})
+});
 
 export const projects = sqliteTable("projects", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -27,7 +27,7 @@ export const projects = sqliteTable("projects", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-})
+});
 
 export const lifeEvents = sqliteTable("life_events", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -49,7 +49,7 @@ export const lifeEvents = sqliteTable("life_events", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-})
+});
 
 export const books = sqliteTable("books", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -70,7 +70,7 @@ export const books = sqliteTable("books", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-})
+});
 
 export const microblogs = sqliteTable("microblogs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -86,7 +86,7 @@ export const microblogs = sqliteTable("microblogs", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-})
+});
 
 export const hearts = sqliteTable("hearts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -96,7 +96,7 @@ export const hearts = sqliteTable("hearts", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-})
+});
 
 export const stacks = sqliteTable("stacks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -109,7 +109,7 @@ export const stacks = sqliteTable("stacks", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-})
+});
 
 export const sites = sqliteTable("sites", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -118,9 +118,9 @@ export const sites = sqliteTable("sites", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-})
+});
 
 export const siteConfig = sqliteTable("site_config", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
-})
+});

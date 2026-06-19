@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { PencilSimple, Trash } from "@phosphor-icons/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Trash, PencilSimple } from "@phosphor-icons/react";
-import { getSites, createSiteFromUrl, deleteSite, updateSite } from "@/actions/sites";
-import { Spinner } from "@/components/Spinner";
-import { Drawer } from "@/components/Drawer";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { createSiteFromUrl, deleteSite, getSites, updateSite } from "@/actions/sites";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { Drawer } from "@/components/Drawer";
+import { Spinner } from "@/components/Spinner";
 
 interface Site {
   id: number;
@@ -25,7 +25,15 @@ function getDomain(url: string): string {
   }
 }
 
-function SiteRow({ site, onDelete, onEdit }: { site: Site; onDelete: (id: number) => void; onEdit: (site: Site) => void }) {
+function SiteRow({
+  site,
+  onDelete,
+  onEdit,
+}: {
+  site: Site;
+  onDelete: (id: number) => void;
+  onEdit: (site: Site) => void;
+}) {
   const domain = getDomain(site.url);
   const [meta, setMeta] = useState<{ title: string | null; logo: string | null } | null>(null);
   const fetchedUrl = useRef("");
@@ -57,7 +65,9 @@ function SiteRow({ site, onDelete, onEdit }: { site: Site; onDelete: (id: number
         src={displayFavicon}
         alt=""
         className="w-5 h-5 rounded shrink-0 mr-3"
-        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+        onError={(e) => {
+          (e.target as HTMLImageElement).style.display = "none";
+        }}
       />
       <div className="min-w-0 flex-1">
         <p className="text-sm truncate">{displayTitle}</p>
@@ -65,15 +75,32 @@ function SiteRow({ site, onDelete, onEdit }: { site: Site; onDelete: (id: number
         {site.tags && (
           <div className="flex flex-wrap gap-1 mt-1">
             {site.tags.split(",").map((tag) => (
-              <span key={tag.trim()} className="px-1.5 py-0.5 text-[10px] bg-hover-bg rounded text-fg/50">{tag.trim()}</span>
+              <span
+                key={tag.trim()}
+                className="px-1.5 py-0.5 text-[10px] bg-hover-bg rounded text-fg/50"
+              >
+                {tag.trim()}
+              </span>
             ))}
           </div>
         )}
-        <p className="text-[11px] text-fg/30 mt-0.5">{formatDistanceToNow(new Date(site.createdAt), { addSuffix: true })}</p>
+        <p className="text-[11px] text-fg/30 mt-0.5">
+          {formatDistanceToNow(new Date(site.createdAt), { addSuffix: true })}
+        </p>
       </div>
       <div className="flex gap-1.5 shrink-0 ml-3">
-        <button onClick={() => onEdit(site)} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-        <button onClick={() => onDelete(site.id)} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+        <button
+          onClick={() => onEdit(site)}
+          className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"
+        >
+          <PencilSimple weight="thin" className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onDelete(site.id)}
+          className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+        >
+          <Trash weight="thin" className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
@@ -91,7 +118,8 @@ export default function SitesPage() {
   const createMut = useMutation({
     mutationFn: (url: string) => createSiteFromUrl(url),
     onSuccess: () => toast.success("Site added"),
-    onError: (err: any) => toast.error(err?.message?.includes("Invalid") ? "Invalid URL" : "Failed to add site"),
+    onError: (err: any) =>
+      toast.error(err?.message?.includes("Invalid") ? "Invalid URL" : "Failed to add site"),
     onSettled: () => qc.invalidateQueries({ queryKey: ["sites"] }),
   });
 
@@ -103,7 +131,10 @@ export default function SitesPage() {
       qc.setQueryData<Site[]>(["sites"], (old) => old?.filter((s) => s.id !== id));
       return { prev };
     },
-    onError: (_err, _id, ctx) => { if (ctx?.prev) qc.setQueryData(["sites"], ctx.prev); toast.error("Failed to delete"); },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["sites"], ctx.prev);
+      toast.error("Failed to delete");
+    },
     onSuccess: () => toast.success("Site deleted"),
     onSettled: () => qc.invalidateQueries({ queryKey: ["sites"] }),
   });
@@ -112,7 +143,10 @@ export default function SitesPage() {
     mutationFn: ({ id, url, tags }: { id: number; url: string; tags: string }) => {
       return updateSite(id, { url, tags: tags || undefined });
     },
-    onSuccess: () => { toast.success("Site updated"); setEditSite(null); },
+    onSuccess: () => {
+      toast.success("Site updated");
+      setEditSite(null);
+    },
     onError: () => toast.error("Failed to update"),
     onSettled: () => qc.invalidateQueries({ queryKey: ["sites"] }),
   });
@@ -128,7 +162,7 @@ export default function SitesPage() {
     }
     window.addEventListener("paste", handlePaste);
     return () => window.removeEventListener("paste", handlePaste);
-  }, []);
+  }, [createMut.mutate]);
 
   if (isLoading) return <Spinner />;
 
@@ -148,69 +182,117 @@ export default function SitesPage() {
 
       <div className="space-y-1">
         {items.map((site) => (
-          <SiteRow key={site.id} site={site} onDelete={(id) => { setEditSite(null); setConfirmId(id); }} onEdit={(s) => { setEditSite(s); setEditUrl(s.url); setEditTags(s.tags ?? ""); }} />
+          <SiteRow
+            key={site.id}
+            site={site}
+            onDelete={(id) => {
+              setEditSite(null);
+              setConfirmId(id);
+            }}
+            onEdit={(s) => {
+              setEditSite(s);
+              setEditUrl(s.url);
+              setEditTags(s.tags ?? "");
+            }}
+          />
         ))}
       </div>
 
-      {confirmId === null && (<Drawer
-        open={!!editSite}
-        onClose={() => { setEditSite(null); setEditUrl(""); setEditTags(""); }}
-        title="Edit Site"
-        headerActions={
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setEditSite(null); setEditUrl(""); setEditTags(""); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
-            <button
-              type="submit"
-              form="site-form"
-              disabled={updateMut.isPending}
-              className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
-            >
-              Save
-            </button>
-          </div>
-        }
-        footer={
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setEditSite(null); setEditUrl(""); setEditTags(""); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
-            <button
-              type="submit"
-              form="site-form"
-              disabled={updateMut.isPending}
-              className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
-            >
-              Save
-            </button>
-          </div>
-        }
-      >
-        <form id="site-form" onSubmit={(e) => { e.preventDefault(); editSite && updateMut.mutate({ id: editSite.id, url: editUrl, tags: editTags }); }} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs text-fg/50">URL</label>
-            <input
-              value={editUrl}
-              onChange={(e) => setEditUrl(e.target.value)}
-              className="w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors"
-              placeholder="https://"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-fg/50">Tags (comma-separated)</label>
-            <textarea
-              value={editTags}
-              onChange={(e) => setEditTags(e.target.value)}
-              className="w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors resize-none h-20"
-              placeholder="design, frontend, reference"
-            />
-          </div>
-        </form>
-      </Drawer>)}
+      {confirmId === null && (
+        <Drawer
+          open={!!editSite}
+          onClose={() => {
+            setEditSite(null);
+            setEditUrl("");
+            setEditTags("");
+          }}
+          title="Edit Site"
+          headerActions={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditSite(null);
+                  setEditUrl("");
+                  setEditTags("");
+                }}
+                className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="site-form"
+                disabled={updateMut.isPending}
+                className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                Save
+              </button>
+            </div>
+          }
+          footer={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditSite(null);
+                  setEditUrl("");
+                  setEditTags("");
+                }}
+                className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="site-form"
+                disabled={updateMut.isPending}
+                className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                Save
+              </button>
+            </div>
+          }
+        >
+          <form
+            id="site-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              editSite && updateMut.mutate({ id: editSite.id, url: editUrl, tags: editTags });
+            }}
+            className="space-y-4"
+          >
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">URL</label>
+              <input
+                value={editUrl}
+                onChange={(e) => setEditUrl(e.target.value)}
+                className="w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors"
+                placeholder="https://"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Tags (comma-separated)</label>
+              <textarea
+                value={editTags}
+                onChange={(e) => setEditTags(e.target.value)}
+                className="w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors resize-none h-20"
+                placeholder="design, frontend, reference"
+              />
+            </div>
+          </form>
+        </Drawer>
+      )}
 
       <ConfirmModal
         open={confirmId !== null}
         title="Delete site"
         message="Are you sure you want to delete this site?"
         confirmLabel="Delete"
-        onConfirm={() => { if (confirmId !== null) deleteMut.mutate(confirmId); setConfirmId(null); }}
+        onConfirm={() => {
+          if (confirmId !== null) deleteMut.mutate(confirmId);
+          setConfirmId(null);
+        }}
         onCancel={() => setConfirmId(null)}
       />
     </div>

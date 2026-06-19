@@ -1,17 +1,23 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { DotsSixVertical, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { PencilSimple, Trash, DotsSixVertical, Plus } from "@phosphor-icons/react";
-import { getProjects, createProject, updateProject, deleteProject, reorderProjects } from "@/actions/projects";
-import { ContentEditor } from "@/components/ContentEditor";
-import { Spinner } from "@/components/Spinner";
-import { ImageUpload } from "@/components/ImageUpload";
-import { Drawer } from "@/components/Drawer";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
+import {
+  createProject,
+  deleteProject,
+  getProjects,
+  reorderProjects,
+  updateProject,
+} from "@/actions/projects";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { ContentEditor } from "@/components/ContentEditor";
+import { Drawer } from "@/components/Drawer";
+import { ImageUpload } from "@/components/ImageUpload";
+import { Spinner } from "@/components/Spinner";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface Project {
@@ -29,8 +35,14 @@ interface Project {
 }
 
 const empty = {
-  title: "", description: "", imageUrl: "", videoUrl: "",
-  url: "", githubUrl: "", workedOn: "", featured: false,
+  title: "",
+  description: "",
+  imageUrl: "",
+  videoUrl: "",
+  url: "",
+  githubUrl: "",
+  workedOn: "",
+  featured: false,
 };
 
 export default function ProjectsPage() {
@@ -66,17 +78,25 @@ export default function ProjectsPage() {
       await qc.cancelQueries({ queryKey: ["projects"] });
       const prev = qc.getQueryData<Project[]>(["projects"]);
       qc.setQueryData<Project[]>(["projects"], (old) => [
-        ...(old || []), { ...data, id: -Date.now() } as Project,
+        ...(old || []),
+        { ...data, id: -Date.now() } as Project,
       ]);
       return { prev };
     },
     onError: (err, _data, ctx) => {
       if (ctx?.prev) qc.setQueryData(["projects"], ctx.prev);
       const fe = parseErrors(err);
-      if (fe) { setErrors(fe); return; }
+      if (fe) {
+        setErrors(fe);
+        return;
+      }
       toast.error("Failed to create");
     },
-    onSuccess: () => { setErrors({}); toast.success("Project created"); setDrawerOpen(false); },
+    onSuccess: () => {
+      setErrors({});
+      toast.success("Project created");
+      setDrawerOpen(false);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["projects"] }),
   });
 
@@ -87,17 +107,24 @@ export default function ProjectsPage() {
       await qc.cancelQueries({ queryKey: ["projects"] });
       const prev = qc.getQueryData<Project[]>(["projects"]);
       qc.setQueryData<Project[]>(["projects"], (old) =>
-        old?.map((item) => (item.id === id ? { ...item, ...data } : item))
+        old?.map((item) => (item.id === id ? { ...item, ...data } : item)),
       );
       return { prev };
     },
     onError: (err, _data, ctx) => {
       if (ctx?.prev) qc.setQueryData(["projects"], ctx.prev);
       const fe = parseErrors(err);
-      if (fe) { setErrors(fe); return; }
+      if (fe) {
+        setErrors(fe);
+        return;
+      }
       toast.error("Failed to update");
     },
-    onSuccess: () => { setErrors({}); toast.success("Project updated"); setDrawerOpen(false); },
+    onSuccess: () => {
+      setErrors({});
+      toast.success("Project updated");
+      setDrawerOpen(false);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["projects"] }),
   });
 
@@ -109,7 +136,10 @@ export default function ProjectsPage() {
       qc.setQueryData<Project[]>(["projects"], (old) => old?.filter((item) => item.id !== id));
       return { prev };
     },
-    onError: (_err, _id, ctx) => { if (ctx?.prev) qc.setQueryData(["projects"], ctx.prev); toast.error("Failed to delete"); },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["projects"], ctx.prev);
+      toast.error("Failed to delete");
+    },
     onSuccess: () => toast.success("Project deleted"),
     onSettled: () => qc.invalidateQueries({ queryKey: ["projects"] }),
   });
@@ -131,12 +161,23 @@ export default function ProjectsPage() {
   }
 
   const isPending = createMut.isPending || updateMut.isPending;
-  function openAdd() { setForm(empty); setEditId(null); setErrors({}); setDrawerOpen(true); }
-  function openEdit(item: Project) { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }
+  function openAdd() {
+    setForm(empty);
+    setEditId(null);
+    setErrors({});
+    setDrawerOpen(true);
+  }
+  function openEdit(item: Project) {
+    setForm(item);
+    setEditId(item.id);
+    setErrors({});
+    setDrawerOpen(true);
+  }
   const f = (key: string) => (form as any)[key] ?? "";
   const s = (key: string, value: any) => setForm((p) => ({ ...p, [key]: value }));
-  const inputCls = "w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors";
-  const errCls = (k: string) => errors[k] ? "text-xs text-red-400 mt-1" : "hidden";
+  const inputCls =
+    "w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors";
+  const errCls = (k: string) => (errors[k] ? "text-xs text-red-400 mt-1" : "hidden");
 
   if (isLoading) return <Spinner />;
 
@@ -144,7 +185,12 @@ export default function ProjectsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-heading">Projects</h1>
-        <button onClick={openAdd} className="w-8 h-8 flex items-center justify-center rounded-full bg-fg text-bg border border-hairline cursor-pointer hover:opacity-90 transition-all"><Plus weight="bold" className="w-4 h-4" /></button>
+        <button
+          onClick={openAdd}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-fg text-bg border border-hairline cursor-pointer hover:opacity-90 transition-all"
+        >
+          <Plus weight="bold" className="w-4 h-4" />
+        </button>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -158,10 +204,15 @@ export default function ProjectsPage() {
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       className={`flex items-center px-4 py-3 border rounded-xl transition-colors ${
-                        snapshot.isDragging ? "border-hairline bg-hover-bg shadow-lg" : "border-hairline hover:bg-hover-bg"
+                        snapshot.isDragging
+                          ? "border-hairline bg-hover-bg shadow-lg"
+                          : "border-hairline hover:bg-hover-bg"
                       }`}
                     >
-                      <div {...provided.dragHandleProps} className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing">
+                      <div
+                        {...provided.dragHandleProps}
+                        className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing"
+                      >
                         <DotsSixVertical weight="thin" className="w-4 h-4 text-fg/50" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -169,13 +220,27 @@ export default function ProjectsPage() {
                         {item.featured ? <p className="text-xs text-fg/50">★ Featured</p> : null}
                         {item.updatedAt && (
                           <p className="text-[11px] text-fg/40 mt-0.5">
-                            edited {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
+                            edited{" "}
+                            {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
                           </p>
                         )}
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
-                        <button onClick={() => openEdit(item)} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-                        <button onClick={() => { setDrawerOpen(false); setConfirmId(item.id); }} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+                        <button
+                          onClick={() => openEdit(item)}
+                          className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"
+                        >
+                          <PencilSimple weight="thin" className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setDrawerOpen(false);
+                            setConfirmId(item.id);
+                          }}
+                          className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                        >
+                          <Trash weight="thin" className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   )}
@@ -187,72 +252,183 @@ export default function ProjectsPage() {
         </Droppable>
       </DragDropContext>
 
-      {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No projects yet.</p>}
+      {items.length === 0 && (
+        <p className="text-xs text-fg/50 text-center py-8">No projects yet.</p>
+      )}
 
-      {confirmId === null && (<Drawer
-        open={drawerOpen}
-         onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
-        title={editId ? "Edit Project" : "Add Project"}
-        headerActions={
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
-            <button type="submit" form="project-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-          </div>
-        }
-        footer={
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
-            <button type="submit" form="project-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-          </div>
-        }
-      >
-        <form id="project-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imgUrl = form.imageUrl; let vidUrl = form.videoUrl; try { if (pendingImage) imgUrl = await uploadToCloudinary(pendingImage); if (pendingVideo) vidUrl = await uploadToCloudinary(pendingVideo, "video"); } catch { toast.error("Upload failed"); return; } if (editId) updateMut.mutate({ id: editId, data: { ...form, imageUrl: imgUrl, videoUrl: vidUrl } }); else createMut.mutate({ ...form, imageUrl: imgUrl, videoUrl: vidUrl }); }} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Title</label>
-              <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />
-              <p className={errCls("title")}>{errors.title}</p>
+      {confirmId === null && (
+        <Drawer
+          open={drawerOpen}
+          onClose={() => {
+            setForm(empty);
+            setEditId(null);
+            setDrawerOpen(false);
+            setErrors({});
+          }}
+          title={editId ? "Edit Project" : "Add Project"}
+          headerActions={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setForm(empty);
+                  setEditId(null);
+                  setDrawerOpen(false);
+                  setErrors({});
+                }}
+                className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="project-form"
+                disabled={isPending}
+                className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                {editId ? "Update" : "Create"}
+              </button>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Worked On</label>
-              <div className="flex items-center gap-2">
-                <input type="date" value={f("workedOn")} onChange={(e) => s("workedOn", e.target.value)} className={`${inputCls} dark:[color-scheme:dark]`} />
-                <button type="button" onClick={() => s("featured", !(form.featured ?? false))} className={`shrink-0 px-3 py-1.5 text-xs rounded-lg font-medium transition-all cursor-pointer ${form.featured ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"}`}>
-                  {form.featured ? "★" : "☆"}
-                </button>
+          }
+          footer={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setForm(empty);
+                  setEditId(null);
+                  setDrawerOpen(false);
+                  setErrors({});
+                }}
+                className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="project-form"
+                disabled={isPending}
+                className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                {editId ? "Update" : "Create"}
+              </button>
+            </div>
+          }
+        >
+          <form
+            id="project-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setErrors({});
+              let imgUrl = form.imageUrl;
+              let vidUrl = form.videoUrl;
+              try {
+                if (pendingImage) imgUrl = await uploadToCloudinary(pendingImage);
+                if (pendingVideo) vidUrl = await uploadToCloudinary(pendingVideo, "video");
+              } catch {
+                toast.error("Upload failed");
+                return;
+              }
+              if (editId)
+                updateMut.mutate({
+                  id: editId,
+                  data: { ...form, imageUrl: imgUrl, videoUrl: vidUrl },
+                });
+              else createMut.mutate({ ...form, imageUrl: imgUrl, videoUrl: vidUrl });
+            }}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Title</label>
+                <input
+                  value={f("title")}
+                  onChange={(e) => s("title", e.target.value)}
+                  className={inputCls}
+                  required
+                />
+                <p className={errCls("title")}>{errors.title}</p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Worked On</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={f("workedOn")}
+                    onChange={(e) => s("workedOn", e.target.value)}
+                    className={`${inputCls} dark:[color-scheme:dark]`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => s("featured", !(form.featured ?? false))}
+                    className={`shrink-0 px-3 py-1.5 text-xs rounded-lg font-medium transition-all cursor-pointer ${form.featured ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"}`}
+                  >
+                    {form.featured ? "★" : "☆"}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Screenshot</label>
+                <ImageUpload
+                  key={drawerOpen ? (editId ?? "new") : "closed"}
+                  value={f("imageUrl")}
+                  onChange={(url) => s("imageUrl", url)}
+                  onRemove={() => s("imageUrl", "")}
+                  onFilePending={setPendingImage}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Demo Video</label>
+                <ImageUpload
+                  key={drawerOpen ? (editId ?? "new") : "closed"}
+                  value={f("videoUrl")}
+                  onChange={(url) => s("videoUrl", url)}
+                  onRemove={() => s("videoUrl", "")}
+                  accept="video/*"
+                  resourceType="video"
+                  onFilePending={setPendingVideo}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Project URL</label>
+                <input
+                  value={f("url")}
+                  onChange={(e) => s("url", e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">GitHub URL</label>
+                <input
+                  value={f("githubUrl")}
+                  onChange={(e) => s("githubUrl", e.target.value)}
+                  className={inputCls}
+                />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Screenshot</label>
-              <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingImage} />
+              <label className="text-xs text-fg/50">Description</label>
+              <ContentEditor
+                key={drawerOpen ? (editId ?? "new") : "closed"}
+                content={f("description")}
+                onChange={(html) => s("description", html)}
+                generateContext={{ title: f("title"), type: "project" }}
+              />
+              <p className={errCls("description")}>{errors.description}</p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Demo Video</label>
-              <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("videoUrl")} onChange={(url) => s("videoUrl", url)} onRemove={() => s("videoUrl", "")} accept="video/*" resourceType="video" onFilePending={setPendingVideo} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Project URL</label>
-              <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">GitHub URL</label>
-              <input value={f("githubUrl")} onChange={(e) => s("githubUrl", e.target.value)} className={inputCls} />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-fg/50">Description</label>
-            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("description")} onChange={(html) => s("description", html)} generateContext={{ title: f("title"), type: "project" }} />
-            <p className={errCls("description")}>{errors.description}</p>
-          </div>
-        </form>
-      </Drawer>)}
+          </form>
+        </Drawer>
+      )}
 
       <ConfirmModal
         open={confirmId !== null}
         title="Delete project"
         message="Are you sure you want to delete this project?"
         confirmLabel="Delete"
-        onConfirm={() => { if (confirmId !== null) deleteMut.mutate(confirmId); setConfirmId(null); }}
+        onConfirm={() => {
+          if (confirmId !== null) deleteMut.mutate(confirmId);
+          setConfirmId(null);
+        }}
         onCancel={() => setConfirmId(null)}
       />
     </div>

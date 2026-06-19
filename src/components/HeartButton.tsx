@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
 import { Heart } from "@phosphor-icons/react";
-import { toggleHeart, getHeartCount } from "@/actions/hearts";
+import { useEffect, useState, useTransition } from "react";
+import { getHeartCount, toggleHeart } from "@/actions/hearts";
 
 interface HeartButtonProps {
   entityType: string;
@@ -17,10 +17,11 @@ export function HeartButton({ entityType, entityId, initialCount }: HeartButtonP
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    const visitorId = document.cookie
-      .split("; ")
-      .find((c) => c.startsWith("visitor_id="))
-      ?.split("=")[1] ?? null;
+    const visitorId =
+      document.cookie
+        .split("; ")
+        .find((c) => c.startsWith("visitor_id="))
+        ?.split("=")[1] ?? null;
     getHeartCount(entityType, entityId, visitorId).then((data) => {
       setCount(data.count);
       setHearted(data.hearted);

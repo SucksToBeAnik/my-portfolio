@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Space_Mono, Inter } from "next/font/google";
+import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
-import { PageShell } from "@/components/PageShell";
-import { BottomNav } from "@/components/BottomNav";
-import { SearchOverlay } from "@/components/SearchOverlay";
-import { ThemeProvider } from "@/lib/ThemeProvider";
-import { QueryProvider } from "@/lib/QueryProvider";
 import { SessionProvider } from "next-auth/react";
+import { BottomNav } from "@/components/BottomNav";
+import { PageShell } from "@/components/PageShell";
+import { SearchOverlay } from "@/components/SearchOverlay";
+import { QueryProvider } from "@/lib/QueryProvider";
+import { ThemeProvider } from "@/lib/ThemeProvider";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -30,11 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${spaceMono.variable} ${inter.variable}`}
-      data-theme="dark"
-    >
+    <html lang="en" className={`${spaceMono.variable} ${inter.variable}`} data-theme="dark">
       <head>
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />

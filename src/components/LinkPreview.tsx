@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
 import Image from "next/image";
+import { useRef, useState } from "react";
 
 interface LinkPreviewProps {
   url: string;
@@ -18,7 +18,12 @@ interface PreviewData {
   domain: string;
 }
 
-export function LinkPreview({ url, children, className = "", position = "right" }: LinkPreviewProps) {
+export function LinkPreview({
+  url,
+  children,
+  className = "",
+  position = "right",
+}: LinkPreviewProps) {
   const [data, setData] = useState<PreviewData | null>(null);
   const [visible, setVisible] = useState(false);
   const [pos, setPos] = useState<React.CSSProperties>({});
@@ -92,13 +97,7 @@ export function LinkPreview({ url, children, className = "", position = "right" 
         >
           {data?.image && (
             <div className="relative w-full aspect-[16/10] bg-hover-bg">
-              <Image
-                src={data.image}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="256px"
-              />
+              <Image src={data.image} alt="" fill className="object-cover" sizes="256px" />
             </div>
           )}
           <div className="px-3.5 py-3 space-y-1.5">
@@ -113,14 +112,10 @@ export function LinkPreview({ url, children, className = "", position = "right" 
               </p>
             </div>
             {data?.title && (
-              <p className="text-sm font-medium text-fg leading-snug line-clamp-2">
-                {data.title}
-              </p>
+              <p className="text-sm font-medium text-fg leading-snug line-clamp-2">{data.title}</p>
             )}
             {data?.description && (
-              <p className="text-xs text-fg/50 leading-relaxed line-clamp-2">
-                {data.description}
-              </p>
+              <p className="text-xs text-fg/50 leading-relaxed line-clamp-2">{data.description}</p>
             )}
           </div>
         </div>

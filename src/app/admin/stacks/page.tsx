@@ -1,17 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { DotsSixVertical, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { PencilSimple, Trash, DotsSixVertical, Plus } from "@phosphor-icons/react";
-import { getStacks, createStack, updateStack, deleteStack, reorderStacks } from "@/actions/stacks";
-import { ContentEditor } from "@/components/ContentEditor";
-import { Spinner } from "@/components/Spinner";
-import { ImageUpload } from "@/components/ImageUpload";
-import { Drawer } from "@/components/Drawer";
+import { createStack, deleteStack, getStacks, reorderStacks, updateStack } from "@/actions/stacks";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { Drawer } from "@/components/Drawer";
+import { ImageUpload } from "@/components/ImageUpload";
+import { Spinner } from "@/components/Spinner";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface Item {
@@ -54,16 +52,26 @@ export default function StacksPage() {
     onMutate: async (data) => {
       await qc.cancelQueries({ queryKey: ["stacks"] });
       const prev = qc.getQueryData<Item[]>(["stacks"]);
-      qc.setQueryData<Item[]>(["stacks"], (old) => [...(old || []), { ...data, id: -Date.now() } as Item]);
+      qc.setQueryData<Item[]>(["stacks"], (old) => [
+        ...(old || []),
+        { ...data, id: -Date.now() } as Item,
+      ]);
       return { prev };
     },
     onError: (err, _data, ctx) => {
       if (ctx?.prev) qc.setQueryData(["stacks"], ctx.prev);
       const fe = parseErrors(err);
-      if (fe) { setErrors(fe); return; }
+      if (fe) {
+        setErrors(fe);
+        return;
+      }
       toast.error("Failed to create");
     },
-    onSuccess: () => { setErrors({}); toast.success("Stack created"); setDrawerOpen(false); },
+    onSuccess: () => {
+      setErrors({});
+      toast.success("Stack created");
+      setDrawerOpen(false);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["stacks"] }),
   });
 
@@ -72,16 +80,25 @@ export default function StacksPage() {
     onMutate: async ({ id, data }) => {
       await qc.cancelQueries({ queryKey: ["stacks"] });
       const prev = qc.getQueryData<Item[]>(["stacks"]);
-      qc.setQueryData<Item[]>(["stacks"], (old) => old?.map((item) => (item.id === id ? { ...item, ...data } : item)));
+      qc.setQueryData<Item[]>(["stacks"], (old) =>
+        old?.map((item) => (item.id === id ? { ...item, ...data } : item)),
+      );
       return { prev };
     },
     onError: (err, _data, ctx) => {
       if (ctx?.prev) qc.setQueryData(["stacks"], ctx.prev);
       const fe = parseErrors(err);
-      if (fe) { setErrors(fe); return; }
+      if (fe) {
+        setErrors(fe);
+        return;
+      }
       toast.error("Failed to update");
     },
-    onSuccess: () => { setErrors({}); toast.success("Stack updated"); setDrawerOpen(false); },
+    onSuccess: () => {
+      setErrors({});
+      toast.success("Stack updated");
+      setDrawerOpen(false);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["stacks"] }),
   });
 
@@ -93,13 +110,17 @@ export default function StacksPage() {
       qc.setQueryData<Item[]>(["stacks"], (old) => old?.filter((item) => item.id !== id));
       return { prev };
     },
-    onError: (_err, _id, ctx) => { if (ctx?.prev) qc.setQueryData(["stacks"], ctx.prev); toast.error("Failed to delete"); },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["stacks"], ctx.prev);
+      toast.error("Failed to delete");
+    },
     onSuccess: () => toast.success("Stack deleted"),
     onSettled: () => qc.invalidateQueries({ queryKey: ["stacks"] }),
   });
 
   const reorderMut = useMutation({
-    mutationFn: (items: { id: number; sortOrder: number }[]) => reorderStacks(items.map(i => i.id)),
+    mutationFn: (items: { id: number; sortOrder: number }[]) =>
+      reorderStacks(items.map((i) => i.id)),
     onError: () => toast.error("Failed to reorder"),
     onSettled: () => qc.invalidateQueries({ queryKey: ["stacks"] }),
   });
@@ -117,8 +138,9 @@ export default function StacksPage() {
   const isPending = createMut.isPending || updateMut.isPending;
   const f = (k: string) => (form as any)?.[k] ?? "";
   const s = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
-  const inputCls = "w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors";
-  const errCls = (k: string) => errors[k] ? "text-xs text-red-400 mt-1" : "hidden";
+  const inputCls =
+    "w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors";
+  const errCls = (k: string) => (errors[k] ? "text-xs text-red-400 mt-1" : "hidden");
 
   if (isLoading) return <Spinner />;
 
@@ -126,7 +148,17 @@ export default function StacksPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-heading">Stacks</h1>
-        <button onClick={() => { setForm(empty); setEditId(null); setErrors({}); setDrawerOpen(true); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-fg text-bg border border-hairline cursor-pointer hover:opacity-90 transition-all"><Plus weight="bold" className="w-4 h-4" /></button>
+        <button
+          onClick={() => {
+            setForm(empty);
+            setEditId(null);
+            setErrors({});
+            setDrawerOpen(true);
+          }}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-fg text-bg border border-hairline cursor-pointer hover:opacity-90 transition-all"
+        >
+          <Plus weight="bold" className="w-4 h-4" />
+        </button>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -136,9 +168,15 @@ export default function StacksPage() {
               {items.map((item, index) => (
                 <Draggable key={item.id} draggableId={String(item.id)} index={index}>
                   {(provided, snapshot) => (
-                    <div ref={provided.innerRef} {...provided.draggableProps}
-                      className={`flex items-center px-4 py-3 border rounded-xl transition-colors ${snapshot.isDragging ? "border-hairline bg-hover-bg shadow-lg" : "border-hairline hover:bg-hover-bg"}`}>
-                      <div {...provided.dragHandleProps} className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing">
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={`flex items-center px-4 py-3 border rounded-xl transition-colors ${snapshot.isDragging ? "border-hairline bg-hover-bg shadow-lg" : "border-hairline hover:bg-hover-bg"}`}
+                    >
+                      <div
+                        {...provided.dragHandleProps}
+                        className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing"
+                      >
                         <DotsSixVertical weight="thin" className="w-4 h-4 text-fg/50" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -146,8 +184,26 @@ export default function StacksPage() {
                         {item.platform && <p className="text-xs text-fg/50">{item.platform}</p>}
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
-                        <button onClick={() => { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-                        <button onClick={() => { setDrawerOpen(false); setConfirmId(item.id); }} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+                        <button
+                          onClick={() => {
+                            setForm(item);
+                            setEditId(item.id);
+                            setErrors({});
+                            setDrawerOpen(true);
+                          }}
+                          className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"
+                        >
+                          <PencilSimple weight="thin" className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setDrawerOpen(false);
+                            setConfirmId(item.id);
+                          }}
+                          className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                        >
+                          <Trash weight="thin" className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   )}
@@ -161,55 +217,147 @@ export default function StacksPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No stacks yet.</p>}
 
-      {confirmId === null && (<Drawer
-        open={drawerOpen}
-         onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
-        title={editId ? "Edit Stack" : "Add Stack"}
-        headerActions={
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
-            <button type="submit" form="stack-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-          </div>
-        }
-        footer={
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
-            <button type="submit" form="stack-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-          </div>
-        }
-      >
-        <form id="stack-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imageUrl = form.imageUrl; if (pendingFile) { try { imageUrl = await uploadToCloudinary(pendingFile); s("imageUrl", imageUrl); } catch { toast.error("Upload failed"); return; } } if (editId) updateMut.mutate({ id: editId, data: { ...form, imageUrl } }); else createMut.mutate({ ...form, imageUrl }); }} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Name</label>
-              <input value={f("name")} onChange={(e) => s("name", e.target.value)} className={inputCls} required />
-              <p className={errCls("name")}>{errors.name}</p>
+      {confirmId === null && (
+        <Drawer
+          open={drawerOpen}
+          onClose={() => {
+            setForm(empty);
+            setEditId(null);
+            setDrawerOpen(false);
+            setErrors({});
+          }}
+          title={editId ? "Edit Stack" : "Add Stack"}
+          headerActions={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setForm(empty);
+                  setEditId(null);
+                  setDrawerOpen(false);
+                  setErrors({});
+                }}
+                className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="stack-form"
+                disabled={isPending}
+                className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                {editId ? "Update" : "Create"}
+              </button>
+            </div>
+          }
+          footer={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setForm(empty);
+                  setEditId(null);
+                  setDrawerOpen(false);
+                  setErrors({});
+                }}
+                className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="stack-form"
+                disabled={isPending}
+                className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+              >
+                {editId ? "Update" : "Create"}
+              </button>
+            </div>
+          }
+        >
+          <form
+            id="stack-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setErrors({});
+              let imageUrl = form.imageUrl;
+              if (pendingFile) {
+                try {
+                  imageUrl = await uploadToCloudinary(pendingFile);
+                  s("imageUrl", imageUrl);
+                } catch {
+                  toast.error("Upload failed");
+                  return;
+                }
+              }
+              if (editId) updateMut.mutate({ id: editId, data: { ...form, imageUrl } });
+              else createMut.mutate({ ...form, imageUrl });
+            }}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Name</label>
+                <input
+                  value={f("name")}
+                  onChange={(e) => s("name", e.target.value)}
+                  className={inputCls}
+                  required
+                />
+                <p className={errCls("name")}>{errors.name}</p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">URL</label>
+                <input
+                  value={f("url")}
+                  onChange={(e) => s("url", e.target.value)}
+                  className={inputCls}
+                  required
+                  placeholder="https://"
+                />
+                <p className={errCls("url")}>{errors.url}</p>
+              </div>
+              <ImageUpload
+                key={drawerOpen ? (editId ?? "new") : "closed"}
+                value={f("imageUrl")}
+                onChange={(url) => s("imageUrl", url)}
+                onRemove={() => s("imageUrl", "")}
+                onFilePending={setPendingFile}
+              />
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Platform</label>
+                <input
+                  value={f("platform")}
+                  onChange={(e) => s("platform", e.target.value)}
+                  className={inputCls}
+                  placeholder="e.g. Web, macOS, iOS"
+                />
+              </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">URL</label>
-              <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} required placeholder="https://" />
-              <p className={errCls("url")}>{errors.url}</p>
+              <label className="text-xs text-fg/50">Description (tech stack)</label>
+              <textarea
+                value={f("description")}
+                onChange={(e) => s("description", e.target.value)}
+                className={`${inputCls} resize-none h-20`}
+                placeholder="React, Adobe Illustrator, etc."
+              />
+              <p className={errCls("description")}>{errors.description}</p>
             </div>
-            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingFile} />
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Platform</label>
-              <input value={f("platform")} onChange={(e) => s("platform", e.target.value)} className={inputCls} placeholder="e.g. Web, macOS, iOS" />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-fg/50">Description (tech stack)</label>
-            <textarea value={f("description")} onChange={(e) => s("description", e.target.value)} className={`${inputCls} resize-none h-20`} placeholder="React, Adobe Illustrator, etc." />
-            <p className={errCls("description")}>{errors.description}</p>
-          </div>
-        </form>
-      </Drawer>)}
+          </form>
+        </Drawer>
+      )}
 
       <ConfirmModal
         open={confirmId !== null}
         title="Delete stack"
         message="Are you sure you want to delete this stack?"
         confirmLabel="Delete"
-        onConfirm={() => { if (confirmId !== null) deleteMut.mutate(confirmId); setConfirmId(null); }}
+        onConfirm={() => {
+          if (confirmId !== null) deleteMut.mutate(confirmId);
+          setConfirmId(null);
+        }}
         onCancel={() => setConfirmId(null)}
       />
     </div>

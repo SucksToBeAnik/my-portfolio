@@ -11,7 +11,14 @@ interface ConfirmModalProps {
   confirmLabel?: string;
 }
 
-export function ConfirmModal({ open, title, message, onConfirm, onCancel, confirmLabel = "Delete" }: ConfirmModalProps) {
+export function ConfirmModal({
+  open,
+  title,
+  message,
+  onConfirm,
+  onCancel,
+  confirmLabel = "Delete",
+}: ConfirmModalProps) {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
