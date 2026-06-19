@@ -157,7 +157,7 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[8vh] sm:pt-[12vh]"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-16 sm:pt-20"
       onClick={onClose}
     >
       <div className="fixed inset-0 bg-bg/60 backdrop-blur-sm" />
