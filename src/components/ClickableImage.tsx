@@ -9,7 +9,7 @@ export function ClickableImage({ src, alt, className }: { src: string; alt: stri
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={className}>
-        <img src={src} alt={alt} className="object-cover w-full h-full" />
+        <img src={src} alt={alt} loading="lazy" className="object-cover w-full h-full" />
       </button>
       {open && (
         <ImageViewer src={src} alt={alt} onClose={() => setOpen(false)} />

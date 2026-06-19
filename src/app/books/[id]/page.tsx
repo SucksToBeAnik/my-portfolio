@@ -39,7 +39,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
       <div className="flex flex-col sm:flex-row gap-6">
         {book.coverUrl ? (
           <div className="w-28 shrink-0">
-            <img src={book.coverUrl} alt={book.title} className="w-full rounded-lg" />
+            <img src={book.coverUrl} alt={book.title} loading="lazy" className="w-full rounded-lg" />
           </div>
         ) : null}
         <div className="space-y-2">

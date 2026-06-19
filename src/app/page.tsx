@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { microblogs, projects } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export const metadata = {
   title: "Suckstobeanik",

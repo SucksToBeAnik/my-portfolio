@@ -68,7 +68,7 @@ export default async function MicroblogPostPage({ params }: { params: Promise<{ 
 
         {post.imageUrl && (
           <div className="overflow-hidden rounded-lg">
-            <img src={post.imageUrl} alt="" className="w-full" />
+            <img src={post.imageUrl} alt="" loading="lazy" className="w-full" />
           </div>
         )}
 

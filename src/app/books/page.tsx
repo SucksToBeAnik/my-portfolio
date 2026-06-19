@@ -10,6 +10,8 @@ export const metadata = {
   description: "Book catalog with ratings and reviews.",
 };
 
+export const revalidate = 3600;
+
 function ratingStars(rating: number | null) {
   return (
     <span className="inline-flex gap-0.5 shrink-0">
@@ -55,7 +57,7 @@ export default async function BooksPage() {
                 >
                   {book.coverUrl ? (
                     <div className="w-12 h-16 rounded-md overflow-hidden shrink-0">
-                      <img src={book.coverUrl} alt={book.title} className="object-cover w-full h-full" />
+                      <img src={book.coverUrl} alt={book.title} loading="lazy" className="object-cover w-full h-full" />
                     </div>
                   ) : (
                     <div className="w-12 h-16 rounded-md bg-hover-bg shrink-0 flex items-center justify-center text-xs text-muted">

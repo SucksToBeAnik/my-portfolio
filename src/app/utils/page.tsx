@@ -103,7 +103,7 @@ function StacksContent() {
         >
           {stack.imageUrl && (
             <div className="w-10 h-10 shrink-0 rounded-lg bg-hover-bg overflow-hidden flex items-center justify-center">
-              <img src={stack.imageUrl} alt={stack.name} className="w-8 h-8 object-contain" />
+              <img src={stack.imageUrl} alt={stack.name} loading="lazy" className="w-8 h-8 object-contain" />
             </div>
           )}
           <div className="min-w-0 flex-1">

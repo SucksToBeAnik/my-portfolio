@@ -14,10 +14,12 @@ import {
   Moon,
   MagnifyingGlass,
 } from "@phosphor-icons/react";
+import dynamic from "next/dynamic";
 import { useTheme } from "@/lib/ThemeProvider";
 import { AuthMenu } from "@/components/AuthMenu";
-import { ChatPopup } from "@/components/ChatPopup";
 import { useState, useCallback, useEffect, useRef } from "react";
+
+const ChatPopup = dynamic(() => import("@/components/ChatPopup").then((m) => m.ChatPopup), { ssr: false });
 
 const navItems = [
   { href: "/", label: "Home", icon: House },

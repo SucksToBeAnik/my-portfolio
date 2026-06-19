@@ -67,7 +67,7 @@ export default async function MicroblogPage() {
                   </p>
                   {post.imageUrl && (
                     <div className="overflow-hidden rounded-lg max-h-60 -mx-1 bg-hover-bg">
-                      <img src={post.imageUrl} alt="" className="w-full h-full object-contain" />
+                      <img src={post.imageUrl} alt="" loading="lazy" className="w-full h-full object-contain" />
                     </div>
                   )}
                 </Link>

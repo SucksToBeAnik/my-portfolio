@@ -16,6 +16,8 @@ export const metadata = {
   description: "Personal milestones, achievements, and travels.",
 };
 
+export const revalidate = 3600;
+
 function formatDate(date: string) {
   const d = new Date(date);
   if (isNaN(d.getTime())) return date;
