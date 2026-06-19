@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { PencilSimple, Trash, DotsSixVertical, Plus, Briefcase, GraduationCap, Star, MapPin, X } from "@phosphor-icons/react";
+import { PencilSimple, Trash, DotsSixVertical, Plus, Briefcase, GraduationCap, Star, MapPin, PushPin, X } from "@phosphor-icons/react";
 import { getLifeEvents, createLifeEvent, updateLifeEvent, deleteLifeEvent, reorderLifeEvents } from "@/actions/life-events";
 import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
@@ -37,10 +37,10 @@ const empty = { title: "", startDate: "", endDate: "", description: "", imageUrl
 const types = ["education", "work", "travel", "milestone"];
 
 const typeIcons: Record<string, React.ReactNode> = {
-  education: <GraduationCap weight="thin" className="w-4 h-4" />,
-  work: <Briefcase weight="thin" className="w-4 h-4" />,
-  travel: <MapPin weight="thin" className="w-4 h-4" />,
-  milestone: <Star weight="thin" className="w-4 h-4" />,
+  education: <GraduationCap weight="fill" className="w-4 h-4" />,
+  work: <Briefcase weight="fill" className="w-4 h-4" />,
+  travel: <MapPin weight="fill" className="w-4 h-4" />,
+  milestone: <Star weight="fill" className="w-4 h-4" />,
 };
 
 export default function LifeEventsPage() {
@@ -168,7 +168,7 @@ export default function LifeEventsPage() {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{item.title}</p>
                         <p className="text-xs text-fg/50">{dateDisplay(item)}</p>
-                        {item.location && <p className="text-[11px] text-fg/40 mt-0.5"><MapPin weight="thin" className="w-3 h-3 inline-block mr-0.5 align-text-top" />{item.location}</p>}
+                        {item.location && <p className="text-[11px] text-fg/40 mt-0.5"><PushPin weight="fill" className="w-3 h-3 inline-block mr-0.5 align-text-top" />{item.location}</p>}
                         {item.updatedAt && <p className="text-[11px] text-fg/40 mt-0.5">edited {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</p>}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0 ml-3">

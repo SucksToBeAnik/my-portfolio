@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Star,
   MapPin,
+  PushPin,
 } from "@phosphor-icons/react/dist/ssr";
 
 export const metadata = {
@@ -32,10 +33,10 @@ function dateRange(start: string, end: string | null, current: boolean | null) {
 }
 
 const typeIcons: Record<string, React.ReactNode> = {
-  education: <GraduationCap weight="thin" className="w-4 h-4" />,
-  work: <Briefcase weight="thin" className="w-4 h-4" />,
-  travel: <MapPin weight="thin" className="w-4 h-4" />,
-  milestone: <Star weight="thin" className="w-4 h-4" />,
+  education: <GraduationCap weight="fill" className="w-4 h-4" />,
+  work: <Briefcase weight="fill" className="w-4 h-4" />,
+  travel: <MapPin weight="fill" className="w-4 h-4" />,
+  milestone: <Star weight="fill" className="w-4 h-4" />,
 };
 
 export default async function LifePage() {
@@ -75,7 +76,7 @@ export default async function LifePage() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-fg transition-colors"
                     >
-                      <MapPin weight="thin" className="w-3 h-3" />
+                      <PushPin weight="fill" className="w-3 h-3" />
                       {event.location}
                     </a>
                   )}
