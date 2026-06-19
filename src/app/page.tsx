@@ -7,6 +7,8 @@ import { db } from "@/db";
 import { microblogs, projects } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Suckstobeanik",
   description: "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
