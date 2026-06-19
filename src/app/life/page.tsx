@@ -6,7 +6,6 @@ import { LinkPreview } from "@/components/LinkPreview";
 import {
   Briefcase,
   GraduationCap,
-  Compass,
   Star,
   MapPin,
 } from "@phosphor-icons/react/dist/ssr";
@@ -35,7 +34,7 @@ function dateRange(start: string, end: string | null, current: boolean | null) {
 const typeIcons: Record<string, React.ReactNode> = {
   education: <GraduationCap weight="thin" className="w-4 h-4" />,
   work: <Briefcase weight="thin" className="w-4 h-4" />,
-  travel: <Compass weight="thin" className="w-4 h-4" />,
+  travel: <MapPin weight="thin" className="w-4 h-4" />,
   milestone: <Star weight="thin" className="w-4 h-4" />,
 };
 

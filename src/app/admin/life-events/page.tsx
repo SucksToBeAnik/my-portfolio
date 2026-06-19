@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { PencilSimple, Trash, DotsSixVertical, Plus, Briefcase, GraduationCap, Compass, Star, MapPin, X } from "@phosphor-icons/react";
+import { PencilSimple, Trash, DotsSixVertical, Plus, Briefcase, GraduationCap, Star, MapPin, X } from "@phosphor-icons/react";
 import { getLifeEvents, createLifeEvent, updateLifeEvent, deleteLifeEvent, reorderLifeEvents } from "@/actions/life-events";
 import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
@@ -39,7 +39,7 @@ const types = ["education", "work", "travel", "milestone"];
 const typeIcons: Record<string, React.ReactNode> = {
   education: <GraduationCap weight="thin" className="w-4 h-4" />,
   work: <Briefcase weight="thin" className="w-4 h-4" />,
-  travel: <Compass weight="thin" className="w-4 h-4" />,
+  travel: <MapPin weight="thin" className="w-4 h-4" />,
   milestone: <Star weight="thin" className="w-4 h-4" />,
 };
 
