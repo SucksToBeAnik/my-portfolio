@@ -10,7 +10,8 @@ const labels: Record<string, string> = {
   "life-events": "Life Events",
   books: "Books",
   microblogs: "Microblog",
-  tools: "Tools",
+  stacks: "Stacks",
+  sites: "Sites",
 };
 
 export function AdminBreadcrumb() {

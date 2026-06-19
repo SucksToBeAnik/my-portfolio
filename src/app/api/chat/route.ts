@@ -1,7 +1,7 @@
 import { streamText, stepCountIs } from "ai"
 import { model } from "@/lib/ai"
 import { db } from "@/db"
-import { projects, books, microblogs, lifeEvents, tools as toolsTable } from "@/db/schema"
+import { projects, books, microblogs, lifeEvents, stacks as stacksTable } from "@/db/schema"
 import { eq, like, or, and, sql } from "drizzle-orm"
 import { cookies } from "next/headers"
 import fs from "fs"
@@ -78,9 +78,9 @@ const agentTools = {
       if (!type || type === "tool") {
         queries.push(
           db
-            .select({ id: toolsTable.id, name: toolsTable.name, description: toolsTable.description, _type: sql`'tool'`.as("type") })
-            .from(toolsTable)
-            .where(or(like(toolsTable.name, likeQuery), like(toolsTable.description, likeQuery)))
+            .select({ id: stacksTable.id, name: stacksTable.name, description: stacksTable.description, _type: sql`'tool'`.as("type") })
+            .from(stacksTable)
+            .where(or(like(stacksTable.name, likeQuery), like(stacksTable.description, likeQuery)))
             .limit(5),
         )
       }
@@ -115,7 +115,7 @@ const agentTools = {
           result = (await db.select().from(lifeEvents).where(eq(lifeEvents.id, id)).limit(1))[0]
           break
         case "tool":
-          result = (await db.select().from(toolsTable).where(eq(toolsTable.id, id)).limit(1))[0]
+          result = (await db.select().from(stacksTable).where(eq(stacksTable.id, id)).limit(1))[0]
           break
       }
       return result ? JSON.stringify(result) : "Item not found."

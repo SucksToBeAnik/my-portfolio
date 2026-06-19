@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { QueryProvider } from "@/lib/QueryProvider";
 import { Toaster } from "sonner";
 import {
   SquaresFour,
@@ -10,6 +9,7 @@ import {
   BookOpenText,
   Quotes,
   Wrench,
+  Link as LinkIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { AdminBreadcrumb } from "@/components/AdminBreadcrumb";
 
@@ -19,7 +19,8 @@ const navItems = [
   { href: "/admin/life-events", label: "Life Events", icon: Heart },
   { href: "/admin/books", label: "Books", icon: BookOpenText },
   { href: "/admin/microblogs", label: "Microblog", icon: Quotes },
-  { href: "/admin/tools", label: "Tools", icon: Wrench },
+  { href: "/admin/stacks", label: "Stacks", icon: Wrench },
+  { href: "/admin/sites", label: "Sites", icon: LinkIcon },
 ];
 
 export default async function AdminLayout({
@@ -31,7 +32,6 @@ export default async function AdminLayout({
   if (!session) redirect("/");
 
   return (
-    <QueryProvider>
     <main className="flex flex-col flex-1 min-h-0">
       <div className="flex h-full bg-bg text-fg flex-1">
         <aside className="hidden md:flex flex-col w-56 border-r border-hairline bg-bg/50 shrink-0 p-4">
@@ -70,6 +70,5 @@ export default async function AdminLayout({
         }}
       />
       </main>
-    </QueryProvider>
   );
 }

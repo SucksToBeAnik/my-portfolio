@@ -24,7 +24,7 @@ const navItems = [
   { href: "/life", label: "Life", icon: Heart },
   { href: "/books", label: "Books", icon: BookOpenText },
   { href: "/microblog", label: "Microblog", icon: Quotes },
-  { href: "/tools", label: "Tools", icon: Wrench },
+  { href: "/utils", label: "Utils", icon: Wrench },
 ];
 
 export function BottomNav() {

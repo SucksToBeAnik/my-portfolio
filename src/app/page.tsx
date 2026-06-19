@@ -38,8 +38,8 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4 text-fg/60">
-          <LinkPreview url="https://github.com/SucksToBeAnik">
+        <div className="flex items-center gap-2 text-fg/60">
+          <LinkPreview url="https://github.com/SucksToBeAnik" position="bottom">
             <Link
               href="https://github.com/SucksToBeAnik"
               target="_blank"
@@ -49,7 +49,7 @@ export default function Home() {
               <GithubLogo weight="thin" className="w-5 h-5" />
             </Link>
           </LinkPreview>
-          <LinkPreview url="https://www.linkedin.com/in/al-jami-islam-anik-485758285">
+          <LinkPreview url="https://www.linkedin.com/in/al-jami-islam-anik-485758285" position="bottom">
             <Link
               href="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
               target="_blank"
@@ -59,7 +59,7 @@ export default function Home() {
               <LinkedinLogo weight="thin" className="w-5 h-5" />
             </Link>
           </LinkPreview>
-          <LinkPreview url="https://x.com/suckstobeanik">
+          <LinkPreview url="https://x.com/suckstobeanik" position="bottom">
             <Link
               href="https://x.com/suckstobeanik"
               target="_blank"

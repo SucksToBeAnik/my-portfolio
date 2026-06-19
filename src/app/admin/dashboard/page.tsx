@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/db";
-import { projects, lifeEvents, books, microblogs, tools } from "@/db/schema";
+import { projects, lifeEvents, books, microblogs, stacks, sites } from "@/db/schema";
 import { count } from "drizzle-orm";
 
 export default async function DashboardPage() {
@@ -8,14 +8,16 @@ export default async function DashboardPage() {
   const [lifeCount] = await db.select({ c: count() }).from(lifeEvents);
   const [bookCount] = await db.select({ c: count() }).from(books);
   const [microblogCount] = await db.select({ c: count() }).from(microblogs);
-  const [toolCount] = await db.select({ c: count() }).from(tools);
+  const [stackCount] = await db.select({ c: count() }).from(stacks);
+  const [siteCount] = await db.select({ c: count() }).from(sites);
 
   const sections = [
     { label: "Projects", count: projectCount.c, href: "/admin/projects" },
     { label: "Life Events", count: lifeCount.c, href: "/admin/life-events" },
     { label: "Books", count: bookCount.c, href: "/admin/books" },
     { label: "Microblogs", count: microblogCount.c, href: "/admin/microblogs" },
-    { label: "Tools", count: toolCount.c, href: "/admin/tools" },
+    { label: "Stacks", count: stackCount.c, href: "/admin/stacks" },
+    { label: "Sites", count: siteCount.c, href: "/admin/sites" },
   ];
 
   return (

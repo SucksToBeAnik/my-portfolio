@@ -5,6 +5,7 @@ import { PageShell } from "@/components/PageShell";
 import { BottomNav } from "@/components/BottomNav";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { ThemeProvider } from "@/lib/ThemeProvider";
+import { QueryProvider } from "@/lib/QueryProvider";
 import { SessionProvider } from "next-auth/react";
 
 const spaceMono = Space_Mono({
@@ -51,9 +52,11 @@ export default function RootLayout({
       <body>
         <SessionProvider>
           <ThemeProvider>
-            <PageShell>{children}</PageShell>
-            <BottomNav />
-            <SearchOverlay />
+            <QueryProvider>
+              <PageShell>{children}</PageShell>
+              <BottomNav />
+              <SearchOverlay />
+            </QueryProvider>
           </ThemeProvider>
         </SessionProvider>
       </body>

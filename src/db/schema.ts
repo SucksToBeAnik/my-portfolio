@@ -94,18 +94,24 @@ export const hearts = sqliteTable("hearts", {
     .$defaultFn(() => new Date()),
 })
 
-export const tools = sqliteTable("tools", {
+export const stacks = sqliteTable("stacks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
-  description: text("description").notNull(),
+  description: text("description"),
   imageUrl: text("image_url"),
-  url: text("url"),
-  category: text("category").notNull(),
+  url: text("url").notNull(),
+  platform: text("platform"),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+})
+
+export const sites = sqliteTable("sites", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  url: text("url").notNull(),
+  tags: text("tags"),
+  createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
 })

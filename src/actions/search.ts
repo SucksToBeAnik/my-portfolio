@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/db"
-import { projects, books, microblogs, lifeEvents, tools } from "@/db/schema"
+import { projects, books, microblogs, lifeEvents, stacks } from "@/db/schema"
 import { desc, eq } from "drizzle-orm"
 
 export interface SearchIndexItem {
@@ -9,11 +9,11 @@ export interface SearchIndexItem {
   title: string
   subtitle: string
   url: string
-  type: "project" | "book" | "microblog" | "lifeEvent" | "tool"
+  type: "project" | "book" | "microblog" | "lifeEvent" | "stack"
 }
 
 export async function getSearchIndex() {
-  const [allProjects, allBooks, allMicroblogs, allLifeEvents, allTools] = await Promise.all([
+  const [allProjects, allBooks, allMicroblogs, allLifeEvents, allStacks] = await Promise.all([
     db
       .select({ id: projects.id, title: projects.title, description: projects.description })
       .from(projects)
@@ -32,9 +32,9 @@ export async function getSearchIndex() {
       .from(lifeEvents)
       .orderBy(desc(lifeEvents.sortOrder)),
     db
-      .select({ id: tools.id, name: tools.name, description: tools.description })
-      .from(tools)
-      .orderBy(desc(tools.sortOrder)),
+      .select({ id: stacks.id, name: stacks.name, description: stacks.description })
+      .from(stacks)
+      .orderBy(desc(stacks.sortOrder)),
   ])
 
   const items: SearchIndexItem[] = [
@@ -66,12 +66,12 @@ export async function getSearchIndex() {
       url: "/life",
       type: "lifeEvent" as const,
     })),
-    ...allTools.map((t) => ({
-      id: t.id,
-      title: t.name,
-      subtitle: t.description ? t.description.replace(/<[^>]*>/g, "").slice(0, 120) : "",
-      url: "/tools",
-      type: "tool" as const,
+    ...allStacks.map((s) => ({
+      id: s.id,
+      title: s.name,
+      subtitle: s.description ? s.description.replace(/<[^>]*>/g, "").slice(0, 120) : "",
+      url: "/utils",
+      type: "stack" as const,
     })),
   ]
 
