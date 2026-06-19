@@ -46,8 +46,10 @@ export default async function LifePage() {
           <article key={event.id} className="relative">
             <span className="absolute left-[-20px] top-1.5 w-2 h-2 rounded-full bg-fg" />
             <div className="grid grid-cols-[auto_1fr] gap-3 items-start">
-              {event.imageUrl && (
+              {event.imageUrl ? (
                 <LifeImage src={event.imageUrl} alt={event.title} />
+              ) : (
+                <div className="w-16 h-16 shrink-0" />
               )}
               <div>
                 <p className="text-xs text-muted mb-1">{dateRange(event.startDate, event.endDate)}</p>

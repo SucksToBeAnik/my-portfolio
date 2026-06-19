@@ -11,6 +11,7 @@ import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Drawer } from "@/components/Drawer";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface Item {
   id: number;
@@ -30,6 +31,7 @@ export default function MicroblogsPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<Item>>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["microblogs"], queryFn: getMicroblogs });
 
@@ -160,22 +162,22 @@ export default function MicroblogsPage() {
 
       <Drawer
         open={drawerOpen}
-        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+         onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
         title={editId ? "Edit Post" : "Add Post"}
         headerActions={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="microblog-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
         footer={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="microblog-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
       >
-        <form id="microblog-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form as any }); else createMut.mutate(form as any); }} className="space-y-4">
+        <form id="microblog-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imageUrl = form.imageUrl; if (pendingFile) { try { imageUrl = await uploadToCloudinary(pendingFile); s("imageUrl", imageUrl); } catch { toast.error("Upload failed"); return; } } if (editId) updateMut.mutate({ id: editId, data: { ...form, imageUrl } as any }); else createMut.mutate({ ...form, imageUrl } as any); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
@@ -190,7 +192,7 @@ export default function MicroblogsPage() {
                 </button>
               </div>
             </div>
-            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
+            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingFile} />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Content</label>

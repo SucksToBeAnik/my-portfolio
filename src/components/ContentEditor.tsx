@@ -14,6 +14,7 @@ import {
   Sparkle,
 } from "@phosphor-icons/react";
 import { ImageUpload } from "@/components/ImageUpload";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface ContentEditorProps {
   content: string;
@@ -58,6 +59,20 @@ export function ContentEditor({
     (url: string) => {
       editor?.chain().focus().setImage({ src: url }).run();
       imageDialogRef.current?.close();
+    },
+    [editor]
+  );
+
+  const handleFileUpload = useCallback(
+    async (file: File | null) => {
+      if (!file) return;
+      try {
+        const url = await uploadToCloudinary(file);
+        editor?.chain().focus().setImage({ src: url }).run();
+        imageDialogRef.current?.close();
+      } catch {
+        // silently fail
+      }
     },
     [editor]
   );
@@ -209,7 +224,7 @@ export function ContentEditor({
       >
         <div className="w-80 bg-bg border border-nav-border rounded-xl shadow-2xl p-4">
           <p className="text-xs font-medium text-fg mb-3">Insert Image</p>
-          <ImageUpload onUpload={handleImageInserted} />
+          <ImageUpload onChange={handleImageInserted} onFilePending={handleFileUpload} />
           <button
             type="button"
             onClick={() => imageDialogRef.current?.close()}

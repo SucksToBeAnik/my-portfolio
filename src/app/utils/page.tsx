@@ -7,7 +7,7 @@ import { getStacks } from "@/actions/stacks";
 import { getSites } from "@/actions/sites";
 import { Spinner } from "@/components/Spinner";
 import { LinkPreview } from "@/components/LinkPreview";
-import { Wrench, Link as LinkIcon, House } from "@phosphor-icons/react";
+import { House } from "@phosphor-icons/react";
 
 type Tab = "stacks" | "sites";
 
@@ -48,32 +48,30 @@ export default function UtilsPage() {
   return (
     <>
       <div className="flex items-center justify-between mb-8 md:mb-16">
-        <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
-          <House weight="thin" className="w-3.5 h-3.5" />
-          <span className="text-fg/20">/</span>
-          <span className="text-fg/60">utils</span>
+          <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
+            <House weight="thin" className="w-3.5 h-3.5" />
+            <span className="text-fg/20">/</span>
+            <span className="text-fg/60">utils</span>
+          </div>
+          <div className="flex gap-3 shrink-0">
+            <button
+              onClick={() => switchTab("stacks")}
+              className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
+                tab === "stacks" ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"
+              }`}
+            >
+              Stacks
+            </button>
+            <button
+              onClick={() => switchTab("sites")}
+              className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
+                tab === "sites" ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"
+              }`}
+            >
+              Sites
+            </button>
+          </div>
         </div>
-        <div className="flex gap-1 bg-hover-bg rounded-lg p-0.5 shrink-0">
-          <button
-            onClick={() => switchTab("stacks")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-all cursor-pointer ${
-              tab === "stacks" ? "bg-fg text-bg" : "text-fg/50 hover:text-fg"
-            }`}
-          >
-            <Wrench weight="thin" className="w-3.5 h-3.5" />
-            Stacks
-          </button>
-          <button
-            onClick={() => switchTab("sites")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-all cursor-pointer ${
-              tab === "sites" ? "bg-fg text-bg" : "text-fg/50 hover:text-fg"
-            }`}
-          >
-            <LinkIcon weight="thin" className="w-3.5 h-3.5" />
-            Sites
-          </button>
-        </div>
-      </div>
 
       {tab === "stacks" && <StacksContent />}
       {tab === "sites" && <SitesContent />}

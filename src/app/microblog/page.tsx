@@ -47,7 +47,7 @@ export default async function MicroblogPage() {
       )}
 
       <div>
-        {items.map((post, i) => {
+        {items.map((post) => {
           const heart = heartsMap[post.id] ?? { count: 0, hearted: false };
 
           return (
@@ -80,7 +80,6 @@ export default async function MicroblogPage() {
                   />
                 </div>
               </article>
-              {i < items.length - 1 && <div className="border-t border-hairline" />}
             </div>
           );
         })}

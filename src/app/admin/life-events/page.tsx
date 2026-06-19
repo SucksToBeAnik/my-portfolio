@@ -11,6 +11,7 @@ import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { Drawer } from "@/components/Drawer";
 import { ImageUpload } from "@/components/ImageUpload";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface Item {
   id: number;
@@ -35,6 +36,7 @@ export default function LifeEventsPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<Item>>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["life-events"], queryFn: getLifeEvents });
 
@@ -173,22 +175,22 @@ export default function LifeEventsPage() {
 
       <Drawer
         open={drawerOpen}
-        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+         onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
         title={editId ? "Edit Event" : "Add Event"}
         headerActions={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="life-event-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
         footer={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="life-event-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
       >
-        <form id="life-event-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); const data = { ...form, endDate: form.endDate || null, imageUrl: form.imageUrl || null, url: form.url || null }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
+        <form id="life-event-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imageUrl = form.imageUrl; if (pendingFile) { try { imageUrl = await uploadToCloudinary(pendingFile); s("imageUrl", imageUrl); } catch { toast.error("Upload failed"); return; } } const data = { ...form, endDate: form.endDate || null, imageUrl: imageUrl || null, url: form.url || null }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2 space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
@@ -210,7 +212,7 @@ export default function LifeEventsPage() {
               <label className="text-xs text-fg/50">End Date <span className="text-fg/20">(leave empty = ongoing)</span></label>
               <input type="date" value={f("endDate")} onChange={(e) => s("endDate", e.target.value)} className={`${inputCls} dark:[color-scheme:dark]`} />
             </div>
-            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
+            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingFile} />
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">URL <span className="text-fg/20">(institution/company)</span></label>
               <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} />

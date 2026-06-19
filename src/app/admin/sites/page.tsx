@@ -152,11 +152,11 @@ export default function SitesPage() {
 
       <Drawer
         open={!!editSite}
-        onClose={() => setEditSite(null)}
+        onClose={() => { setEditSite(null); setEditUrl(""); setEditTags(""); }}
         title="Edit Site"
         headerActions={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setEditSite(null)} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setEditSite(null); setEditUrl(""); setEditTags(""); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button
               type="submit"
               form="site-form"
@@ -169,7 +169,7 @@ export default function SitesPage() {
         }
         footer={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setEditSite(null)} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setEditSite(null); setEditUrl(""); setEditTags(""); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button
               type="submit"
               form="site-form"

@@ -11,6 +11,7 @@ import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Drawer } from "@/components/Drawer";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface Project {
   id: number;
@@ -37,6 +38,8 @@ export default function ProjectsPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<Project>>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pendingImage, setPendingImage] = useState<File | null>(null);
+  const [pendingVideo, setPendingVideo] = useState<File | null>(null);
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["projects"],
@@ -186,22 +189,22 @@ export default function ProjectsPage() {
 
       <Drawer
         open={drawerOpen}
-        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+         onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
         title={editId ? "Edit Project" : "Add Project"}
         headerActions={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="project-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
         footer={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="project-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
       >
-        <form id="project-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
+        <form id="project-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imgUrl = form.imageUrl; let vidUrl = form.videoUrl; try { if (pendingImage) imgUrl = await uploadToCloudinary(pendingImage); if (pendingVideo) vidUrl = await uploadToCloudinary(pendingVideo, "video"); } catch { toast.error("Upload failed"); return; } if (editId) updateMut.mutate({ id: editId, data: { ...form, imageUrl: imgUrl, videoUrl: vidUrl } }); else createMut.mutate({ ...form, imageUrl: imgUrl, videoUrl: vidUrl }); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
@@ -217,8 +220,8 @@ export default function ProjectsPage() {
                 </button>
               </div>
             </div>
-            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
-            <ImageUpload currentUrl={f("videoUrl")} onUpload={(url) => s("videoUrl", url)} onRemove={() => s("videoUrl", "")} accept="video/*" resourceType="video" />
+            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingImage} />
+            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("videoUrl")} onChange={(url) => s("videoUrl", url)} onRemove={() => s("videoUrl", "")} accept="video/*" resourceType="video" onFilePending={setPendingVideo} />
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Project URL</label>
               <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} />

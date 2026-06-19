@@ -4,15 +4,24 @@ import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { PencilSimple, Trash, DotsSixVertical, Plus, Star } from "@phosphor-icons/react";
+import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
+import { PencilSimple, Trash, DotsSixVertical, Plus, Star, BookOpenText, BookBookmark, Books } from "@phosphor-icons/react";
 import { getBooks, createBook, updateBook, deleteBook, reorderBooks } from "@/actions/books";
 import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Drawer } from "@/components/Drawer";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 const categories = ["fiction", "non-fiction", "sci-fi", "fantasy", "self-help", "business", "biography", "history", "philosophy", "poetry"];
+
+const groups = ["reading", "read", "want_to_read"] as const;
+const groupLabels: Record<string, string> = { reading: "Reading", read: "Read", want_to_read: "Want to Read" };
+const groupIcons: Record<string, React.ReactNode> = {
+  reading: <BookOpenText weight="thin" className="w-4 h-4" />,
+  read: <BookBookmark weight="thin" className="w-4 h-4" />,
+  want_to_read: <Books weight="thin" className="w-4 h-4" />,
+};
 
 interface Item {
   id: number;
@@ -36,6 +45,7 @@ export default function BooksPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<Item>>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["books"], queryFn: getBooks });
 
@@ -106,13 +116,39 @@ export default function BooksPage() {
     onSettled: () => qc.invalidateQueries({ queryKey: ["books"] }),
   });
 
-  function handleDragEnd(result: any) {
+  function handleDragEnd(result: DropResult) {
     if (!result.destination) return;
-    const reordered = Array.from(items);
-    const [moved] = reordered.splice(result.source.index, 1);
-    reordered.splice(result.destination.index, 0, moved);
-    qc.setQueryData<Item[]>(["books"], reordered);
-    const updates = reordered.map((item, i) => ({ id: item.id, sortOrder: i }));
+    const { source, destination } = result;
+    const sourceGroup = source.droppableId;
+    const destGroup = destination.droppableId;
+    if (sourceGroup === destGroup && source.index === destination.index) return;
+
+    const grouped: Record<string, Item[]> = {};
+    for (const g of groups) {
+      grouped[g] = items.filter((i) => i.status === g).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    }
+
+    const [movedItem] = grouped[sourceGroup].splice(source.index, 1);
+    if (destGroup !== sourceGroup) movedItem.status = destGroup as Item["status"];
+    grouped[destGroup].splice(destination.index, 0, movedItem);
+
+    let sortOrder = 0;
+    const updates: { id: number; sortOrder: number; status?: "reading" | "read" | "want_to_read" }[] = [];
+    const newItems: Item[] = [];
+    for (const g of groups) {
+      for (const item of grouped[g]) {
+        const isMoved = item.id === movedItem.id;
+        updates.push({
+          id: item.id,
+          sortOrder: sortOrder,
+          ...(isMoved && destGroup !== sourceGroup ? { status: destGroup as "reading" | "read" | "want_to_read" } : {}),
+        });
+        newItems.push({ ...item, sortOrder });
+        sortOrder++;
+      }
+    }
+
+    qc.setQueryData<Item[]>(["books"], newItems);
     reorderMut.mutate(updates);
   }
 
@@ -133,56 +169,68 @@ export default function BooksPage() {
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="books">
-          {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-1">
-              {items.map((item, index) => (
-                <Draggable key={item.id} draggableId={String(item.id)} index={index}>
-                  {(provided, snapshot) => (
-                    <div ref={provided.innerRef} {...provided.draggableProps}
-                      className={`flex items-center px-4 py-3 border rounded-xl transition-colors ${snapshot.isDragging ? "border-hairline bg-hover-bg shadow-lg" : "border-hairline hover:bg-hover-bg"}`}>
-                      <div {...provided.dragHandleProps} className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing">
-                        <DotsSixVertical weight="thin" className="w-4 h-4 text-fg/50" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate">{item.title}</p>
-                        <p className="text-xs text-fg/50">{item.author} — {item.status.replace("_", " ")}</p>
-                        {item.updatedAt && <p className="text-[11px] text-fg/40 mt-0.5">edited {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</p>}
-                      </div>
-                      <div className="flex gap-1.5 shrink-0 ml-3">
-                        <button onClick={() => { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-                        <button onClick={() => deleteMut.mutate(item.id)} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
-                      </div>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
+        {groups.map((g) => {
+          const groupItems = items.filter((i) => i.status === g).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+          if (groupItems.length === 0) return null;
+          return (
+            <div key={g} className="space-y-2">
+              <h2 className="flex items-center gap-1.5 text-xs font-heading text-fg/50 uppercase tracking-wider">
+                {groupIcons[g]}
+                {groupLabels[g]}
+              </h2>
+              <Droppable droppableId={g}>
+                {(provided) => (
+                  <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-1">
+                    {groupItems.map((item, index) => (
+                      <Draggable key={item.id} draggableId={`${g}-${item.id}`} index={index}>
+                        {(provided, snapshot) => (
+                          <div ref={provided.innerRef} {...provided.draggableProps}
+                            className={`flex items-center px-4 py-3 border rounded-xl transition-colors ${snapshot.isDragging ? "border-hairline bg-hover-bg shadow-lg" : "border-hairline hover:bg-hover-bg"}`}>
+                            <div {...provided.dragHandleProps} className="mr-3 flex items-center shrink-0 p-2 -ml-2 rounded-lg hover:bg-hover-bg transition-colors cursor-grab active:cursor-grabbing">
+                              <DotsSixVertical weight="thin" className="w-4 h-4 text-fg/50" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium truncate">{item.title}</p>
+                              <p className="text-xs text-fg/50">{item.author}</p>
+                              {item.updatedAt && <p className="text-[11px] text-fg/40 mt-0.5">edited {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</p>}
+                            </div>
+                            <div className="flex gap-1.5 shrink-0 ml-3">
+                              <button onClick={() => { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
+                              <button onClick={() => deleteMut.mutate(item.id)} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
             </div>
-          )}
-        </Droppable>
+          );
+        })}
       </DragDropContext>
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No books yet.</p>}
 
       <Drawer
         open={drawerOpen}
-        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+         onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
         title={editId ? "Edit Book" : "Add Book"}
         headerActions={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="book-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
         footer={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="book-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
       >
-        <form id="book-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
+        <form id="book-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let coverUrl = form.coverUrl; if (pendingFile) { try { coverUrl = await uploadToCloudinary(pendingFile); s("coverUrl", coverUrl); } catch { toast.error("Upload failed"); return; } } if (editId) updateMut.mutate({ id: editId, data: { ...form, coverUrl } }); else createMut.mutate({ ...form, coverUrl }); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
@@ -194,7 +242,7 @@ export default function BooksPage() {
               <input value={f("author")} onChange={(e) => s("author", e.target.value)} className={inputCls} required />
               <p className={errCls("author")}>{errors.author}</p>
             </div>
-            <ImageUpload currentUrl={f("coverUrl")} onUpload={(url) => s("coverUrl", url)} onRemove={() => s("coverUrl", "")} />
+            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("coverUrl")} onChange={(url) => s("coverUrl", url)} onRemove={() => s("coverUrl", "")} onFilePending={setPendingFile} />
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Status</label>
               <select value={f("status")} onChange={(e) => s("status", e.target.value)} className={selectCls}>

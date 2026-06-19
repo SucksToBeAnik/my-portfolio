@@ -48,6 +48,7 @@ export default async function Home() {
             <p className="text-base leading-relaxed text-fg/80 max-w-lg">
               I&apos;m a software engineer who loves building simple solutions.
               Here, I share a little bit of everything that interests me.
+              <span className="block"><AskPrompt /></span>
             </p>
         </div>
 
@@ -84,8 +85,6 @@ export default async function Home() {
           </LinkPreview>
         </div>
       </section>
-
-      <AskPrompt />
 
       {/* Blogs & Projects */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">

@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Toaster } from "sonner";
 import { AdminBreadcrumb } from "@/components/AdminBreadcrumb";
 import { AdminNav } from "@/components/AdminNav";
+import { ResponsiveToaster } from "@/components/ResponsiveToaster";
 
 export default async function AdminLayout({
   children,
@@ -33,19 +33,7 @@ export default async function AdminLayout({
       {/* Mobile bottom nav */}
       <AdminNav variant="bottom" />
 
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          style: {
-            background: "var(--bg)",
-            color: "var(--fg)",
-            border: "1px solid var(--hairline)",
-            borderRadius: "12px",
-            fontSize: "13px",
-            fontFamily: "var(--font-sans), sans-serif",
-          },
-        }}
-      />
+      <ResponsiveToaster />
       </main>
   );
 }

@@ -11,6 +11,7 @@ import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Drawer } from "@/components/Drawer";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface Item {
   id: number;
@@ -30,6 +31,7 @@ export default function StacksPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<Item>>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["stacks"], queryFn: getStacks });
 
@@ -159,22 +161,22 @@ export default function StacksPage() {
 
       <Drawer
         open={drawerOpen}
-        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+         onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
         title={editId ? "Edit Stack" : "Add Stack"}
         headerActions={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="stack-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
         footer={
           <div className="flex items-center gap-2">
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="button" onClick={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
             <button type="submit" form="stack-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
           </div>
         }
       >
-        <form id="stack-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
+        <form id="stack-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imageUrl = form.imageUrl; if (pendingFile) { try { imageUrl = await uploadToCloudinary(pendingFile); s("imageUrl", imageUrl); } catch { toast.error("Upload failed"); return; } } if (editId) updateMut.mutate({ id: editId, data: { ...form, imageUrl } }); else createMut.mutate({ ...form, imageUrl }); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Name</label>
@@ -186,7 +188,7 @@ export default function StacksPage() {
               <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} required placeholder="https://" />
               <p className={errCls("url")}>{errors.url}</p>
             </div>
-            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
+            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingFile} />
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Platform</label>
               <input value={f("platform")} onChange={(e) => s("platform", e.target.value)} className={inputCls} placeholder="e.g. Web, macOS, iOS" />

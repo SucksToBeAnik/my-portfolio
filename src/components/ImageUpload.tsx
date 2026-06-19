@@ -2,16 +2,15 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Upload, Link as LinkIcon, Image as ImageIcon, Video, Trash } from "@phosphor-icons/react";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 
-const MAX_SIZE = 10 * 1024 * 1024;
 const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"];
 const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/ogg"];
 
 interface ImageUploadProps {
-  onUpload: (url: string) => void;
+  value?: string;
+  onChange?: (url: string) => void;
   onRemove?: () => void;
-  currentUrl?: string;
+  onFilePending?: (file: File | null) => void;
   accept?: string;
   resourceType?: "image" | "video";
 }
@@ -19,18 +18,19 @@ interface ImageUploadProps {
 type Tab = "upload" | "url";
 
 export function ImageUpload({
-  onUpload,
+  value = "",
+  onChange,
   onRemove,
-  currentUrl,
+  onFilePending,
   accept = "image/*",
   resourceType = "image",
 }: ImageUploadProps) {
   const [dragOver, setDragOver] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [urlInput, setUrlInput] = useState("");
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("upload");
+  const [urlInput, setUrlInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const validate = useCallback(
@@ -41,37 +41,25 @@ export function ImageUpload({
           ? "Only MP4, WebM, and OGG videos are allowed."
           : "Only JPEG, PNG, GIF, WebP, and AVIF images are allowed.";
       }
-      if (file.size > MAX_SIZE) {
-        return "File exceeds 10MB limit.";
-      }
       return null;
     },
     [resourceType]
   );
 
   const handleFile = useCallback(
-    async (file: File) => {
+    (file: File) => {
       setError(null);
       const validationError = validate(file);
       if (validationError) {
         setError(validationError);
         return;
       }
+      setPendingFile(file);
       const objectUrl = URL.createObjectURL(file);
       setPreview(objectUrl);
-      setUploading(true);
-      try {
-        const url = await uploadToCloudinary(file, resourceType);
-        onUpload(url);
-      } catch {
-        setError("Upload failed. Try again.");
-      } finally {
-        setUploading(false);
-        URL.revokeObjectURL(objectUrl);
-        setPreview(null);
-      }
+      onFilePending?.(file);
     },
-    [onUpload, validate, resourceType]
+    [validate, onFilePending]
   );
 
   const handleDrop = useCallback(
@@ -92,14 +80,27 @@ export function ImageUpload({
     [handleFile]
   );
 
-  const handleUrlSubmit = useCallback(() => {
-    if (urlInput) {
-      setError(null);
-      onUpload(urlInput);
-    }
-  }, [urlInput, onUpload]);
+  const handleRemove = useCallback(() => {
+    if (preview) URL.revokeObjectURL(preview);
+    setPendingFile(null);
+    setPreview(null);
+    onFilePending?.(null);
+    onRemove?.();
+  }, [preview, onFilePending, onRemove]);
 
-  const hasMedia = currentUrl || preview;
+  const handleUrlCommit = useCallback(() => {
+    if (!urlInput.trim() || !onChange) return;
+    setError(null);
+    if (preview) URL.revokeObjectURL(preview);
+    setPendingFile(null);
+    setPreview(null);
+    onFilePending?.(null);
+    onChange(urlInput.trim());
+    setUrlInput("");
+  }, [urlInput, onChange, preview, onFilePending]);
+
+  const hasPending = pendingFile && preview;
+  const hasMedia = value && !hasPending;
 
   return (
     <div className="space-y-2">
@@ -117,7 +118,7 @@ export function ImageUpload({
         </button>
         <button
           type="button"
-          onClick={() => { setTab("url"); setError(null); setUrlInput(""); }}
+          onClick={() => { setTab("url"); setError(null); setUrlInput(value); }}
           className={`text-xs transition-colors cursor-pointer pb-0.5 border-b ${
             tab === "url"
               ? "text-fg font-medium border-fg"
@@ -130,24 +131,19 @@ export function ImageUpload({
 
       {tab === "upload" ? (
         <div
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragOver(true);
-          }}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
-          onClick={() => {
-            if (!hasMedia && !uploading) inputRef.current?.click();
-          }}
+          onClick={() => { if (!hasMedia && !hasPending) inputRef.current?.click(); }}
           className={`relative flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl transition-colors overflow-hidden cursor-pointer ${
-            hasMedia ? "p-0" : "p-6"
+            hasMedia || hasPending ? "p-0" : "p-6"
           } ${
             dragOver
               ? "border-fg bg-fg/5"
               : "border-nav-border hover:border-nav-text"
           }`}
         >
-          {uploading && preview ? (
+          {hasPending ? (
             <div className="relative w-full">
               {resourceType === "video" ? (
                 <video src={preview} className="w-full max-h-32 object-contain rounded-lg" />
@@ -155,23 +151,20 @@ export function ImageUpload({
                 <img src={preview} alt="" className="w-full max-h-32 object-contain rounded-lg" />
               )}
               <div className="absolute inset-0 bg-bg/60 flex items-center justify-center rounded-lg">
-                <p className="text-xs text-fg">Uploading...</p>
+                <p className="text-xs text-fg">Pending — save to upload</p>
               </div>
             </div>
-          ) : currentUrl ? (
+          ) : hasMedia ? (
             <div className="relative group w-full">
               {resourceType === "video" ? (
-                <video src={currentUrl} className="w-full max-h-32 object-contain rounded-lg" />
+                <video src={value} className="w-full max-h-32 object-contain rounded-lg" />
               ) : (
-                <img src={currentUrl} alt="" className="w-full max-h-32 object-contain rounded-lg" />
+                <img src={value} alt="" className="w-full max-h-32 object-contain rounded-lg" />
               )}
               <div className="absolute inset-0 bg-bg/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-lg">
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    inputRef.current?.click();
-                  }}
+                  onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
                   className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 transition-all"
                 >
                   Replace
@@ -179,10 +172,7 @@ export function ImageUpload({
                 {onRemove && (
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRemove();
-                    }}
+                    onClick={(e) => { e.stopPropagation(); handleRemove(); }}
                     className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-red-500/80 text-white rounded-lg hover:bg-red-500 transition-all"
                   >
                     <Trash weight="thin" className="w-3 h-3" />
@@ -211,13 +201,13 @@ export function ImageUpload({
             className="hidden"
           />
         </div>
-      ) : currentUrl ? (
+      ) : hasMedia ? (
         <div className="flex items-center justify-between px-3 py-2 bg-hover-bg rounded-lg">
-          <span className="text-[11px] text-fg/60 truncate flex-1 mr-2 break-all">{currentUrl}</span>
+          <span className="text-[11px] text-fg/60 truncate flex-1 mr-2 break-all">{value}</span>
           {onRemove && (
             <button
               type="button"
-              onClick={onRemove}
+              onClick={handleRemove}
               className="flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300 transition-colors shrink-0 ml-2"
             >
               <Trash weight="thin" className="w-3 h-3" />
@@ -226,31 +216,18 @@ export function ImageUpload({
           )}
         </div>
       ) : (
-        <div className="flex gap-2">
+        <div className="flex">
           <input
             type="text"
-            placeholder={
-              resourceType === "video"
-                ? "Paste video URL"
-                : "Paste image URL"
-            }
+            placeholder={resourceType === "video" ? "Paste video URL" : "Paste image URL"}
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleUrlSubmit();
-              }
+              if (e.key === "Enter") { e.preventDefault(); handleUrlCommit(); }
             }}
+            onBlur={handleUrlCommit}
             className="flex-1 px-3 py-1.5 text-xs bg-nav-hover-bg border border-nav-border rounded-lg text-fg placeholder-nav-text/50 focus:outline-none focus:border-nav-text transition-colors"
           />
-          <button
-            type="button"
-            onClick={handleUrlSubmit}
-            className="px-3 py-1.5 text-xs font-medium bg-nav-active-bg text-nav-active-text rounded-lg hover:opacity-90 transition-opacity"
-          >
-            Add
-          </button>
         </div>
       )}
 

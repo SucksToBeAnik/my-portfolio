@@ -45,12 +45,15 @@ export async function deleteBook(id: number) {
 }
 
 export async function reorderBooks(
-  items: { id: number; sortOrder: number }[]
+  items: { id: number; sortOrder: number; status?: "reading" | "read" | "want_to_read" }[]
 ) {
   for (const item of items) {
     await db
       .update(books)
-      .set({ sortOrder: item.sortOrder })
+      .set({
+        sortOrder: item.sortOrder,
+        ...(item.status ? { status: item.status } : {}),
+      })
       .where(eq(books.id, item.id))
   }
   revalidatePath("/admin/books")
