@@ -38,7 +38,7 @@ export default async function Home() {
         />
 
         <div className="space-y-3">
-          <h1 className="text-4xl font-heading">Suckstobeanik</h1>
+          <h1 className="text-4xl font-heading">@suckstobeanik</h1>
           <p className="text-base leading-relaxed text-fg/80 max-w-lg">
             I&apos;m a software engineer building things for the web. Currently
             working on tools that make developers&apos; lives easier.

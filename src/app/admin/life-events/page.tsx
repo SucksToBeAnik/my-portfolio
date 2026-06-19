@@ -171,10 +171,20 @@ export default function LifeEventsPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No life events yet.</p>}
 
-      <Drawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setErrors({}); }} title={editId ? "Edit Event" : "Add Event"}>
-        <form onSubmit={(e) => { e.preventDefault(); setErrors({}); const data = { ...form, endDate: form.endDate || null, imageUrl: form.imageUrl || null, url: form.url || null }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
+      <Drawer
+        open={drawerOpen}
+        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+        title={editId ? "Edit Event" : "Add Event"}
+        headerActions={
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="submit" form="life-event-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
+          </div>
+        }
+      >
+        <form id="life-event-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); const data = { ...form, endDate: form.endDate || null, imageUrl: form.imageUrl || null, url: form.url || null }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+            <div className="sm:col-span-2 space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
               <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />
               <p className={errCls("title")}>{errors.title}</p>
@@ -187,12 +197,12 @@ export default function LifeEventsPage() {
             </div>
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Start Date</label>
-              <input type="date" value={f("startDate")} onChange={(e) => s("startDate", e.target.value)} className={inputCls} required />
+              <input type="date" value={f("startDate")} onChange={(e) => s("startDate", e.target.value)} className={`${inputCls} dark:[color-scheme:dark]`} required />
               <p className={errCls("startDate")}>{errors.startDate}</p>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">End Date <span className="text-fg/20">(leave empty = ongoing)</span></label>
-              <input type="date" value={f("endDate")} onChange={(e) => s("endDate", e.target.value)} className={inputCls} />
+              <input type="date" value={f("endDate")} onChange={(e) => s("endDate", e.target.value)} className={`${inputCls} dark:[color-scheme:dark]`} />
             </div>
             <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
             <div className="space-y-1.5">
@@ -202,12 +212,8 @@ export default function LifeEventsPage() {
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Description</label>
-            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("description")} onChange={(html) => s("description", html)} />
+            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("description")} onChange={(html) => s("description", html)} generateContext={{ title: f("title"), type: "lifeEvent" }} />
             <p className={errCls("description")}>{errors.description}</p>
-          </div>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" disabled={isPending} className="px-4 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-4 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
           </div>
         </form>
       </Drawer>

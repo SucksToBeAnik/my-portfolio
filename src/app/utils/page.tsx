@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getStacks } from "@/actions/stacks";
 import { getSites } from "@/actions/sites";
@@ -28,7 +29,21 @@ function siteGroup(createdAt: Date): number {
 }
 
 export default function UtilsPage() {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("stacks");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("tab");
+    if (t === "sites" || t === "stacks") setTab(t);
+  }, []);
+
+  function switchTab(t: Tab) {
+    setTab(t);
+    const params = new URLSearchParams(window.location.search);
+    params.set("tab", t);
+    router.replace(`/utils?${params.toString()}`, { scroll: false });
+  }
 
   return (
     <>
@@ -40,7 +55,7 @@ export default function UtilsPage() {
         </div>
         <div className="flex gap-1 bg-hover-bg rounded-lg p-0.5 shrink-0">
           <button
-            onClick={() => setTab("stacks")}
+            onClick={() => switchTab("stacks")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-all cursor-pointer ${
               tab === "stacks" ? "bg-fg text-bg" : "text-fg/50 hover:text-fg"
             }`}
@@ -49,7 +64,7 @@ export default function UtilsPage() {
             Stacks
           </button>
           <button
-            onClick={() => setTab("sites")}
+            onClick={() => switchTab("sites")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-all cursor-pointer ${
               tab === "sites" ? "bg-fg text-bg" : "text-fg/50 hover:text-fg"
             }`}

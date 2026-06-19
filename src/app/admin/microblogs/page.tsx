@@ -158,28 +158,38 @@ export default function MicroblogsPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No posts yet.</p>}
 
-      <Drawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setErrors({}); }} title={editId ? "Edit Post" : "Add Post"}>
-        <form onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form as any }); else createMut.mutate(form as any); }} className="space-y-4">
+      <Drawer
+        open={drawerOpen}
+        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+        title={editId ? "Edit Post" : "Add Post"}
+        headerActions={
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="submit" form="microblog-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
+          </div>
+        }
+      >
+        <form id="microblog-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form as any }); else createMut.mutate(form as any); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
               <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />
               <p className={errCls("title")}>{errors.title}</p>
             </div>
-            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="published" checked={form.published ?? false} onChange={(e) => s("published", e.target.checked)} className="accent-fg" />
-              <label htmlFor="published" className="text-xs text-fg/50">Published</label>
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Status</label>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => s("published", !(form.published ?? false))} className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all cursor-pointer ${form.published ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"}`}>
+                  {form.published ? "● Published" : "○ Draft"}
+                </button>
+              </div>
             </div>
+            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Content</label>
-            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("content")} onChange={(html) => s("content", html)} />
+            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("content")} onChange={(html) => s("content", html)} generateContext={{ title: f("title"), type: "microblog" }} />
             <p className={errCls("content")}>{errors.content}</p>
-          </div>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" disabled={isPending} className="px-4 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-4 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
           </div>
         </form>
       </Drawer>

@@ -165,8 +165,18 @@ export default function BooksPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No books yet.</p>}
 
-      <Drawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setErrors({}); }} title={editId ? "Edit Book" : "Add Book"}>
-        <form onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
+      <Drawer
+        open={drawerOpen}
+        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+        title={editId ? "Edit Book" : "Add Book"}
+        headerActions={
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="submit" form="book-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
+          </div>
+        }
+      >
+        <form id="book-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
@@ -179,6 +189,14 @@ export default function BooksPage() {
               <p className={errCls("author")}>{errors.author}</p>
             </div>
             <ImageUpload currentUrl={f("coverUrl")} onUpload={(url) => s("coverUrl", url)} onRemove={() => s("coverUrl", "")} />
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Status</label>
+              <select value={f("status")} onChange={(e) => s("status", e.target.value)} className={selectCls}>
+                <option value="want_to_read">Want to Read</option>
+                <option value="reading">Reading</option>
+                <option value="read">Read</option>
+              </select>
+            </div>
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Rating</label>
               <div className="flex gap-1">
@@ -197,12 +215,8 @@ export default function BooksPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Status</label>
-              <select value={f("status")} onChange={(e) => s("status", e.target.value)} className={selectCls}>
-                <option value="want_to_read">Want to Read</option>
-                <option value="reading">Reading</option>
-                <option value="read">Read</option>
-              </select>
+              <label className="text-xs text-fg/50">Quote</label>
+              <input value={f("quote")} onChange={(e) => s("quote", e.target.value)} className={inputCls} />
             </div>
           </div>
           <div className="space-y-1.5">
@@ -230,16 +244,8 @@ export default function BooksPage() {
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs text-fg/50">Quote</label>
-            <input value={f("quote")} onChange={(e) => s("quote", e.target.value)} className={inputCls} />
-          </div>
-          <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Review</label>
-            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("review")} onChange={(html) => s("review", html)} />
-          </div>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" disabled={isPending} className="px-4 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-4 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("review")} onChange={(html) => s("review", html)} generateContext={{ title: f("title"), type: "book" }} />
           </div>
         </form>
       </Drawer>

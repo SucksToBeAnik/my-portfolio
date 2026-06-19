@@ -157,8 +157,18 @@ export default function StacksPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No stacks yet.</p>}
 
-      <Drawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setErrors({}); }} title={editId ? "Edit Stack" : "Add Stack"}>
-        <form onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
+      <Drawer
+        open={drawerOpen}
+        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+        title={editId ? "Edit Stack" : "Add Stack"}
+        headerActions={
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="submit" form="stack-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
+          </div>
+        }
+      >
+        <form id="stack-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Name</label>
@@ -180,10 +190,6 @@ export default function StacksPage() {
             <label className="text-xs text-fg/50">Description (tech stack)</label>
             <textarea value={f("description")} onChange={(e) => s("description", e.target.value)} className={`${inputCls} resize-none h-20`} placeholder="React, Adobe Illustrator, etc." />
             <p className={errCls("description")}>{errors.description}</p>
-          </div>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" disabled={isPending} className="px-4 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-4 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
           </div>
         </form>
       </Drawer>

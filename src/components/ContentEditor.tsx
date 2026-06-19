@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import LinkExtension from "@tiptap/extension-link";
@@ -11,6 +11,7 @@ import {
   ListNumbers,
   LinkSimple,
   Image,
+  Sparkle,
 } from "@phosphor-icons/react";
 import { ImageUpload } from "@/components/ImageUpload";
 
@@ -18,14 +19,17 @@ interface ContentEditorProps {
   content: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  generateContext?: { title?: string; type: string };
 }
 
 export function ContentEditor({
   content,
   onChange,
   placeholder,
+  generateContext,
 }: ContentEditorProps) {
   const imageDialogRef = useRef<HTMLDialogElement>(null);
+  const [generating, setGenerating] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -69,6 +73,27 @@ export function ContentEditor({
     }
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }, [editor]);
+
+  const handleGenerate = useCallback(async () => {
+    if (!editor || !generateContext || generating) return;
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...generateContext, existing: editor.getHTML() }),
+      });
+      const data = await res.json();
+      if (data.html) {
+        editor.chain().focus().setContent(data.html, { emitUpdate: false }).run();
+        onChange(data.html);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setGenerating(false);
+    }
+  }, [editor, generateContext, generating, onChange]);
 
   if (!editor) return null;
 
@@ -157,6 +182,22 @@ export function ContentEditor({
           () => imageDialogRef.current?.showModal(),
           "Image",
           Image
+        )}
+
+        {generateContext && (
+          <>
+            <div className="w-px h-4 mx-1 bg-nav-border" />
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={generating}
+              className="flex items-center gap-1 px-2 py-1 rounded text-xs text-nav-text hover:text-nav-text-hover hover:bg-nav-hover-bg transition-colors disabled:opacity-50"
+              title="Generate content with AI"
+            >
+              <Sparkle weight="thin" className="w-3.5 h-3.5" />
+              {generating ? "..." : "Auto"}
+            </button>
+          </>
         )}
       </div>
 

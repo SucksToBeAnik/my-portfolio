@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { X } from "@phosphor-icons/react";
 
 interface DrawerProps {
   open: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  headerActions?: React.ReactNode;
 }
 
-export function Drawer({ open, onClose, title, children }: DrawerProps) {
+export function Drawer({ open, onClose, title, children, headerActions }: DrawerProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,15 +44,9 @@ export function Drawer({ open, onClose, title, children }: DrawerProps) {
         }`}
         style={{ pointerEvents: open ? "auto" : "none" }}
       >
-        <div className="flex items-center justify-between shrink-0 px-5 py-4 border-b border-hairline">
+        <div className="flex items-center justify-between shrink-0 px-5 py-3 border-b border-hairline">
           <h2 className="text-sm font-heading text-fg">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 text-fg/40 hover:text-fg/80 transition-colors"
-          >
-            <X weight="thin" className="w-4 h-4" />
-          </button>
+          {headerActions}
         </div>
         <div className="flex-1 overflow-y-auto p-5">
           {children}

@@ -184,26 +184,35 @@ export default function ProjectsPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No projects yet.</p>}
 
-      <Drawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setErrors({}); }} title={editId ? "Edit Project" : "Add Project"}>
-        <form onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
+      <Drawer
+        open={drawerOpen}
+        onClose={() => { setDrawerOpen(false); setErrors({}); }}
+        title={editId ? "Edit Project" : "Add Project"}
+        headerActions={
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
+            <button type="submit" form="project-form" disabled={isPending} className="px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
+          </div>
+        }
+      >
+        <form id="project-form" onSubmit={(e) => { e.preventDefault(); setErrors({}); if (editId) updateMut.mutate({ id: editId, data: form }); else createMut.mutate(form); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
               <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />
               <p className={errCls("title")}>{errors.title}</p>
             </div>
-            <ImageUpload
-              currentUrl={f("imageUrl")}
-              onUpload={(url) => s("imageUrl", url)}
-              onRemove={() => s("imageUrl", "")}
-            />
-            <ImageUpload
-              currentUrl={f("videoUrl")}
-              onUpload={(url) => s("videoUrl", url)}
-              onRemove={() => s("videoUrl", "")}
-              accept="video/*"
-              resourceType="video"
-            />
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Worked On</label>
+              <div className="flex items-center gap-2">
+                <input type="date" value={f("workedOn")} onChange={(e) => s("workedOn", e.target.value)} className={`${inputCls} dark:[color-scheme:dark]`} />
+                <button type="button" onClick={() => s("featured", !(form.featured ?? false))} className={`shrink-0 px-3 py-1.5 text-xs rounded-lg font-medium transition-all cursor-pointer ${form.featured ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"}`}>
+                  {form.featured ? "★" : "☆"}
+                </button>
+              </div>
+            </div>
+            <ImageUpload currentUrl={f("imageUrl")} onUpload={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} />
+            <ImageUpload currentUrl={f("videoUrl")} onUpload={(url) => s("videoUrl", url)} onRemove={() => s("videoUrl", "")} accept="video/*" resourceType="video" />
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Project URL</label>
               <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} />
@@ -212,23 +221,11 @@ export default function ProjectsPage() {
               <label className="text-xs text-fg/50">GitHub URL</label>
               <input value={f("githubUrl")} onChange={(e) => s("githubUrl", e.target.value)} className={inputCls} />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Worked On</label>
-              <input type="date" value={f("workedOn")} onChange={(e) => s("workedOn", e.target.value)} className={inputCls} />
-            </div>
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="featured" checked={form.featured ?? false} onChange={(e) => s("featured", e.target.checked)} className="accent-fg" />
-              <label htmlFor="featured" className="text-xs text-fg/50">Featured</label>
-            </div>
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Description</label>
-            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("description")} onChange={(html) => s("description", html)} />
+            <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("description")} onChange={(html) => s("description", html)} generateContext={{ title: f("title"), type: "project" }} />
             <p className={errCls("description")}>{errors.description}</p>
-          </div>
-          <div className="flex gap-2 pt-2">
-            <button type="submit" disabled={isPending} className="px-4 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">{editId ? "Update" : "Create"}</button>
-            <button type="button" onClick={() => { setDrawerOpen(false); setErrors({}); }} className="px-4 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all">Cancel</button>
           </div>
         </form>
       </Drawer>

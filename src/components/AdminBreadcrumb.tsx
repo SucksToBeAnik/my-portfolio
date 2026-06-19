@@ -27,7 +27,7 @@ export function AdminBreadcrumb() {
         <House weight="thin" className="w-3.5 h-3.5" />
       </Link>
       <span className="text-fg/20 shrink-0">/</span>
-      <span className="text-fg/60 shrink-0">admin</span>
+      <span className="text-fg/60 shrink-0">Admin</span>
       {pageLabel && (
         <>
           <span className="text-fg/20 shrink-0">/</span>

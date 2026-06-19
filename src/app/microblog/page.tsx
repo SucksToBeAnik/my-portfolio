@@ -52,14 +52,14 @@ export default async function MicroblogPage() {
 
           return (
             <div key={post.id}>
-              <article className="py-8">
+              <article className="pb-8">
                 {post.publishedAt && (
                   <p className="text-xs text-muted mb-3">
                     {formatDate(new Date(post.publishedAt))}
                   </p>
                 )}
                 <Link href={`/microblog/${post.id}`} className="block space-y-3 group">
-                  <h2 className="text-base font-heading leading-snug group-hover:underline">
+                  <h2 className="text-base font-heading leading-snug">
                     {post.title}
                   </h2>
                   <p className="text-xs text-fg/60 line-clamp-3">
