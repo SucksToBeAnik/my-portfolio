@@ -58,8 +58,8 @@ export default async function LifePage() {
       <div className="relative pl-8 space-y-10 before:absolute before:left-[15.5px] before:top-2 before:bottom-2 before:w-px before:bg-hairline">
         {items.map((event) => (
           <article key={event.id} className="relative">
-            <span className="absolute left-[-24px] top-2.5 text-fg/40">
-              {typeIcons[event.type] || <span className="block w-2 h-2 rounded-full bg-fg" />}
+            <span className="absolute left-[-24px] top-2.5 text-fg/70">
+              {typeIcons[event.type] || <span className="block w-2.5 h-2.5 rounded-full bg-fg" />}
             </span>
             <div className="grid grid-cols-[auto_1fr] gap-3 items-start">
               {event.imageUrl ? (
