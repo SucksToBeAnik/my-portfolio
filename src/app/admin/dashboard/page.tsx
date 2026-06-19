@@ -2,7 +2,17 @@ import { count, eq } from "drizzle-orm";
 import Link from "next/link";
 import { updateWorkingOn } from "@/actions/site-config";
 import { db } from "@/db";
-import { books, lifeEvents, microblogs, projects, siteConfig, sites, stacks } from "@/db/schema";
+import {
+  books,
+  lifeEvents,
+  media,
+  microblogs,
+  projects,
+  siteConfig,
+  sites,
+  stacks,
+  tils,
+} from "@/db/schema";
 
 export const metadata = {
   title: "Dashboard — Admin — Suckstobeanik",
@@ -15,6 +25,8 @@ export default async function DashboardPage() {
   const [microblogCount] = await db.select({ c: count() }).from(microblogs);
   const [stackCount] = await db.select({ c: count() }).from(stacks);
   const [siteCount] = await db.select({ c: count() }).from(sites);
+  const [mediaCount] = await db.select({ c: count() }).from(media);
+  const [tilCount] = await db.select({ c: count() }).from(tils);
 
   const workingOn = await db
     .select()
@@ -30,6 +42,8 @@ export default async function DashboardPage() {
     { label: "Microblogs", count: microblogCount.c, href: "/admin/microblogs" },
     { label: "Stacks", count: stackCount.c, href: "/admin/stacks" },
     { label: "Sites", count: siteCount.c, href: "/admin/sites" },
+    { label: "Media", count: mediaCount.c, href: "/admin/media" },
+    { label: "TIL", count: tilCount.c, href: "/admin/tils" },
   ];
 
   return (

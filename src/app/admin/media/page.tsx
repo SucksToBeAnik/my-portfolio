@@ -1,7 +1,7 @@
 "use client";
 
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { DotsSixVertical, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
+import { DotsSixVertical, PencilSimple, Plus, Star, Trash } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -234,9 +234,17 @@ export default function MediaPage() {
                           <span className="text-[10px] px-1 py-0.5 rounded bg-hover-bg text-fg/50">
                             {statusIcons[item.status]} {statusLabels[item.status]}
                           </span>
-                          {item.rating && (
-                            <span className="text-xs text-fg/50">{item.rating}/5</span>
-                          )}
+                          {item.rating ? (
+                            <span className="inline-flex gap-0.5 shrink-0">
+                              {[1, 2, 3, 4, 5].map((n) => (
+                                <Star
+                                  key={n}
+                                  weight="fill"
+                                  className={`w-3 h-3 ${(item.rating ?? 0) >= n ? "text-fg" : "text-fg/30"}`}
+                                />
+                              ))}
+                            </span>
+                          ) : null}
                           {item.type === "series" && item.seasons && (
                             <span className="text-xs text-fg/30">{item.seasons} seasons</span>
                           )}
