@@ -40,13 +40,13 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
 
   useEffect(() => {
     if (open) {
-      inputRef.current?.focus();
       setMessages([]);
       const val = getCookie("query_remaining");
       if (val) {
         const n = parseInt(val, 10);
         if (!isNaN(n)) setRemaining(n);
       }
+      requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [open]);
 
@@ -157,10 +157,10 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-16 sm:pt-20"
+      className="fixed top-0 left-0 right-0 h-dvh z-[100] flex items-start justify-center pt-16 sm:pt-20"
       onClick={onClose}
     >
-      <div className="fixed inset-0 bg-bg/60 backdrop-blur-sm" />
+      <div className="fixed top-0 left-0 right-0 h-dvh bg-bg/60 backdrop-blur-sm" />
       <div
         className="relative w-full max-w-[480px] mx-4 bg-bg border border-hairline rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[480px] sm:max-h-[520px]"
         onClick={(e) => e.stopPropagation()}
