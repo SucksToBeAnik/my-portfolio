@@ -5,9 +5,11 @@ import { books } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ArrowLeft, Star } from "@phosphor-icons/react/dist/ssr";
 
-export const metadata = {
-  title: "Book — Suckstobeanik",
-};
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const book = await db.select({ title: books.title, author: books.author }).from(books).where(eq(books.id, Number(id))).limit(1).then(r => r[0]);
+  return { title: book ? `${book.title} — Books — Suckstobeanik` : "Books — Suckstobeanik" };
+}
 
 function ratingStars(rating: number | null) {
   return (

@@ -6,6 +6,11 @@ import { db } from "@/db";
 import { microblogs, projects } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 
+export const metadata = {
+  title: "Suckstobeanik",
+  description: "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
+};
+
 function stripHtml(html: string) {
   return html.replace(/<[^>]*>/g, "");
 }
@@ -39,10 +44,10 @@ export default async function Home() {
 
         <div className="space-y-3">
           <h1 className="text-4xl font-heading">@suckstobeanik</h1>
-          <p className="text-base leading-relaxed text-fg/80 max-w-lg">
-            I&apos;m a software engineer building things for the web. Currently
-            working on tools that make developers&apos; lives easier.
-          </p>
+            <p className="text-base leading-relaxed text-fg/80 max-w-lg">
+              I&apos;m a software engineer who loves building simple solutions.
+              Here, I share a little bit of everything that interests me.
+            </p>
         </div>
 
         <div className="flex items-center gap-2 text-fg/60">

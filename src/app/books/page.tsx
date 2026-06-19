@@ -7,6 +7,7 @@ import { Star } from "@phosphor-icons/react/dist/ssr";
 
 export const metadata = {
   title: "Books — Suckstobeanik",
+  description: "Book catalog with ratings and reviews.",
 };
 
 function ratingStars(rating: number | null) {

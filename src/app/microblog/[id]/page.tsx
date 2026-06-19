@@ -7,9 +7,11 @@ import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { HeartButton } from "@/components/HeartButton";
 import { getHeartData } from "@/actions/hearts";
 
-export const metadata = {
-  title: "Microblog — Suckstobeanik",
-};
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const post = await db.select({ title: microblogs.title }).from(microblogs).where(eq(microblogs.id, Number(id))).limit(1).then(r => r[0]);
+  return { title: post ? `${post.title} — Microblog — Suckstobeanik` : "Microblog — Suckstobeanik" };
+}
 
 function formatDate(date: Date) {
   return date.toLocaleDateString("en-US", {

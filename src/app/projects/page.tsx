@@ -8,6 +8,7 @@ import { VideoEmbed } from "@/components/VideoEmbed";
 
 export const metadata = {
   title: "Projects — Suckstobeanik",
+  description: "Things I've built — side projects, open source, and experiments.",
 };
 
 function formatDate(date: string) {

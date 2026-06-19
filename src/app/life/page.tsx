@@ -7,6 +7,7 @@ import { LinkPreview } from "@/components/LinkPreview";
 
 export const metadata = {
   title: "Life — Suckstobeanik",
+  description: "Personal milestones, achievements, and travels.",
 };
 
 function formatDate(date: string) {

@@ -3,6 +3,10 @@ import { db } from "@/db";
 import { projects, lifeEvents, books, microblogs, stacks, sites } from "@/db/schema";
 import { count } from "drizzle-orm";
 
+export const metadata = {
+  title: "Dashboard — Admin — Suckstobeanik",
+};
+
 export default async function DashboardPage() {
   const [projectCount] = await db.select({ c: count() }).from(projects);
   const [lifeCount] = await db.select({ c: count() }).from(lifeEvents);
