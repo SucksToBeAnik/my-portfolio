@@ -2,7 +2,7 @@
 
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { books, lifeEvents, microblogs, projects, stacks } from "@/db/schema";
+import { books, lifeEvents, microblogs, projects, stacks, tils } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 export interface SearchIndexItem {
@@ -10,7 +10,7 @@ export interface SearchIndexItem {
   title: string;
   subtitle: string;
   url: string;
-  type: "project" | "book" | "microblog" | "lifeEvent" | "stack" | "page";
+  type: "project" | "book" | "microblog" | "til" | "lifeEvent" | "stack" | "page";
 }
 
 const staticPages: SearchIndexItem[] = [
@@ -18,7 +18,7 @@ const staticPages: SearchIndexItem[] = [
   { id: 1, title: "Projects", subtitle: "Things I've built", url: "/projects", type: "page" },
   { id: 2, title: "Life", subtitle: "Personal timeline", url: "/life", type: "page" },
   { id: 3, title: "Books", subtitle: "Book catalog & reviews", url: "/books", type: "page" },
-  { id: 4, title: "Microblog", subtitle: "Short-form posts", url: "/microblog", type: "page" },
+  { id: 4, title: "Writings", subtitle: "Microblog posts & TIL", url: "/writings", type: "page" },
   { id: 5, title: "Utils", subtitle: "Stacks & sites I use", url: "/utils", type: "page" },
 ];
 
@@ -60,10 +60,18 @@ const adminPages: SearchIndexItem[] = [
     type: "page",
   },
   { id: 106, title: "Admin / Sites", subtitle: "Manage sites", url: "/admin/sites", type: "page" },
+  { id: 107, title: "Admin / TIL", subtitle: "Manage TILs", url: "/admin/tils", type: "page" },
+  {
+    id: 108,
+    title: "Admin / Media",
+    subtitle: "Manage movies & series",
+    url: "/admin/media",
+    type: "page",
+  },
 ];
 
 export async function getSearchIndex() {
-  const [allProjects, allBooks, allMicroblogs, allLifeEvents, allStacks, session] =
+  const [allProjects, allBooks, allMicroblogs, allLifeEvents, allStacks, allTils, session] =
     await Promise.all([
       db
         .select({ id: projects.id, title: projects.title, description: projects.description })
@@ -86,6 +94,7 @@ export async function getSearchIndex() {
         .select({ id: stacks.id, name: stacks.name, description: stacks.description })
         .from(stacks)
         .orderBy(desc(stacks.sortOrder)),
+      db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.sortOrder)),
       auth(),
     ]);
 
@@ -126,6 +135,13 @@ export async function getSearchIndex() {
       subtitle: s.description ? s.description.replace(/<[^>]*>/g, "").slice(0, 120) : "",
       url: "/utils",
       type: "stack" as const,
+    })),
+    ...allTils.map((t) => ({
+      id: t.id,
+      title: t.title,
+      subtitle: "",
+      url: "/writings",
+      type: "til" as const,
     })),
   ];
 

@@ -79,7 +79,6 @@ export const microblogs = sqliteTable("microblogs", {
   imageUrl: text("image_url"),
   published: integer("published", { mode: "boolean" }).default(false),
   publishedAt: integer("published_at", { mode: "timestamp" }),
-  til: integer("til", { mode: "boolean" }).default(false),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -124,6 +123,19 @@ export const sites = sqliteTable("sites", {
 export const siteConfig = sqliteTable("site_config", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
+});
+
+export const tils = sqliteTable("tils", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 export const media = sqliteTable("media", {

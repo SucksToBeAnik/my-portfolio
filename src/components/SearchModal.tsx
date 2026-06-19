@@ -5,6 +5,7 @@ import {
   Compass,
   FolderOpen,
   Heart,
+  Lightbulb,
   MagnifyingGlass,
   Quotes,
   Wrench,
@@ -19,6 +20,7 @@ const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
   project: { icon: FolderOpen, label: "Projects" },
   book: { icon: BookOpenText, label: "Books" },
   microblog: { icon: Quotes, label: "Microblog" },
+  til: { icon: Lightbulb, label: "TIL" },
   lifeEvent: { icon: Heart, label: "Life" },
   stack: { icon: Wrench, label: "Stacks" },
 };

@@ -8,7 +8,7 @@ import {
   House,
   MagnifyingGlass,
   Moon,
-  Quotes,
+  NotePencil,
   SunDim,
   Wrench,
 } from "@phosphor-icons/react";
@@ -28,7 +28,7 @@ const navItems = [
   { href: "/projects", label: "Projects", icon: FolderOpen },
   { href: "/life", label: "Life", icon: Heart },
   { href: "/books", label: "Books", icon: BookOpenText },
-  { href: "/microblog", label: "Microblog", icon: Quotes },
+  { href: "/writings", label: "Writings", icon: NotePencil },
   { href: "/utils", label: "Utils", icon: Wrench },
 ];
 

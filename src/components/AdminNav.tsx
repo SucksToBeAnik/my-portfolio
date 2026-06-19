@@ -6,6 +6,7 @@ import {
   FolderOpen,
   Globe,
   Heart,
+  Lightbulb,
   Quotes,
   SquaresFour,
   Wrench,
@@ -22,6 +23,7 @@ const navItems = [
   { href: "/admin/stacks", label: "Stacks", icon: Wrench },
   { href: "/admin/sites", label: "Sites", icon: Globe },
   { href: "/admin/media", label: "Media", icon: FilmStrip },
+  { href: "/admin/tils", label: "TIL", icon: Lightbulb },
 ];
 
 export function AdminNav({ variant }: { variant?: "sidebar" | "bottom" }) {

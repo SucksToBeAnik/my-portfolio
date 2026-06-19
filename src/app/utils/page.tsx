@@ -301,9 +301,13 @@ function MediaContent() {
                 </div>
                 <div className="p-2.5 space-y-1">
                   <p className="text-xs font-medium leading-tight line-clamp-2">{item.title}</p>
-                  <div className="flex items-center gap-1.5 text-[10px] text-fg/50">
-                    {item.year && <span>{item.year}</span>}
-                    {item.type === "series" && item.seasons && <span>{item.seasons} seasons</span>}
+                  <div className="flex items-center justify-between text-[10px] text-fg/50">
+                    <span>
+                      {item.year && <span>{item.year}</span>}
+                      {item.type === "series" && item.seasons && (
+                        <span> · {item.seasons} seasons</span>
+                      )}
+                    </span>
                     {item.rating ? (
                       <span className="inline-flex gap-0.5 shrink-0">
                         {[1, 2, 3, 4, 5].map((n) => (
