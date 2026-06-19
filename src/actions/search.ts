@@ -2,7 +2,7 @@
 
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { books, lifeEvents, microblogs, projects, stacks, tils } from "@/db/schema";
+import { books, lifeEvents, media, microblogs, projects, stacks, tils } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 export interface SearchIndexItem {
@@ -10,7 +10,7 @@ export interface SearchIndexItem {
   title: string;
   subtitle: string;
   url: string;
-  type: "project" | "book" | "microblog" | "til" | "lifeEvent" | "stack" | "page";
+  type: "project" | "book" | "microblog" | "til" | "lifeEvent" | "stack" | "media" | "page";
 }
 
 const staticPages: SearchIndexItem[] = [
@@ -71,7 +71,7 @@ const adminPages: SearchIndexItem[] = [
 ];
 
 export async function getSearchIndex() {
-  const [allProjects, allBooks, allMicroblogs, allLifeEvents, allStacks, allTils, session] =
+  const [allProjects, allBooks, allMicroblogs, allLifeEvents, allStacks, allTils, allMedia, session] =
     await Promise.all([
       db
         .select({ id: projects.id, title: projects.title, description: projects.description })
@@ -95,6 +95,7 @@ export async function getSearchIndex() {
         .from(stacks)
         .orderBy(desc(stacks.sortOrder)),
       db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.sortOrder)),
+      db.select({ id: media.id, title: media.title, year: media.year, type: media.type }).from(media).orderBy(desc(media.sortOrder)),
       auth(),
     ]);
 
@@ -142,6 +143,13 @@ export async function getSearchIndex() {
       subtitle: "",
       url: "/writings",
       type: "til" as const,
+    })),
+    ...allMedia.map((m) => ({
+      id: m.id,
+      title: m.title,
+      subtitle: `${m.type === "series" ? "Series" : "Movie"}${m.year ? ` · ${m.year}` : ""}`,
+      url: "/utils?tab=media",
+      type: "media" as const,
     })),
   ];
 

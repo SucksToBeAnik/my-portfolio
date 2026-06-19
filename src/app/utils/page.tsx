@@ -1,7 +1,8 @@
 "use client";
 
-import { House, PlayCircle, Star } from "@phosphor-icons/react";
+import { House, PlayCircle, Stack, Star } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getMediaPublic } from "@/actions/media";
@@ -50,7 +51,9 @@ export default function UtilsPage() {
     <>
       <div className="flex items-center justify-between mb-8 md:mb-16">
         <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
-          <House weight="thin" className="w-3.5 h-3.5" />
+          <Link href="/" className="hover:text-fg transition-colors">
+            <House weight="thin" className="w-3.5 h-3.5" />
+          </Link>
           <span className="text-fg/20">/</span>
           <span className="text-fg/60">utils</span>
         </div>
@@ -299,27 +302,31 @@ function MediaContent() {
                     </div>
                   )}
                 </div>
-                <div className="p-2.5 space-y-1">
+                <div className="p-2.5 space-y-1.5">
                   <p className="text-xs font-medium leading-tight line-clamp-2">{item.title}</p>
-                  <div className="flex items-center justify-between text-[10px] text-fg/50">
-                    <span>
-                      {item.year && <span>{item.year}</span>}
-                      {item.type === "series" && item.seasons && (
-                        <span> · {item.seasons} seasons</span>
-                      )}
+                  <div className="flex items-center flex-wrap gap-1 text-[10px]">
+                    <span className="px-1 py-px rounded font-heading uppercase tracking-wider bg-fg/10 text-fg/60">
+                      {item.type === "series" ? "Series" : "Movie"}
                     </span>
-                    {item.rating ? (
-                      <span className="inline-flex gap-0.5 shrink-0">
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <Star
-                            key={n}
-                            weight="fill"
-                            className={`w-2.5 h-2.5 ${(item.rating ?? 0) >= n ? "text-fg" : "text-fg/30"}`}
-                          />
-                        ))}
+                    {item.type === "series" && item.seasons && (
+                      <span className="inline-flex items-center gap-0.5 px-1 py-px rounded bg-fg/5 text-fg/50">
+                        <Stack weight="regular" className="w-2.5 h-2.5" />
+                        {item.seasons}
                       </span>
-                    ) : null}
+                    )}
+                    {item.year && <span className="text-fg/40">{item.year}</span>}
                   </div>
+                  {item.rating ? (
+                    <span className="inline-flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star
+                          key={n}
+                          weight="fill"
+                          className={`w-2.5 h-2.5 ${(item.rating ?? 0) >= n ? "text-fg" : "text-fg/30"}`}
+                        />
+                      ))}
+                    </span>
+                  ) : null}
                 </div>
               </div>
             ))}

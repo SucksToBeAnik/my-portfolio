@@ -17,6 +17,7 @@ import {
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { Drawer } from "@/components/Drawer";
 import { Spinner } from "@/components/Spinner";
+import { StarRating } from "@/components/StarRating";
 
 interface Item {
   id: number;
@@ -439,15 +440,8 @@ export default function MediaPage() {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs text-fg/50">Rating (1-5)</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={5}
-                  value={f("rating") ?? ""}
-                  onChange={(e) => s("rating", e.target.value ? Number(e.target.value) : null)}
-                  className={inputCls}
-                />
+                <label className="text-xs text-fg/50">Rating</label>
+                <StarRating value={form.rating ?? null} onChange={(v) => s("rating", v)} />
               </div>
               {form.type === "series" && (
                 <div className="space-y-1.5">

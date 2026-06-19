@@ -17,11 +17,7 @@ function stripHtml(html: string) {
 }
 
 function formatDate(date: Date) {
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 export default function WritingsPage() {
@@ -45,7 +41,9 @@ export default function WritingsPage() {
     <>
       <div className="flex items-center justify-between mb-8 md:mb-16">
         <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
-          <House weight="thin" className="w-3.5 h-3.5" />
+          <Link href="/" className="hover:text-fg transition-colors">
+            <House weight="thin" className="w-3.5 h-3.5" />
+          </Link>
           <span className="text-fg/20">/</span>
           <span className="text-fg/60">writings</span>
         </div>
@@ -137,8 +135,8 @@ function TilContent() {
     <div className="space-y-8">
       {items.map((item) => (
         <div key={item.id} className="flex gap-6">
-          <div className="w-16 shrink-0 text-right space-y-2">
-            <p className="text-xs text-fg/40 leading-tight">
+          <div className="w-24 shrink-0 text-right space-y-2">
+            <p className="text-xs text-fg/40 leading-tight whitespace-nowrap">
               {formatDate(new Date(item.createdAt))}
             </p>
             <div className="flex justify-end">

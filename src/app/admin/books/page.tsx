@@ -8,7 +8,6 @@ import {
   DotsSixVertical,
   PencilSimple,
   Plus,
-  Star,
   Trash,
 } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,10 +16,11 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { createBook, deleteBook, getBooks, reorderBooks, updateBook } from "@/actions/books";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import { ContentEditor } from "@/components/ContentEditor";
 import { Drawer } from "@/components/Drawer";
+import { ContentEditor } from "@/components/ContentEditor";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Spinner } from "@/components/Spinner";
+import { StarRating } from "@/components/StarRating";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 const categories = [
@@ -443,20 +443,7 @@ export default function BooksPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs text-fg/50">Rating</label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => s("rating", (form.rating ?? 0) === n ? null : n)}
-                      className={`p-1.5 rounded transition-colors cursor-pointer hover:text-fg ${
-                        (form.rating ?? 0) >= n ? "text-fg" : "text-fg/30"
-                      }`}
-                    >
-                      <Star weight="fill" className="w-4 h-4" />
-                    </button>
-                  ))}
-                </div>
+                <StarRating value={form.rating ?? null} onChange={(v) => s("rating", v)} />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs text-fg/50">Quote</label>
