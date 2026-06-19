@@ -11,6 +11,7 @@ const schema = z.object({
   content: z.string().min(1),
   imageUrl: z.string().optional(),
   published: z.boolean().optional(),
+  til: z.boolean().optional(),
   publishedAt: z.date().optional().nullable(),
 });
 

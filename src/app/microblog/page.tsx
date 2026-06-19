@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { getHeartsCounts } from "@/actions/heart-counts";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -32,11 +32,18 @@ function formatDate(date: Date) {
   });
 }
 
-export default async function MicroblogPage() {
+export default async function MicroblogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ til?: string }>;
+}) {
+  const { til } = await searchParams;
+  const showTil = til === "1";
+
   const items = await db
     .select()
     .from(microblogs)
-    .where(eq(microblogs.published, true))
+    .where(and(eq(microblogs.published, true), showTil ? eq(microblogs.til, true) : undefined))
     .orderBy(desc(microblogs.publishedAt));
 
   const heartsMap = await getHeartsCounts(
@@ -47,7 +54,22 @@ export default async function MicroblogPage() {
   return (
     <div>
       <div className="mb-8 md:mb-16">
-        <Breadcrumb crumbs={[{ label: "Microblog" }]} />
+        <Breadcrumb crumbs={[{ label: showTil ? "Today I Learned" : "Microblog" }]} />
+      </div>
+
+      <div className="flex gap-3 mb-6">
+        <Link
+          href="/microblog"
+          className={`text-xs transition-colors border-b-2 pb-1 ${!showTil ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"}`}
+        >
+          All
+        </Link>
+        <Link
+          href="/microblog?til=1"
+          className={`text-xs transition-colors border-b-2 pb-1 ${showTil ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"}`}
+        >
+          TIL
+        </Link>
       </div>
 
       {items.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
@@ -63,6 +85,11 @@ export default async function MicroblogPage() {
                     {formatDate(new Date(post.publishedAt))}
                     <span className="text-fg/20 mx-2">·</span>
                     {readTime(post.content)}
+                    {post.til && (
+                      <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-medium">
+                        TIL
+                      </span>
+                    )}
                   </p>
                 )}
                 <Link href={`/microblog/${post.id}`} className="block space-y-3 group">

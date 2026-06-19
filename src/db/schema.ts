@@ -79,6 +79,7 @@ export const microblogs = sqliteTable("microblogs", {
   imageUrl: text("image_url"),
   published: integer("published", { mode: "boolean" }).default(false),
   publishedAt: integer("published_at", { mode: "timestamp" }),
+  til: integer("til", { mode: "boolean" }).default(false),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()

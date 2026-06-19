@@ -1,6 +1,6 @@
 "use client";
 
-import { House, PlayCircle } from "@phosphor-icons/react";
+import { House, PlayCircle, Star } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -304,7 +304,17 @@ function MediaContent() {
                   <div className="flex items-center gap-1.5 text-[10px] text-fg/50">
                     {item.year && <span>{item.year}</span>}
                     {item.type === "series" && item.seasons && <span>{item.seasons} seasons</span>}
-                    {item.rating && <span className="text-[10px]">{item.rating}/5</span>}
+                    {item.rating ? (
+                      <span className="inline-flex gap-0.5 shrink-0">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <Star
+                            key={n}
+                            weight="fill"
+                            className={`w-2.5 h-2.5 ${(item.rating ?? 0) >= n ? "text-fg" : "text-fg/30"}`}
+                          />
+                        ))}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
               </div>

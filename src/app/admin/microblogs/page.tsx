@@ -26,11 +26,19 @@ interface Item {
   content: string;
   imageUrl: string | null;
   published: boolean | null;
+  til: boolean | null;
   publishedAt: Date | null;
   updatedAt: Date | null;
 }
 
-const empty = { title: "", content: "", imageUrl: "", published: false, publishedAt: null };
+const empty = {
+  title: "",
+  content: "",
+  imageUrl: "",
+  published: false,
+  til: false,
+  publishedAt: null,
+};
 
 export default function MicroblogsPage() {
   const qc = useQueryClient();
@@ -194,6 +202,7 @@ export default function MicroblogsPage() {
                         <p className="text-sm font-medium truncate">{item.title}</p>
                         <p className="text-xs text-fg/50">
                           {item.published ? "Published" : "Draft"}
+                          {item.til && <span className="ml-2 text-blue-400">TIL</span>}
                         </p>
                         {item.updatedAt && (
                           <p className="text-[11px] text-fg/40 mt-0.5">
@@ -335,6 +344,13 @@ export default function MicroblogsPage() {
                     className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all cursor-pointer ${form.published ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"}`}
                   >
                     {form.published ? "● Published" : "○ Draft"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => s("til", !(form.til ?? false))}
+                    className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all cursor-pointer ${form.til ? "bg-blue-600 text-white" : "bg-hover-bg text-fg/50 hover:text-fg"}`}
+                  >
+                    {form.til ? "● TIL" : "○ TIL"}
                   </button>
                 </div>
               </div>
