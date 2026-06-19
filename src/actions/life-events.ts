@@ -14,6 +14,10 @@ const schema = z.object({
   imageUrl: z.string().optional().nullable(),
   url: z.string().optional().nullable(),
   type: z.string().min(1),
+  current: z.boolean().optional(),
+  location: z.string().optional().nullable(),
+  latitude: z.number().optional().nullable(),
+  longitude: z.number().optional().nullable(),
   sortOrder: z.number().optional(),
 })
 

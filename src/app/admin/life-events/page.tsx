@@ -5,13 +5,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { PencilSimple, Trash, DotsSixVertical, Plus } from "@phosphor-icons/react";
+import { PencilSimple, Trash, DotsSixVertical, Plus, Briefcase, GraduationCap, Compass, Star } from "@phosphor-icons/react";
 import { getLifeEvents, createLifeEvent, updateLifeEvent, deleteLifeEvent, reorderLifeEvents } from "@/actions/life-events";
 import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { Drawer } from "@/components/Drawer";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { ImageUpload } from "@/components/ImageUpload";
+import { LocationPicker } from "@/components/LocationPicker";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface Item {
@@ -23,13 +24,24 @@ interface Item {
   imageUrl: string | null;
   url: string | null;
   type: string;
+  current: boolean | null;
+  location: string | null;
+  latitude: number | null;
+  longitude: number | null;
   sortOrder: number | null;
   updatedAt: Date | null;
 }
 
-const empty = { title: "", startDate: "", endDate: "", description: "", imageUrl: "", url: "", type: "education" };
+const empty = { title: "", startDate: "", endDate: "", description: "", imageUrl: "", url: "", type: "education", current: false, location: "", latitude: null, longitude: null };
 
 const types = ["education", "work", "travel", "milestone"];
+
+const typeIcons: Record<string, React.ReactNode> = {
+  education: <GraduationCap weight="thin" className="w-4 h-4" />,
+  work: <Briefcase weight="thin" className="w-4 h-4" />,
+  travel: <Compass weight="thin" className="w-4 h-4" />,
+  milestone: <Star weight="thin" className="w-4 h-4" />,
+};
 
 export default function LifeEventsPage() {
   const qc = useQueryClient();
@@ -127,10 +139,9 @@ export default function LifeEventsPage() {
   const errCls = (k: string) => errors[k] ? "text-xs text-red-400 mt-1" : "hidden";
 
   function dateDisplay(item: Item) {
-    let s = item.startDate;
-    if (item.endDate) s += ` — ${item.endDate}`;
-    else s += " — Present";
-    return s;
+    if (item.endDate) return `${item.startDate} — ${item.endDate}`;
+    if (item.current) return `${item.startDate} — Present`;
+    return item.startDate;
   }
 
   if (isLoading) return <Spinner />;
@@ -156,10 +167,11 @@ export default function LifeEventsPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{item.title}</p>
-                        <p className="text-xs text-fg/50">{dateDisplay(item)} — {item.type}</p>
+                        <p className="text-xs text-fg/50">{dateDisplay(item)} {item.location ? `· ${item.location}` : ""}</p>
                         {item.updatedAt && <p className="text-[11px] text-fg/40 mt-0.5">edited {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</p>}
                       </div>
-                      <div className="flex gap-1.5 shrink-0 ml-3">
+                      <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                        <span className="text-fg/30">{typeIcons[item.type] || null}</span>
                         <button onClick={() => { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
                         <button onClick={() => { setDrawerOpen(false); setConfirmId(item.id); }} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
                       </div>
@@ -192,7 +204,7 @@ export default function LifeEventsPage() {
           </div>
         }
       >
-        <form id="life-event-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imageUrl = form.imageUrl; if (pendingFile) { try { imageUrl = await uploadToCloudinary(pendingFile); s("imageUrl", imageUrl); } catch { toast.error("Upload failed"); return; } } const data = { ...form, endDate: form.endDate || null, imageUrl: imageUrl || null, url: form.url || null }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
+        <form id="life-event-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imageUrl = form.imageUrl; if (pendingFile) { try { imageUrl = await uploadToCloudinary(pendingFile); s("imageUrl", imageUrl); } catch { toast.error("Upload failed"); return; } } const data = { ...form, endDate: form.endDate || null, imageUrl: imageUrl || null, url: form.url || null, location: form.location || null, latitude: form.latitude ?? null, longitude: form.longitude ?? null, current: form.current ?? false }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2 space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
@@ -201,9 +213,21 @@ export default function LifeEventsPage() {
             </div>
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Type</label>
-              <select value={f("type")} onChange={(e) => s("type", e.target.value)} className={selectCls}>
-                {types.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-              </select>
+              <div className="flex gap-2">
+                {types.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => s("type", t)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                      f("type") === t ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"
+                    }`}
+                  >
+                    {typeIcons[t]}
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Start Date</label>
@@ -211,14 +235,34 @@ export default function LifeEventsPage() {
               <p className={errCls("startDate")}>{errors.startDate}</p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">End Date <span className="text-fg/20">(leave empty = ongoing)</span></label>
+              <label className="text-xs text-fg/50">End Date</label>
               <input type="date" value={f("endDate")} onChange={(e) => s("endDate", e.target.value)} className={`${inputCls} dark:[color-scheme:dark]`} />
+            </div>
+            <div className="space-y-1.5 flex items-end pb-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.current ?? false}
+                  onChange={(e) => s("current", e.target.checked)}
+                  className="w-4 h-4 rounded border-hairline bg-hover-bg text-fg focus:ring-0"
+                />
+                <span className="text-xs text-fg/50">Currently active</span>
+              </label>
             </div>
             <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingFile} />
             <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">URL <span className="text-fg/20">(institution/company)</span></label>
-              <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} />
+              <label className="text-xs text-fg/50">URL</label>
+              <input value={f("url")} onChange={(e) => s("url", e.target.value)} placeholder="https://..." className={inputCls} />
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs text-fg/50">Location</label>
+            <LocationPicker
+              location={f("location")}
+              latitude={form.latitude ?? null}
+              longitude={form.longitude ?? null}
+              onSelect={(loc, lat, lng) => { s("location", loc); s("latitude", lat); s("longitude", lng); }}
+            />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Description</label>

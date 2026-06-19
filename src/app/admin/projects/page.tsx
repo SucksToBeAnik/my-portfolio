@@ -222,8 +222,14 @@ export default function ProjectsPage() {
                 </button>
               </div>
             </div>
-            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingImage} />
-            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("videoUrl")} onChange={(url) => s("videoUrl", url)} onRemove={() => s("videoUrl", "")} accept="video/*" resourceType="video" onFilePending={setPendingVideo} />
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Screenshot</label>
+              <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingImage} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Demo Video</label>
+              <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("videoUrl")} onChange={(url) => s("videoUrl", url)} onRemove={() => s("videoUrl", "")} accept="video/*" resourceType="video" onFilePending={setPendingVideo} />
+            </div>
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Project URL</label>
               <input value={f("url")} onChange={(e) => s("url", e.target.value)} className={inputCls} />

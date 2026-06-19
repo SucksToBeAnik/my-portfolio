@@ -4,6 +4,13 @@ import { desc } from "drizzle-orm";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { LifeImage } from "@/components/LifeImage";
 import { LinkPreview } from "@/components/LinkPreview";
+import {
+  Briefcase,
+  GraduationCap,
+  Compass,
+  Star,
+  MapPin,
+} from "@phosphor-icons/react/dist/ssr";
 
 export const metadata = {
   title: "Life — Suckstobeanik",
@@ -19,11 +26,19 @@ function formatDate(date: string) {
   });
 }
 
-function dateRange(start: string, end: string | null) {
+function dateRange(start: string, end: string | null, current: boolean | null) {
   const s = formatDate(start);
-  if (!end) return `${s} — Present`;
-  return `${s} — ${formatDate(end)}`;
+  if (end) return `${s} — ${formatDate(end)}`;
+  if (current) return `${s} — Present`;
+  return s;
 }
+
+const typeIcons: Record<string, React.ReactNode> = {
+  education: <GraduationCap weight="thin" className="w-4 h-4" />,
+  work: <Briefcase weight="thin" className="w-4 h-4" />,
+  travel: <Compass weight="thin" className="w-4 h-4" />,
+  milestone: <Star weight="thin" className="w-4 h-4" />,
+};
 
 export default async function LifePage() {
   const items = await db
@@ -44,7 +59,9 @@ export default async function LifePage() {
       <div className="relative pl-8 space-y-10 before:absolute before:left-[15.5px] before:top-2 before:bottom-2 before:w-px before:bg-hairline">
         {items.map((event) => (
           <article key={event.id} className="relative">
-            <span className="absolute left-[-20px] top-1.5 w-2 h-2 rounded-full bg-fg" />
+            <span className="absolute left-[-24px] top-2.5 text-fg/40">
+              {typeIcons[event.type] || <span className="block w-2 h-2 rounded-full bg-fg" />}
+            </span>
             <div className="grid grid-cols-[auto_1fr] gap-3 items-start">
               {event.imageUrl ? (
                 <LifeImage src={event.imageUrl} alt={event.title} />
@@ -52,8 +69,20 @@ export default async function LifePage() {
                 <div className="w-16 h-16 shrink-0" />
               )}
               <div>
-                <p className="text-xs text-muted mb-1">{dateRange(event.startDate, event.endDate)}</p>
-                <p className="text-[10px] uppercase tracking-wider text-muted mb-2">{event.type}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-xs text-muted">{dateRange(event.startDate, event.endDate, event.current)}</p>
+                  {event.location && (
+                    <a
+                      href={`https://www.google.com/maps?q=${encodeURIComponent(event.location)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[11px] text-muted hover:text-fg transition-colors"
+                    >
+                      <MapPin weight="thin" className="w-3 h-3" />
+                      {event.location}
+                    </a>
+                  )}
+                </div>
                 <h2 className="text-base font-heading leading-snug mb-2">
                   {event.url ? (
                     <LinkPreview url={event.url}>

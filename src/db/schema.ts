@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
 
 export const adminUsers = sqliteTable("admin_users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -38,6 +38,10 @@ export const lifeEvents = sqliteTable("life_events", {
   imageUrl: text("image_url"),
   url: text("url"),
   type: text("type").notNull(),
+  current: integer("current", { mode: "boolean" }).default(false),
+  location: text("location"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
