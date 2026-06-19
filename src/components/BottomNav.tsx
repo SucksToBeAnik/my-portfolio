@@ -14,8 +14,8 @@ import {
 } from "@phosphor-icons/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { AuthMenu } from "@/components/AuthMenu";
 import { useTheme } from "@/lib/ThemeProvider";
 
@@ -31,6 +31,100 @@ const navItems = [
   { href: "/writings", label: "Writings", icon: NotePencil },
   { href: "/utils", label: "Utils", icon: Wrench },
 ];
+
+const subTabs: Record<string, { label: string; href: string }[]> = {
+  "/writings": [
+    { label: "Microblog", href: "/writings?tab=microblog" },
+    { label: "TIL", href: "/writings?tab=til" },
+  ],
+  "/utils": [
+    { label: "Stacks", href: "/utils?tab=stacks" },
+    { label: "Sites", href: "/utils?tab=sites" },
+    { label: "Media", href: "/utils?tab=media" },
+  ],
+};
+
+function NavItem({
+  href,
+  label,
+  icon: Icon,
+  isActive,
+}: {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  isActive: boolean;
+}) {
+  const router = useRouter();
+  const tabs = subTabs[href];
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // close on click outside
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [open]);
+
+  if (!tabs) {
+    return (
+      <Link
+        href={href}
+        className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0"
+      >
+        <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
+        <span className="hidden sm:inline">{label}</span>
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      ref={wrapperRef}
+      className="relative"
+      onMouseEnter={() => {
+        if (closeTimer.current) clearTimeout(closeTimer.current);
+        setOpen(true);
+      }}
+      onMouseLeave={() => {
+        closeTimer.current = setTimeout(() => setOpen(false), 120);
+      }}
+    >
+      {open && (
+        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 flex flex-col items-stretch bg-nav-bg backdrop-blur-xl border border-nav-border rounded-2xl px-1.5 py-1.5 shadow-xl min-w-max">
+          {tabs.map((tab) => (
+            <button
+              key={tab.href}
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                router.push(tab.href);
+              }}
+              className="px-3 py-1.5 text-xs text-nav-text hover:text-nav-text-hover hover:bg-white/5 rounded-xl transition-colors cursor-pointer text-left whitespace-nowrap"
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0 cursor-pointer select-none"
+      >
+        <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
+        <span className="hidden sm:inline">{label}</span>
+      </button>
+    </div>
+  );
+}
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -50,20 +144,15 @@ export function BottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 flex justify-center pb-4 pointer-events-none z-50">
         <div className="flex items-center justify-center w-full max-w-[700px] mx-4 px-1.5 py-1.5 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
           <div className="flex items-center gap-0 sm:gap-0.5">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0"
-                >
-                  <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
-                  <span className="hidden sm:inline">{item.label}</span>
-                </Link>
-              );
-            })}
+            {navItems.map((item) => (
+              <NavItem
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                icon={item.icon}
+                isActive={pathname === item.href}
+              />
+            ))}
             <button
               type="button"
               onClick={() => setChatOpen((p) => !p)}

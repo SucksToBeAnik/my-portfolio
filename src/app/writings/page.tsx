@@ -3,7 +3,7 @@
 import { House } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getMicroblogs } from "@/actions/microblogs";
 import { getTilsPublic } from "@/actions/tils";
@@ -22,19 +22,12 @@ function formatDate(date: Date) {
 
 export default function WritingsPage() {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("microblog");
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get("tab");
-    if (t === "til" || t === "microblog") setTab(t);
-  }, []);
+  const searchParams = useSearchParams();
+  const raw = searchParams.get("tab");
+  const tab: Tab = raw === "til" || raw === "microblog" ? raw : "microblog";
 
   function switchTab(t: Tab) {
-    setTab(t);
-    const params = new URLSearchParams(window.location.search);
-    params.set("tab", t);
-    router.replace(`/writings?${params.toString()}`, { scroll: false });
+    router.replace(`/writings?tab=${t}`, { scroll: false });
   }
 
   return (

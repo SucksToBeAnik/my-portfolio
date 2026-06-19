@@ -3,7 +3,7 @@
 import { House, PlayCircle, Stack, Star } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getMediaPublic } from "@/actions/media";
 import { getSites } from "@/actions/sites";
@@ -32,19 +32,12 @@ function siteGroup(createdAt: Date): number {
 
 export default function UtilsPage() {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("stacks");
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get("tab");
-    if (t === "sites" || t === "stacks") setTab(t);
-  }, []);
+  const searchParams = useSearchParams();
+  const raw = searchParams.get("tab");
+  const tab: Tab = raw === "sites" || raw === "stacks" || raw === "media" ? raw : "stacks";
 
   function switchTab(t: Tab) {
-    setTab(t);
-    const params = new URLSearchParams(window.location.search);
-    params.set("tab", t);
-    router.replace(`/utils?${params.toString()}`, { scroll: false });
+    router.replace(`/utils?tab=${t}`, { scroll: false });
   }
 
   return (
