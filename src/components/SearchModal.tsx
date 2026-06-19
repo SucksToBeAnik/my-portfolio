@@ -103,7 +103,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
         </div>
 
         <div className="max-h-[50vh] overflow-y-auto">
-          {!loaded && (
+          {!loaded && query && (
             <div className="flex items-center justify-center py-8 text-xs text-muted">Loading...</div>
           )}
 
