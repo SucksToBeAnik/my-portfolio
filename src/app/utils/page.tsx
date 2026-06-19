@@ -1,15 +1,16 @@
 "use client";
 
-import { House } from "@phosphor-icons/react";
+import { House, PlayCircle } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { getMediaPublic } from "@/actions/media";
 import { getSites } from "@/actions/sites";
 import { getStacks } from "@/actions/stacks";
 import { LinkPreview } from "@/components/LinkPreview";
 import { Spinner } from "@/components/Spinner";
 
-type Tab = "stacks" | "sites";
+type Tab = "stacks" | "sites" | "media";
 
 const groupLabels = [
   { label: "Today", days: 0 },
@@ -70,11 +71,20 @@ export default function UtilsPage() {
           >
             Sites
           </button>
+          <button
+            onClick={() => switchTab("media")}
+            className={`pb-1 text-xs transition-all cursor-pointer border-b-2 ${
+              tab === "media" ? "border-fg text-fg" : "border-transparent text-fg/50 hover:text-fg"
+            }`}
+          >
+            Media
+          </button>
         </div>
       </div>
 
       {tab === "stacks" && <StacksContent />}
       {tab === "sites" && <SitesContent />}
+      {tab === "media" && <MediaContent />}
     </>
   );
 }
@@ -230,6 +240,74 @@ function SitesContent() {
           <div className="space-y-1">
             {group.items.map((site) => (
               <SiteItem key={site.id} url={site.url} tags={site.tags} createdAt={site.createdAt} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const statusLabels: Record<string, string> = {
+  watching: "Watching",
+  watched: "Watched",
+  planned: "Plan to Watch",
+  dropped: "Dropped",
+};
+
+function MediaContent() {
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["media-public"],
+    queryFn: getMediaPublic,
+  });
+
+  if (isLoading) return <Spinner />;
+
+  if (items.length === 0) {
+    return <p className="text-xs text-fg/50 text-center py-8">No entries yet.</p>;
+  }
+
+  const grouped: { label: string; items: typeof items }[] = [];
+  const statusOrder = ["watching", "watched", "planned", "dropped"];
+  for (const s of statusOrder) {
+    const g = items.filter((i) => i.status === s);
+    if (g.length > 0) grouped.push({ label: statusLabels[s], items: g });
+  }
+
+  return (
+    <div className="space-y-8">
+      {grouped.map((group) => (
+        <div key={group.label}>
+          <p className="text-[11px] font-heading mb-3">{group.label}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {group.items.map((item) => (
+              <div
+                key={item.id}
+                className="group relative flex flex-col border border-hairline rounded-xl overflow-hidden hover:bg-hover-bg transition-colors"
+              >
+                <div className="aspect-[2/3] bg-hover-bg overflow-hidden">
+                  {item.posterUrl ? (
+                    <img
+                      src={item.posterUrl}
+                      alt={item.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <PlayCircle weight="thin" className="w-8 h-8 text-fg/20" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-2.5 space-y-1">
+                  <p className="text-xs font-medium leading-tight line-clamp-2">{item.title}</p>
+                  <div className="flex items-center gap-1.5 text-[10px] text-fg/50">
+                    {item.year && <span>{item.year}</span>}
+                    {item.type === "series" && item.seasons && <span>{item.seasons} seasons</span>}
+                    {item.rating && <span className="text-[10px]">{item.rating}/5</span>}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>

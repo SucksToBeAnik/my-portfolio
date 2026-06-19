@@ -2,6 +2,7 @@
 
 import {
   BookOpenText,
+  FilmStrip,
   FolderOpen,
   Globe,
   Heart,
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/admin/microblogs", label: "Microblog", icon: Quotes },
   { href: "/admin/stacks", label: "Stacks", icon: Wrench },
   { href: "/admin/sites", label: "Sites", icon: Globe },
+  { href: "/admin/media", label: "Media", icon: FilmStrip },
 ];
 
 export function AdminNav({ variant }: { variant?: "sidebar" | "bottom" }) {

@@ -16,6 +16,12 @@ function stripHtml(html: string) {
   return html.replace(/<[^>]*>/g, "");
 }
 
+function readTime(html: string) {
+  const words = stripHtml(html).split(/\s+/).filter(Boolean).length;
+  const min = Math.max(1, Math.ceil(words / 200));
+  return `${min} min read`;
+}
+
 function formatDate(date: Date) {
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -55,6 +61,8 @@ export default async function MicroblogPage() {
                 {post.publishedAt && (
                   <p className="text-xs text-muted mb-3">
                     {formatDate(new Date(post.publishedAt))}
+                    <span className="text-fg/20 mx-2">·</span>
+                    {readTime(post.content)}
                   </p>
                 )}
                 <Link href={`/microblog/${post.id}`} className="block space-y-3 group">

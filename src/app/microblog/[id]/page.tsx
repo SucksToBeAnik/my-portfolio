@@ -30,6 +30,15 @@ function formatDate(date: Date) {
   });
 }
 
+function readTime(html: string) {
+  const words = html
+    .replace(/<[^>]*>/g, "")
+    .split(/\s+/)
+    .filter(Boolean).length;
+  const min = Math.max(1, Math.ceil(words / 200));
+  return `${min} min read`;
+}
+
 export default async function MicroblogPostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const post = (
@@ -78,7 +87,11 @@ export default async function MicroblogPostPage({ params }: { params: Promise<{ 
         <div className="space-y-2">
           <h1 className="text-2xl font-heading">{post.title}</h1>
           {post.publishedAt && (
-            <p className="text-xs text-muted">{formatDate(new Date(post.publishedAt))}</p>
+            <p className="text-xs text-muted">
+              {formatDate(new Date(post.publishedAt))}
+              <span className="text-fg/20 mx-2">·</span>
+              {readTime(post.content)}
+            </p>
           )}
         </div>
 

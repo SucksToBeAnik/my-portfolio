@@ -124,3 +124,27 @@ export const siteConfig = sqliteTable("site_config", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
 });
+
+export const media = sqliteTable("media", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  imdbId: text("imdb_id"),
+  title: text("title").notNull(),
+  year: text("year"),
+  type: text("type", { enum: ["movie", "series"] })
+    .notNull()
+    .default("movie"),
+  posterUrl: text("poster_url"),
+  plot: text("plot"),
+  rating: integer("rating"),
+  status: text("status", { enum: ["watching", "watched", "planned", "dropped"] })
+    .notNull()
+    .default("planned"),
+  seasons: integer("seasons"),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});

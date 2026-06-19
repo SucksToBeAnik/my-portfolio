@@ -21,4 +21,8 @@ export const env = cleanEnv(process.env, {
   ADMIN_PASSWORD: str({
     desc: "Admin login password",
   }),
+  OMDB_API_KEY: str({
+    desc: "OMDb API key for IMDb metadata lookup",
+    default: "",
+  }),
 });
