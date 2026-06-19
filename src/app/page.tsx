@@ -99,8 +99,8 @@ export default async function Home() {
 
       {(workingOn || reading) && (
         <div className="text-xs text-fg/50 text-right space-y-1">
-          {workingOn && <p><span className="font-medium text-fg/60">{workingOn}</span> ·</p>}
-          {reading && <p><span className="font-medium text-fg/60">{reading.title}</span> <span className="text-fg/30">by {reading.author}</span> ·</p>}
+          {workingOn && <p>Working on <span className="font-medium text-fg/60">{workingOn}</span></p>}
+          {reading && <p>Reading <span className="font-medium text-fg/60">{reading.title}</span> by {reading.author}</p>}
         </div>
       )}
 
