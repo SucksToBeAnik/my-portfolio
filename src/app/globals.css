@@ -80,7 +80,7 @@ body {
 
 /* Prevent iOS auto-zoom on input focus — inputs < 16px trigger Safari zoom */
 @media (hover: none) and (pointer: coarse) {
-  input, textarea, select {
+  input, textarea, select, [contenteditable] {
     font-size: 16px !important;
   }
 }
