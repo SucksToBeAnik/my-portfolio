@@ -10,6 +10,7 @@ const schema = z.object({
   title: z.string().min(1),
   content: z.string().min(1),
   imageUrl: z.string().optional(),
+  tags: z.string().optional(),
   published: z.boolean().optional(),
   til: z.boolean().optional(),
   publishedAt: z.date().optional().nullable(),

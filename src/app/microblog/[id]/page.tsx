@@ -76,11 +76,11 @@ export default async function MicroblogPostPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-6 md:space-y-8">
       <Link
-        href="/microblog"
+        href="/writings?tab=microblog"
         className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
       >
         <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
-        Microblog
+        Writings
       </Link>
 
       <article className="space-y-6">

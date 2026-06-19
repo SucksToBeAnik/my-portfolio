@@ -90,7 +90,7 @@ function MicroblogContent() {
             <p className="text-xs text-muted mb-3">{formatDate(new Date(post.publishedAt))}</p>
           )}
           <Link href={`/microblog/${post.id}`} className="block space-y-3 group">
-            <h2 className="text-base font-heading leading-snug">{post.title}</h2>
+            <h2 className="text-base font-heading leading-snug group-hover:text-fg/60 transition-colors">{post.title}</h2>
             <p className="text-xs text-fg/60 line-clamp-3">{stripHtml(post.content)}</p>
             {post.imageUrl && (
               <div className="overflow-hidden rounded-lg max-h-60 -mx-1 bg-hover-bg">
@@ -136,10 +136,13 @@ function TilContent() {
               <HeartButton entityType="til" entityId={item.id} initialCount={0} />
             </div>
           </div>
-          <div className="min-w-0 flex-1 pt-0.5">
-            <h3 className="text-sm font-heading mb-2">{item.title}</h3>
-            <p className="text-xs text-fg/70 leading-relaxed whitespace-pre-wrap">{item.content}</p>
-          </div>
+          <Link
+            href={`/writings/til/${item.id}`}
+            className="min-w-0 flex-1 pt-0.5 block group"
+          >
+            <p className="text-sm font-heading mb-2 group-hover:text-fg/60 transition-colors">{item.title}</p>
+            <p className="text-xs text-fg/70 leading-relaxed whitespace-pre-wrap line-clamp-3">{item.content}</p>
+          </Link>
         </div>
       ))}
     </div>

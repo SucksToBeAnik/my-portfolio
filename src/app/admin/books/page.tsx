@@ -21,6 +21,7 @@ import { ContentEditor } from "@/components/ContentEditor";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Spinner } from "@/components/Spinner";
 import { StarRating } from "@/components/StarRating";
+import { TagPicker } from "@/components/TagPicker";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 const categories = [
@@ -456,35 +457,11 @@ export default function BooksPage() {
             </div>
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Category</label>
-              <div className="flex flex-wrap gap-1.5">
-                {categories.map((cat) => {
-                  const selected = (f("category") as string)
-                    .split(",")
-                    .map((c: string) => c.trim())
-                    .includes(cat);
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => {
-                        const current = (f("category") as string)
-                          .split(",")
-                          .map((c: string) => c.trim())
-                          .filter(Boolean);
-                        const next = selected
-                          ? current.filter((c: string) => c !== cat)
-                          : [...current, cat];
-                        s("category", next.join(", "));
-                      }}
-                      className={`px-3 py-1.5 rounded-lg text-[11px] transition-colors cursor-pointer ${
-                        selected ? "bg-fg text-bg" : "bg-hover-bg text-fg/60 hover:text-fg"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
-              </div>
+              <TagPicker
+                value={f("category") as string}
+                onChange={(v) => s("category", v)}
+                tags={categories}
+              />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Review</label>

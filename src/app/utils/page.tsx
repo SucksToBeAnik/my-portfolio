@@ -3,6 +3,7 @@
 import { House, PlayCircle, Stack, Star } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { FilterPopover } from "@/components/FilterPopover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getMediaPublic } from "@/actions/media";
@@ -90,6 +91,7 @@ function StacksContent() {
     queryKey: ["stacks-public"],
     queryFn: getStacks,
   });
+  const [activePlatforms, setActivePlatforms] = useState<string[]>([]);
 
   if (isLoading) return <Spinner />;
 
@@ -97,15 +99,38 @@ function StacksContent() {
     return <p className="text-xs text-fg/50 text-center py-8">No stacks yet.</p>;
   }
 
+  const allPlatforms = Array.from(
+    new Set(
+      stacks.flatMap((s) =>
+        (s.platform ?? "").split(",").map((p) => p.trim()).filter(Boolean)
+      )
+    )
+  ).sort();
+
+  const filtered =
+    activePlatforms.length > 0
+      ? stacks.filter((s) =>
+          activePlatforms.some((p) =>
+            (s.platform ?? "").split(",").map((x) => x.trim()).includes(p)
+          )
+        )
+      : stacks;
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {stacks.map((stack) => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-heading text-fg/30 uppercase tracking-wider">Stacks</p>
+        <FilterPopover tags={allPlatforms} active={activePlatforms} onChange={setActivePlatforms} />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {filtered.map((stack, i) => (
         <a
-          key={stack.id}
+          key={`${activePlatforms.join(',')}-${stack.id}`}
           href={stack.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-start gap-3 border border-hairline rounded-xl p-4 hover:bg-hover-bg transition-colors group"
+          style={{ animationDelay: `${i * 30}ms` }}
+          className="flex items-start gap-3 border border-hairline rounded-xl p-4 hover:bg-hover-bg transition-colors group animate-fade-up"
         >
           {stack.imageUrl && (
             <div className="w-10 h-10 shrink-0 rounded-lg bg-hover-bg overflow-hidden flex items-center justify-center">
@@ -120,9 +145,11 @@ function StacksContent() {
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-medium">{stack.name}</h3>
             {stack.platform && (
-              <span className="inline-block mt-1 px-1.5 py-0.5 text-[10px] bg-hover-bg rounded text-fg/50">
-                {stack.platform}
-              </span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {stack.platform.split(",").map((p) => p.trim()).filter(Boolean).map((p) => (
+                  <span key={p} className="px-1.5 py-0.5 text-[10px] bg-hover-bg rounded text-fg/50">{p}</span>
+                ))}
+              </div>
             )}
             {stack.description && (
               <p className="text-xs text-fg/50 mt-1 leading-relaxed">{stack.description}</p>
@@ -130,6 +157,7 @@ function StacksContent() {
           </div>
         </a>
       ))}
+      </div>
     </div>
   );
 }
@@ -213,6 +241,7 @@ function SitesContent() {
     queryKey: ["sites-public"],
     queryFn: getSites,
   });
+  const [activeTags, setActiveTags] = useState<string[]>([]);
 
   if (isLoading) return <Spinner />;
 
@@ -220,26 +249,59 @@ function SitesContent() {
     return <p className="text-xs text-fg/50 text-center py-8">No sites yet.</p>;
   }
 
-  const grouped: { label: string; items: typeof sites }[] = [];
+  const allTags = Array.from(
+    new Set(
+      sites.flatMap((s) =>
+        (s.tags ?? "").split(",").map((t) => t.trim()).filter(Boolean)
+      )
+    )
+  ).sort();
 
-  for (const site of sites) {
+  const filtered =
+    activeTags.length > 0
+      ? sites.filter((s) =>
+          activeTags.some((t) =>
+            (s.tags ?? "").split(",").map((x) => x.trim()).includes(t)
+          )
+        )
+      : sites;
+
+  const grouped: { label: string; items: typeof sites }[] = [];
+  for (const site of filtered) {
     const g = siteGroup(new Date(site.createdAt));
     if (!grouped[g]) grouped[g] = { label: groupLabels[g].label, items: [] };
     grouped[g].items.push(site);
   }
 
   return (
-    <div className="space-y-6">
-      {grouped.map((group) => (
-        <div key={group.label}>
-          <p className="text-[11px] text-fg/30 font-heading mb-2">{group.label}</p>
-          <div className="space-y-1">
-            {group.items.map((site) => (
-              <SiteItem key={site.id} url={site.url} tags={site.tags} createdAt={site.createdAt} />
-            ))}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-heading text-fg/30 uppercase tracking-wider">Sites</p>
+        <FilterPopover tags={allTags} active={activeTags} onChange={setActiveTags} />
+      </div>
+      <div className="space-y-6">
+        {grouped.map((group) => (
+          <div key={group.label} className="space-y-2">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-heading uppercase tracking-widest text-fg/30 shrink-0">
+                {group.label}
+              </span>
+              <div className="flex-1 h-px bg-hairline" />
+            </div>
+            <div className="space-y-1">
+              {group.items.map((site, i) => (
+                <div
+                  key={`${activeTags.join(',')}-${site.id}`}
+                  style={{ animationDelay: `${i * 30}ms` }}
+                  className="animate-fade-up"
+                >
+                  <SiteItem url={site.url} tags={site.tags} createdAt={site.createdAt} />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -277,9 +339,12 @@ function MediaContent() {
           <p className="text-[11px] font-heading mb-3">{group.label}</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {group.items.map((item) => (
-              <div
+              <a
                 key={item.id}
-                className="group relative flex flex-col border border-hairline rounded-xl overflow-hidden hover:bg-hover-bg transition-colors"
+                href={item.imdbUrl ?? undefined}
+                target={item.imdbUrl ? "_blank" : undefined}
+                rel={item.imdbUrl ? "noopener noreferrer" : undefined}
+                className={`group relative flex flex-col border border-hairline rounded-xl overflow-hidden transition-colors ${item.imdbUrl ? "hover:bg-hover-bg cursor-pointer" : ""}`}
               >
                 <div className="aspect-[2/3] bg-hover-bg overflow-hidden">
                   {item.posterUrl ? (
@@ -321,7 +386,7 @@ function MediaContent() {
                     </span>
                   ) : null}
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>

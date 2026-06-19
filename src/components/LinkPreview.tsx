@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface LinkPreviewProps {
   url: string;
@@ -79,6 +80,42 @@ export function LinkPreview({
     setVisible(false);
   }
 
+  const popup = visible ? (
+    <div
+      style={{
+        position: "fixed",
+        transform: position === "bottom" ? "translateX(-50%)" : undefined,
+        zIndex: 9999,
+        ...pos,
+      }}
+      className="w-64 bg-bg border border-hairline rounded-xl shadow-2xl overflow-hidden pointer-events-none"
+    >
+      {data?.image && (
+        <div className="relative w-full aspect-[16/10] bg-hover-bg">
+          <Image src={data.image} alt="" fill className="object-cover" sizes="256px" />
+        </div>
+      )}
+      <div className="px-3.5 py-3 space-y-1.5">
+        <div className="flex items-center gap-2">
+          {data?.logo && (
+            <div className="w-4 h-4 shrink-0 rounded overflow-hidden bg-hover-bg">
+              <Image src={data.logo} alt="" width={16} height={16} className="object-contain" />
+            </div>
+          )}
+          <p className="text-[10px] text-fg/40 uppercase tracking-wider truncate">
+            {data?.domain || getDomain(url)}
+          </p>
+        </div>
+        {data?.title && (
+          <p className="text-sm font-medium text-fg leading-snug line-clamp-2">{data.title}</p>
+        )}
+        {data?.description && (
+          <p className="text-xs text-fg/50 leading-relaxed line-clamp-2">{data.description}</p>
+        )}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <span
       className={`relative inline-flex ${className}`}
@@ -86,40 +123,7 @@ export function LinkPreview({
       onMouseLeave={handleMouseLeave}
     >
       {children}
-      {visible && (
-        <div
-          style={{
-            position: "fixed",
-            transform: position === "bottom" ? "translateX(-50%)" : undefined,
-            ...pos,
-          }}
-          className="w-64 bg-bg border border-hairline rounded-xl shadow-2xl overflow-hidden pointer-events-none z-50"
-        >
-          {data?.image && (
-            <div className="relative w-full aspect-[16/10] bg-hover-bg">
-              <Image src={data.image} alt="" fill className="object-cover" sizes="256px" />
-            </div>
-          )}
-          <div className="px-3.5 py-3 space-y-1.5">
-            <div className="flex items-center gap-2">
-              {data?.logo && (
-                <div className="w-4 h-4 shrink-0 rounded overflow-hidden bg-hover-bg">
-                  <Image src={data.logo} alt="" width={16} height={16} className="object-contain" />
-                </div>
-              )}
-              <p className="text-[10px] text-fg/40 uppercase tracking-wider truncate">
-                {data?.domain || getDomain(url)}
-              </p>
-            </div>
-            {data?.title && (
-              <p className="text-sm font-medium text-fg leading-snug line-clamp-2">{data.title}</p>
-            )}
-            {data?.description && (
-              <p className="text-xs text-fg/50 leading-relaxed line-clamp-2">{data.description}</p>
-            )}
-          </div>
-        </div>
-      )}
+      {typeof document !== "undefined" && popup ? createPortal(popup, document.body) : null}
     </span>
   );
 }

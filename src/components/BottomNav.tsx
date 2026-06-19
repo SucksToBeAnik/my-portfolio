@@ -135,6 +135,17 @@ export function BottomNav() {
     return () => window.removeEventListener("openchat", handler);
   }, []);
 
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "/" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setChatOpen((o) => !o);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   if (pathname.startsWith("/admin")) return null;
 
   return (

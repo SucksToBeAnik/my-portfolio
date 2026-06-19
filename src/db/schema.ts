@@ -77,6 +77,7 @@ export const microblogs = sqliteTable("microblogs", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   imageUrl: text("image_url"),
+  tags: text("tags"),
   published: integer("published", { mode: "boolean" }).default(false),
   publishedAt: integer("published_at", { mode: "timestamp" }),
   sortOrder: integer("sort_order").default(0),
@@ -147,6 +148,7 @@ export const media = sqliteTable("media", {
     .notNull()
     .default("movie"),
   posterUrl: text("poster_url"),
+  imdbUrl: text("imdb_url"),
   plot: text("plot"),
   rating: integer("rating"),
   status: text("status", { enum: ["watching", "watched", "planned", "dropped"] })

@@ -26,6 +26,7 @@ interface Item {
   year: string | null;
   type: "movie" | "series";
   posterUrl: string | null;
+  imdbUrl: string | null;
   plot: string | null;
   rating: number | null;
   status: "watching" | "watched" | "planned" | "dropped";
@@ -39,6 +40,7 @@ const empty = {
   year: "",
   type: "movie" as const,
   posterUrl: "",
+  imdbUrl: "",
   plot: "",
   rating: null,
   status: "planned" as const,
@@ -166,6 +168,7 @@ export default function MediaPage() {
       year: result.year,
       type: result.type,
       posterUrl: result.posterUrl ?? "",
+      imdbUrl: result.imdbUrl ?? "",
       plot: result.plot ?? "",
       seasons: result.seasons,
       imdbId: result.imdbId,
@@ -246,9 +249,6 @@ export default function MediaPage() {
                               ))}
                             </span>
                           ) : null}
-                          {item.type === "series" && item.seasons && (
-                            <span className="text-xs text-fg/30">{item.seasons} seasons</span>
-                          )}
                         </div>
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
@@ -360,6 +360,7 @@ export default function MediaPage() {
                 year: form.year || undefined,
                 plot: form.plot || undefined,
                 posterUrl: form.posterUrl || undefined,
+                imdbUrl: form.imdbUrl || undefined,
                 imdbId: form.imdbId || undefined,
               };
               if (editId) updateMut.mutate({ id: editId, data });
@@ -475,6 +476,16 @@ export default function MediaPage() {
                   }}
                 />
               )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">IMDb URL</label>
+              <input
+                value={f("imdbUrl")}
+                onChange={(e) => s("imdbUrl", e.target.value)}
+                className={inputCls}
+                placeholder="Auto-filled from IMDb lookup"
+              />
             </div>
 
             <div className="space-y-1.5">

@@ -18,13 +18,20 @@ import { ContentEditor } from "@/components/ContentEditor";
 import { Drawer } from "@/components/Drawer";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Spinner } from "@/components/Spinner";
+import { TagPicker } from "@/components/TagPicker";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+
+const microblogTags = [
+  "tech", "life", "thoughts", "coding", "design", "career",
+  "learning", "tools", "opinion", "tip",
+];
 
 interface Item {
   id: number;
   title: string;
   content: string;
   imageUrl: string | null;
+  tags: string | null;
   published: boolean | null;
   publishedAt: Date | null;
   updatedAt: Date | null;
@@ -34,6 +41,7 @@ const empty = {
   title: "",
   content: "",
   imageUrl: "",
+  tags: "",
   published: false,
   til: false,
   publishedAt: null,
@@ -351,6 +359,14 @@ export default function MicroblogsPage() {
                 onChange={(url) => s("imageUrl", url)}
                 onRemove={() => s("imageUrl", "")}
                 onFilePending={setPendingFile}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Tags</label>
+              <TagPicker
+                value={f("tags") as string ?? ""}
+                onChange={(v) => s("tags", v)}
+                tags={microblogTags}
               />
             </div>
             <div className="space-y-1.5">

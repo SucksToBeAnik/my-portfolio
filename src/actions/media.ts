@@ -13,6 +13,7 @@ const mediaSchema = z.object({
   year: z.string().optional(),
   type: z.enum(["movie", "series"]),
   posterUrl: z.string().optional(),
+  imdbUrl: z.string().optional(),
   plot: z.string().optional(),
   rating: z.number().int().min(1).max(5).optional().nullable(),
   status: z.enum(["watching", "watched", "planned", "dropped"]),
@@ -32,6 +33,7 @@ export async function getMediaPublic() {
       year: media.year,
       type: media.type,
       posterUrl: media.posterUrl,
+      imdbUrl: media.imdbUrl,
       plot: media.plot,
       rating: media.rating,
       status: media.status,
@@ -94,6 +96,7 @@ export async function lookupIMDb(imdbId: string) {
           ? Number.parseInt(data.totalSeasons, 10)
           : null,
       imdbId,
+      imdbUrl: `https://www.imdb.com/title/${imdbId}/`,
     };
   } catch {
     return null;

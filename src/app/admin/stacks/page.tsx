@@ -10,7 +10,13 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { Drawer } from "@/components/Drawer";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Spinner } from "@/components/Spinner";
+import { TagPicker } from "@/components/TagPicker";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+
+const platformTags = [
+  "Web", "macOS", "iOS", "Android", "Windows", "Linux",
+  "CLI", "API", "Desktop", "Mobile", "Browser", "Cross-platform",
+];
 
 interface Item {
   id: number;
@@ -181,7 +187,13 @@ export default function StacksPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{item.name}</p>
-                        {item.platform && <p className="text-xs text-fg/50">{item.platform}</p>}
+                        {item.platform && (
+                          <div className="flex flex-wrap gap-1 mt-0.5">
+                            {item.platform.split(",").map((p) => p.trim()).filter(Boolean).map((p) => (
+                              <span key={p} className="text-[10px] px-1.5 py-0.5 bg-hover-bg rounded text-fg/50">{p}</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
                         <button
@@ -327,11 +339,10 @@ export default function StacksPage() {
               />
               <div className="space-y-1.5">
                 <label className="text-xs text-fg/50">Platform</label>
-                <input
-                  value={f("platform")}
-                  onChange={(e) => s("platform", e.target.value)}
-                  className={inputCls}
-                  placeholder="e.g. Web, macOS, iOS"
+                <TagPicker
+                  value={f("platform") as string}
+                  onChange={(v) => s("platform", v)}
+                  tags={platformTags}
                 />
               </div>
             </div>

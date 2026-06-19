@@ -46,6 +46,7 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
         const n = parseInt(val, 10);
         if (!Number.isNaN(n)) setRemaining(n);
       }
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [open]);
 
