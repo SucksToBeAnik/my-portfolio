@@ -25,6 +25,7 @@ export async function createLifeEvent(data: z.infer<typeof schema>) {
   const parsed = schema.parse(data)
   await db.insert(lifeEvents).values(parsed)
   revalidatePath("/admin/life-events")
+  revalidatePath("/life")
 }
 
 export async function updateLifeEvent(id: number, data: z.infer<typeof schema>) {
@@ -34,6 +35,7 @@ export async function updateLifeEvent(id: number, data: z.infer<typeof schema>) 
     .set({ ...parsed, updatedAt: new Date() })
     .where(eq(lifeEvents.id, id))
   revalidatePath("/admin/life-events")
+  revalidatePath("/life")
 }
 
 export async function deleteLifeEvent(id: number) {
@@ -51,4 +53,5 @@ export async function reorderLifeEvents(
       .where(eq(lifeEvents.id, item.id))
   }
   revalidatePath("/admin/life-events")
+  revalidatePath("/life")
 }

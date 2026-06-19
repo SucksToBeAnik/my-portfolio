@@ -17,7 +17,7 @@ import {
 import { useTheme } from "@/lib/ThemeProvider";
 import { AuthMenu } from "@/components/AuthMenu";
 import { ChatPopup } from "@/components/ChatPopup";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 const navItems = [
   { href: "/", label: "Home", icon: House },
@@ -33,6 +33,12 @@ export function BottomNav() {
   const { theme, toggleTheme } = useTheme();
   const [chatOpen, setChatOpen] = useState(false);
   const [utilsHover, setUtilsHover] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setChatOpen(true);
+    window.addEventListener("openchat", handler);
+    return () => window.removeEventListener("openchat", handler);
+  }, []);
   const utilsTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const isUtils = pathname === "/utils";

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { GithubLogo, LinkedinLogo, XLogo, FolderOpen } from "@phosphor-icons/react/dist/ssr";
 import { LinkPreview } from "@/components/LinkPreview";
+import { AskPrompt } from "@/components/AskPrompt";
 import { db } from "@/db";
 import { microblogs, projects } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -83,6 +84,8 @@ export default async function Home() {
           </LinkPreview>
         </div>
       </section>
+
+      <AskPrompt />
 
       {/* Blogs & Projects */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">

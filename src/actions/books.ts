@@ -26,6 +26,7 @@ export async function createBook(data: z.infer<typeof schema>) {
   const parsed = schema.parse(data)
   await db.insert(books).values(parsed)
   revalidatePath("/admin/books")
+  revalidatePath("/books")
 }
 
 export async function updateBook(id: number, data: z.infer<typeof schema>) {
@@ -35,6 +36,7 @@ export async function updateBook(id: number, data: z.infer<typeof schema>) {
     .set({ ...parsed, updatedAt: new Date() })
     .where(eq(books.id, id))
   revalidatePath("/admin/books")
+  revalidatePath("/books")
 }
 
 export async function deleteBook(id: number) {
@@ -52,4 +54,5 @@ export async function reorderBooks(
       .where(eq(books.id, item.id))
   }
   revalidatePath("/admin/books")
+  revalidatePath("/books")
 }
