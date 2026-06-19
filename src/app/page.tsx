@@ -98,10 +98,11 @@ export default async function Home() {
       </section>
 
       {(workingOn || reading) && (
-        <div className="space-y-2 text-xs text-fg/50">
-          {workingOn && <p>Working on <span className="text-fg">{workingOn}</span></p>}
-          {reading && <p>Reading <span className="text-fg">{reading.title}</span> by {reading.author}</p>}
-        </div>
+        <p className="text-xs text-fg/50">
+          {workingOn && <>Working on <span className="font-medium text-fg/60">{workingOn}</span></>}
+          {workingOn && reading && <span> · </span>}
+          {reading && <>Reading <span className="font-medium text-fg/60">{reading.title}</span> by {reading.author}</>}
+        </p>
       )}
 
       {/* Blogs & Projects */}
