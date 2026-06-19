@@ -45,6 +45,7 @@ export async function updateLifeEvent(id: number, data: z.infer<typeof schema>) 
 export async function deleteLifeEvent(id: number) {
   await db.delete(lifeEvents).where(eq(lifeEvents.id, id))
   revalidatePath("/admin/life-events")
+  revalidatePath("/life")
 }
 
 export async function reorderLifeEvents(

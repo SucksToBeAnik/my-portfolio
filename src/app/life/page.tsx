@@ -1,6 +1,5 @@
 import { db } from "@/db";
 import { lifeEvents } from "@/db/schema";
-import { desc } from "drizzle-orm";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { LifeImage } from "@/components/LifeImage";
 import { LinkPreview } from "@/components/LinkPreview";
@@ -28,8 +27,8 @@ function formatDate(date: string) {
 
 function dateRange(start: string, end: string | null, current: boolean | null) {
   const s = formatDate(start);
-  if (end) return `${s} — ${formatDate(end)}`;
-  if (current) return `${s} — Present`;
+  if (end) return `${s} - ${formatDate(end)}`;
+  if (current) return `${s} - Present`;
   return s;
 }
 
@@ -44,7 +43,7 @@ export default async function LifePage() {
   const items = await db
     .select()
     .from(lifeEvents)
-    .orderBy(desc(lifeEvents.startDate));
+    .orderBy(lifeEvents.sortOrder);
 
   return (
     <div className="space-y-12">
@@ -69,20 +68,18 @@ export default async function LifePage() {
                 <div className="w-16 h-16 shrink-0" />
               )}
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-xs text-muted">{dateRange(event.startDate, event.endDate, event.current)}</p>
+                  <p className="text-xs text-muted mb-0.5">{dateRange(event.startDate, event.endDate, event.current)}</p>
                   {event.location && (
                     <a
                       href={`https://www.google.com/maps?q=${encodeURIComponent(event.location)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-[11px] text-muted hover:text-fg transition-colors"
+                      className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-fg transition-colors"
                     >
                       <MapPin weight="thin" className="w-3 h-3" />
                       {event.location}
                     </a>
                   )}
-                </div>
                 <h2 className="text-base font-heading leading-snug mb-2">
                   {event.url ? (
                     <LinkPreview url={event.url}>

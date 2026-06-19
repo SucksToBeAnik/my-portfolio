@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { PencilSimple, Trash, DotsSixVertical, Plus, Briefcase, GraduationCap, Compass, Star } from "@phosphor-icons/react";
+import { PencilSimple, Trash, DotsSixVertical, Plus, Briefcase, GraduationCap, Compass, Star, MapPin, X } from "@phosphor-icons/react";
 import { getLifeEvents, createLifeEvent, updateLifeEvent, deleteLifeEvent, reorderLifeEvents } from "@/actions/life-events";
 import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
@@ -139,8 +139,8 @@ export default function LifeEventsPage() {
   const errCls = (k: string) => errors[k] ? "text-xs text-red-400 mt-1" : "hidden";
 
   function dateDisplay(item: Item) {
-    if (item.endDate) return `${item.startDate} — ${item.endDate}`;
-    if (item.current) return `${item.startDate} — Present`;
+    if (item.endDate) return `${item.startDate} - ${item.endDate}`;
+    if (item.current && !item.endDate) return `${item.startDate} - Present`;
     return item.startDate;
   }
 
@@ -167,7 +167,8 @@ export default function LifeEventsPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{item.title}</p>
-                        <p className="text-xs text-fg/50">{dateDisplay(item)} {item.location ? `· ${item.location}` : ""}</p>
+                        <p className="text-xs text-fg/50">{dateDisplay(item)}</p>
+                        {item.location && <p className="text-[11px] text-fg/40 mt-0.5"><MapPin weight="thin" className="w-3 h-3 inline-block mr-0.5 align-text-top" />{item.location}</p>}
                         {item.updatedAt && <p className="text-[11px] text-fg/40 mt-0.5">edited {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}</p>}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0 ml-3">
@@ -204,14 +205,14 @@ export default function LifeEventsPage() {
           </div>
         }
       >
-        <form id="life-event-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imageUrl = form.imageUrl; if (pendingFile) { try { imageUrl = await uploadToCloudinary(pendingFile); s("imageUrl", imageUrl); } catch { toast.error("Upload failed"); return; } } const data = { ...form, endDate: form.endDate || null, imageUrl: imageUrl || null, url: form.url || null, location: form.location || null, latitude: form.latitude ?? null, longitude: form.longitude ?? null, current: form.current ?? false }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <form id="life-event-form" onSubmit={async (e) => { e.preventDefault(); setErrors({}); let imageUrl = form.imageUrl; if (pendingFile) { try { imageUrl = await uploadToCloudinary(pendingFile); s("imageUrl", imageUrl); } catch { toast.error("Upload failed"); return; } } const data = { ...form, endDate: form.endDate || null, imageUrl: imageUrl || null, url: form.url || null, location: form.location || null, latitude: form.latitude ?? null, longitude: form.longitude ?? null, current: form.current ?? false }; if (editId) updateMut.mutate({ id: editId, data: data as any }); else createMut.mutate(data as any); }} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2 space-y-1.5">
               <label className="text-xs text-fg/50">Title</label>
               <input value={f("title")} onChange={(e) => s("title", e.target.value)} className={inputCls} required />
               <p className={errCls("title")}>{errors.title}</p>
             </div>
-            <div className="space-y-1.5">
+            <div className="sm:col-span-2 space-y-1.5">
               <label className="text-xs text-fg/50">Type</label>
               <div className="flex gap-2">
                 {types.map((t) => (
@@ -229,32 +230,57 @@ export default function LifeEventsPage() {
                 ))}
               </div>
             </div>
-            <div className="space-y-1.5">
+            <div className={`space-y-1.5 ${form.current ? "sm:col-span-2" : ""}`}>
               <label className="text-xs text-fg/50">Start Date</label>
-              <input type="date" value={f("startDate")} onChange={(e) => s("startDate", e.target.value)} className={`${inputCls} dark:[color-scheme:dark]`} required />
+              <div className="relative">
+                <input type="date" value={f("startDate")} onChange={(e) => s("startDate", e.target.value)} className={`${inputCls} pr-8 dark:[color-scheme:dark]`} required />
+                {f("startDate") && (
+                  <button type="button" onClick={() => s("startDate", "")} className="absolute right-1 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-fg/40 hover:text-fg transition-colors cursor-pointer">
+                    <X weight="thin" className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
               <p className={errCls("startDate")}>{errors.startDate}</p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">End Date</label>
-              <input type="date" value={f("endDate")} onChange={(e) => s("endDate", e.target.value)} className={`${inputCls} dark:[color-scheme:dark]`} />
-            </div>
-            <div className="space-y-1.5 flex items-end pb-1">
-              <label className="flex items-center gap-2 cursor-pointer">
+            {!form.current && (
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">End Date</label>
+                <div className="relative">
+                  <input type="date" value={f("endDate")} onChange={(e) => s("endDate", e.target.value)} className={`${inputCls} pr-8 dark:[color-scheme:dark]`} />
+                  {f("endDate") && (
+                    <button type="button" onClick={() => s("endDate", "")} className="absolute right-1 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-fg/40 hover:text-fg transition-colors cursor-pointer">
+                      <X weight="thin" className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+            <div className="sm:col-span-2 flex items-center py-1">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={form.current ?? false}
-                  onChange={(e) => s("current", e.target.checked)}
+                  onChange={(e) => {
+                    if (e.target.checked) s("endDate", "");
+                    s("current", e.target.checked);
+                  }}
                   className="w-4 h-4 rounded border-hairline bg-hover-bg text-fg focus:ring-0"
                 />
-                <span className="text-xs text-fg/50">Currently active</span>
+                <span className="text-xs text-fg/50">Currently active (no end date)</span>
               </label>
             </div>
-            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingFile} />
-            <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">URL</label>
-              <input value={f("url")} onChange={(e) => s("url", e.target.value)} placeholder="https://..." className={inputCls} />
-            </div>
           </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-fg/50">Image</label>
+            <ImageUpload key={drawerOpen ? editId ?? "new" : "closed"} value={f("imageUrl")} onChange={(url) => s("imageUrl", url)} onRemove={() => s("imageUrl", "")} onFilePending={setPendingFile} />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-fg/50">URL</label>
+            <input value={f("url")} onChange={(e) => s("url", e.target.value)} placeholder="https://..." className={inputCls} />
+          </div>
+
           <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Location</label>
             <LocationPicker
@@ -264,6 +290,7 @@ export default function LifeEventsPage() {
               onSelect={(loc, lat, lng) => { s("location", loc); s("latitude", lat); s("longitude", lng); }}
             />
           </div>
+
           <div className="space-y-1.5">
             <label className="text-xs text-fg/50">Description</label>
             <ContentEditor key={drawerOpen ? editId ?? "new" : "closed"} content={f("description")} onChange={(html) => s("description", html)} generateContext={{ title: f("title"), type: "lifeEvent" }} />
