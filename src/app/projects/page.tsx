@@ -4,6 +4,7 @@ import { HeartButton } from "@/components/HeartButton";
 import { getHeartsForEntities } from "@/actions/hearts";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { ClickableImage } from "@/components/ClickableImage";
+import { VideoEmbed } from "@/components/VideoEmbed";
 
 export const metadata = {
   title: "Projects — Suckstobeanik",
@@ -17,40 +18,6 @@ function formatDate(date: string) {
     day: "numeric",
     year: "numeric",
   });
-}
-
-function isYouTubeUrl(url: string) {
-  return /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)/.test(url);
-}
-
-function getYouTubeEmbedUrl(url: string) {
-  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return m ? `https://www.youtube.com/embed/${m[1]}?modestbranding=1&rel=0` : url;
-}
-
-function VideoEmbed({ url, title }: { url: string; title: string }) {
-  if (isYouTubeUrl(url)) {
-    return (
-      <div className="aspect-video overflow-hidden rounded-lg">
-        <iframe
-          src={getYouTubeEmbedUrl(url)}
-          title={title}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-    );
-  }
-  return (
-    <video
-      src={url}
-      controls
-      className="w-full max-h-[220px] rounded-lg object-contain bg-black"
-    >
-      <a href={url} className="text-xs underline">Watch video</a>
-    </video>
-  );
 }
 
 export default async function ProjectsPage() {
@@ -99,19 +66,19 @@ export default async function ProjectsPage() {
             </div>
           </div>
 
-          <div className="space-y-4 sm:grid sm:grid-cols-[1fr_1fr] sm:gap-4 min-h-0">
+          <div className={`space-y-4 sm:grid sm:gap-4 min-h-0 ${project.videoUrl ? "sm:grid-cols-[3fr_2fr]" : "sm:grid-cols-[1fr_1fr]"}`}>
             {project.videoUrl ? (
               <VideoEmbed url={project.videoUrl} title={project.title} />
             ) : project.imageUrl ? (
               <ClickableImage
                 src={project.imageUrl}
                 alt={project.title}
-                className="overflow-hidden rounded-lg max-h-[220px] cursor-pointer hover:opacity-80 transition-opacity"
+                className="overflow-hidden rounded-lg max-h-[400px] cursor-pointer hover:opacity-80 transition-opacity"
               />
             ) : (
-              <div className="bg-hover-bg rounded-lg max-h-[220px]" />
+              <div className="bg-hover-bg rounded-lg max-h-[400px]" />
             )}
-            <div className="overflow-y-auto max-h-[220px] space-y-2 pr-1">
+            <div className="overflow-y-auto max-h-[400px] space-y-2 pr-1">
               <h2 className="text-xl font-heading leading-snug">
                 {project.title}
               </h2>

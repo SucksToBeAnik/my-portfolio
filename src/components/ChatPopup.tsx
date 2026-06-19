@@ -36,9 +36,11 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
   const [remaining, setRemaining] = useState<number>(50);
   const listRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
+      inputRef.current?.focus();
       setMessages([]);
       const val = getCookie("query_remaining");
       if (val) {
@@ -229,6 +231,7 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
             <span className="text-[10px] text-muted shrink-0">{remaining}/50</span>
           )}
           <input
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your question..."

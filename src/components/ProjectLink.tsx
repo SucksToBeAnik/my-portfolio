@@ -11,7 +11,7 @@ const iconMap: Record<string, typeof Globe> = {
 export function ProjectLink({ url, label }: { url: string; label: string }) {
   const Icon = iconMap[label];
   return (
-    <LinkPreview url={url}>
+    <LinkPreview url={url} position="bottom">
       <a
         href={url}
         target="_blank"
