@@ -15,6 +15,7 @@ const mediaSchema = z.object({
   posterUrl: z.string().optional(),
   imdbUrl: z.string().optional(),
   plot: z.string().optional(),
+  review: z.string().max(500).optional(),
   rating: z.number().int().min(1).max(5).optional().nullable(),
   status: z.enum(["watching", "watched", "planned", "dropped"]),
   seasons: z.number().int().positive().optional().nullable(),
@@ -22,6 +23,15 @@ const mediaSchema = z.object({
 
 export async function getMedia() {
   return db.select().from(media).orderBy(asc(media.sortOrder));
+}
+
+export async function getMediaItem(id: number) {
+  const rows = await db
+    .select()
+    .from(media)
+    .where(eq(media.id, id))
+    .limit(1);
+  return rows[0] ?? null;
 }
 
 export async function getMediaPublic() {
@@ -35,6 +45,7 @@ export async function getMediaPublic() {
       posterUrl: media.posterUrl,
       imdbUrl: media.imdbUrl,
       plot: media.plot,
+      review: media.review,
       rating: media.rating,
       status: media.status,
       seasons: media.seasons,
@@ -100,6 +111,24 @@ export async function lookupIMDb(imdbId: string) {
     };
   } catch {
     return null;
+  }
+}
+
+export async function searchIMDb(query: string) {
+  if (!env.OMDB_API_KEY || !query.trim()) return [];
+  try {
+    const res = await fetch(`https://www.omdbapi.com/?apikey=${env.OMDB_API_KEY}&s=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    if (data.Response === "False" || !data.Search) return [];
+    return (data.Search as any[]).map((item) => ({
+      imdbId: item.imdbID as string,
+      title: item.Title as string,
+      year: item.Year as string,
+      type: item.Type === "series" ? ("series" as const) : ("movie" as const),
+      posterUrl: item.Poster && item.Poster !== "N/A" ? (item.Poster as string) : null,
+    }));
+  } catch {
+    return [];
   }
 }
 

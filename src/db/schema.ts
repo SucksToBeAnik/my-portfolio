@@ -150,6 +150,7 @@ export const media = sqliteTable("media", {
   posterUrl: text("poster_url"),
   imdbUrl: text("imdb_url"),
   plot: text("plot"),
+  review: text("review"),
   rating: integer("rating"),
   status: text("status", { enum: ["watching", "watched", "planned", "dropped"] })
     .notNull()

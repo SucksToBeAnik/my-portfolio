@@ -337,14 +337,12 @@ function MediaContent() {
       {grouped.map((group) => (
         <div key={group.label}>
           <p className="text-[11px] font-heading mb-3">{group.label}</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
             {group.items.map((item) => (
-              <a
+              <Link
                 key={item.id}
-                href={item.imdbUrl ?? undefined}
-                target={item.imdbUrl ? "_blank" : undefined}
-                rel={item.imdbUrl ? "noopener noreferrer" : undefined}
-                className={`group relative flex flex-col border border-hairline rounded-xl overflow-hidden transition-colors ${item.imdbUrl ? "hover:bg-hover-bg cursor-pointer" : ""}`}
+                href={`/utils/media/${item.id}`}
+                className="group relative flex flex-col border border-hairline rounded-xl overflow-hidden transition-colors hover:bg-hover-bg"
               >
                 <div className="aspect-[2/3] bg-hover-bg overflow-hidden">
                   {item.posterUrl ? (
@@ -385,8 +383,16 @@ function MediaContent() {
                       ))}
                     </span>
                   ) : null}
+                  {item.review && (
+                    <>
+                      <div className="h-px bg-hairline" />
+                      <p className="text-[10px] text-fg/50 italic leading-relaxed line-clamp-3">
+                        &ldquo;{item.review}&rdquo;
+                      </p>
+                    </>
+                  )}
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>

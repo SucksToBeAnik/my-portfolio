@@ -3,15 +3,15 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { DotsSixVertical, PencilSimple, Plus, Star, Trash } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   createMedia,
   deleteMedia,
-  extractImdbId,
   getMedia,
   lookupIMDb,
   reorderMedia,
+  searchIMDb,
   updateMedia,
 } from "@/actions/media";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -28,6 +28,7 @@ interface Item {
   posterUrl: string | null;
   imdbUrl: string | null;
   plot: string | null;
+  review: string | null;
   rating: number | null;
   status: "watching" | "watched" | "planned" | "dropped";
   seasons: number | null;
@@ -42,6 +43,7 @@ const empty = {
   posterUrl: "",
   imdbUrl: "",
   plot: "",
+  review: "",
   rating: null,
   status: "planned" as const,
   seasons: null,
@@ -67,8 +69,44 @@ export default function MediaPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<Item>>(empty);
   const [confirmId, setConfirmId] = useState<number | null>(null);
-  const [imdbLookup, setImdbLookup] = useState(false);
-  const [lookupInput, setLookupInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Awaited<ReturnType<typeof searchIMDb>>>([]);
+  const [searching, setSearching] = useState(false);
+  const [lookingUp, setLookingUp] = useState(false);
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  async function handleSearch(q: string) {
+    setSearchQuery(q);
+    clearTimeout(searchTimer.current);
+    if (!q.trim()) { setSearchResults([]); return; }
+    searchTimer.current = setTimeout(async () => {
+      setSearching(true);
+      const results = await searchIMDb(q);
+      setSearchResults(results);
+      setSearching(false);
+    }, 400);
+  }
+
+  async function handleSelect(imdbId: string) {
+    setSearchResults([]);
+    setSearchQuery("");
+    setLookingUp(true);
+    const result = await lookupIMDb(imdbId);
+    setLookingUp(false);
+    if (!result) { toast.error("Could not fetch details"); return; }
+    setForm((p) => ({
+      ...p,
+      title: result.title,
+      year: result.year,
+      type: result.type,
+      posterUrl: result.posterUrl ?? "",
+      imdbUrl: result.imdbUrl ?? "",
+      plot: result.plot ?? "",
+      seasons: result.seasons,
+      imdbId: result.imdbId,
+    }));
+    toast.success(`Loaded: ${result.title}`);
+  }
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["media"], queryFn: getMedia });
 
@@ -149,33 +187,6 @@ export default function MediaPage() {
     reorderMut.mutate(updates);
   }
 
-  async function handleLookup() {
-    const imdbId = await extractImdbId(lookupInput);
-    if (!imdbId) {
-      toast.error("Could not extract IMDb ID from input");
-      return;
-    }
-    setImdbLookup(true);
-    const result = await lookupIMDb(imdbId);
-    setImdbLookup(false);
-    if (!result) {
-      toast.error("Could not find on IMDb");
-      return;
-    }
-    setForm((p) => ({
-      ...p,
-      title: result.title,
-      year: result.year,
-      type: result.type,
-      posterUrl: result.posterUrl ?? "",
-      imdbUrl: result.imdbUrl ?? "",
-      plot: result.plot ?? "",
-      seasons: result.seasons,
-      imdbId: result.imdbId,
-    }));
-    toast.success(`Found: ${result.title}`);
-  }
-
   const isPending = createMut.isPending || updateMut.isPending;
   const f = (k: string) => (form as any)?.[k] ?? "";
   const s = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
@@ -193,7 +204,7 @@ export default function MediaPage() {
             setForm(empty);
             setEditId(null);
 
-            setLookupInput("");
+            setSearchQuery(""); setSearchResults([]);
             setDrawerOpen(true);
           }}
           className="w-8 h-8 flex items-center justify-center rounded-full bg-fg text-bg border border-hairline cursor-pointer hover:opacity-90 transition-all"
@@ -257,7 +268,7 @@ export default function MediaPage() {
                             setForm(item);
                             setEditId(item.id);
 
-                            setLookupInput("");
+                            setSearchQuery(""); setSearchResults([]);
                             setDrawerOpen(true);
                           }}
                           className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"
@@ -294,7 +305,7 @@ export default function MediaPage() {
             setEditId(null);
             setDrawerOpen(false);
 
-            setLookupInput("");
+            setSearchQuery(""); setSearchResults([]);
           }}
           title={editId ? "Edit Entry" : "Add Movie / Series"}
           headerActions={
@@ -306,7 +317,7 @@ export default function MediaPage() {
                   setEditId(null);
                   setDrawerOpen(false);
 
-                  setLookupInput("");
+                  setSearchQuery(""); setSearchResults([]);
                 }}
                 className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
               >
@@ -331,7 +342,7 @@ export default function MediaPage() {
                   setEditId(null);
                   setDrawerOpen(false);
 
-                  setLookupInput("");
+                  setSearchQuery(""); setSearchResults([]);
                 }}
                 className="px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg transition-all"
               >
@@ -359,6 +370,7 @@ export default function MediaPage() {
                 seasons: form.seasons ?? null,
                 year: form.year || undefined,
                 plot: form.plot || undefined,
+                review: form.review || undefined,
                 posterUrl: form.posterUrl || undefined,
                 imdbUrl: form.imdbUrl || undefined,
                 imdbId: form.imdbId || undefined,
@@ -370,30 +382,44 @@ export default function MediaPage() {
           >
             {!editId && (
               <div className="space-y-1.5">
-                <label className="text-xs text-fg/50">IMDb ID or URL</label>
-                <div className="flex gap-2">
+                <label className="text-xs text-fg/50">Search</label>
+                <div className="relative">
                   <input
-                    value={lookupInput}
-                    onChange={(e) => setLookupInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleLookup();
-                      }
-                    }}
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
                     className={inputCls}
-                    placeholder="tt0111161 or https://imdb.com/title/tt0111161/"
+                    placeholder={lookingUp ? "Loading details…" : "Search for a movie or series…"}
+                    disabled={lookingUp}
+                    autoComplete="off"
                   />
-                  <button
-                    type="button"
-                    onClick={handleLookup}
-                    disabled={imdbLookup}
-                    className="shrink-0 px-3 py-1.5 text-xs font-medium bg-hover-bg text-fg/60 rounded-lg hover:bg-hover-bg disabled:opacity-50 transition-all cursor-pointer"
-                  >
-                    {imdbLookup ? "..." : "Lookup"}
-                  </button>
+                  {(searching || lookingUp) && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-fg/40">
+                      {lookingUp ? "loading…" : "searching…"}
+                    </span>
+                  )}
+                  {searchResults.length > 0 && (
+                    <div className="absolute top-full mt-1 left-0 right-0 z-50 bg-bg border border-hairline rounded-xl shadow-xl overflow-hidden max-h-64 overflow-y-auto">
+                      {searchResults.map((r) => (
+                        <button
+                          key={r.imdbId}
+                          type="button"
+                          onClick={() => handleSelect(r.imdbId)}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-hover-bg transition-colors text-left cursor-pointer"
+                        >
+                          {r.posterUrl ? (
+                            <img src={r.posterUrl} alt="" className="w-8 h-11 object-cover rounded shrink-0" />
+                          ) : (
+                            <div className="w-8 h-11 rounded bg-hover-bg shrink-0" />
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium truncate">{r.title}</p>
+                            <p className="text-[10px] text-fg/40">{r.year} · {r.type === "series" ? "Series" : "Movie"}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <p className="text-[10px] text-fg/30">Paste an IMDb link or ID to auto-fill</p>
               </div>
             )}
 
@@ -495,6 +521,22 @@ export default function MediaPage() {
                 onChange={(e) => s("plot", e.target.value)}
                 className={`${inputCls} resize-none h-20`}
                 placeholder="Auto-filled from IMDb lookup"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs text-fg/50">My Review</label>
+                <span className={`text-[10px] tabular-nums ${(f("review") as string).length > 500 ? "text-red-400" : "text-fg/30"}`}>
+                  {(f("review") as string).length}/500
+                </span>
+              </div>
+              <textarea
+                value={f("review")}
+                onChange={(e) => s("review", e.target.value)}
+                maxLength={500}
+                className={`${inputCls} resize-none h-24`}
+                placeholder="Your personal take…"
               />
             </div>
           </form>
