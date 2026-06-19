@@ -8,6 +8,7 @@ import { Trash, PencilSimple } from "@phosphor-icons/react";
 import { getSites, createSiteFromUrl, deleteSite, updateSite } from "@/actions/sites";
 import { Spinner } from "@/components/Spinner";
 import { Drawer } from "@/components/Drawer";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 interface Site {
   id: number;
@@ -83,6 +84,7 @@ export default function SitesPage() {
   const [editSite, setEditSite] = useState<Site | null>(null);
   const [editUrl, setEditUrl] = useState("");
   const [editTags, setEditTags] = useState("");
+  const [confirmId, setConfirmId] = useState<number | null>(null);
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["sites"], queryFn: getSites });
 
@@ -146,11 +148,11 @@ export default function SitesPage() {
 
       <div className="space-y-1">
         {items.map((site) => (
-          <SiteRow key={site.id} site={site} onDelete={(id) => deleteMut.mutate(id)} onEdit={(s) => { setEditSite(s); setEditUrl(s.url); setEditTags(s.tags ?? ""); }} />
+          <SiteRow key={site.id} site={site} onDelete={(id) => { setEditSite(null); setConfirmId(id); }} onEdit={(s) => { setEditSite(s); setEditUrl(s.url); setEditTags(s.tags ?? ""); }} />
         ))}
       </div>
 
-      <Drawer
+      {confirmId === null && (<Drawer
         open={!!editSite}
         onClose={() => { setEditSite(null); setEditUrl(""); setEditTags(""); }}
         title="Edit Site"
@@ -201,7 +203,16 @@ export default function SitesPage() {
             />
           </div>
         </form>
-      </Drawer>
+      </Drawer>)}
+
+      <ConfirmModal
+        open={confirmId !== null}
+        title="Delete site"
+        message="Are you sure you want to delete this site?"
+        confirmLabel="Delete"
+        onConfirm={() => { if (confirmId !== null) deleteMut.mutate(confirmId); setConfirmId(null); }}
+        onCancel={() => setConfirmId(null)}
+      />
     </div>
   );
 }

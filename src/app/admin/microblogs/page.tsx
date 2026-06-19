@@ -11,6 +11,7 @@ import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Drawer } from "@/components/Drawer";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface Item {
@@ -32,6 +33,7 @@ export default function MicroblogsPage() {
   const [form, setForm] = useState<Partial<Item>>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["microblogs"], queryFn: getMicroblogs });
 
@@ -146,7 +148,7 @@ export default function MicroblogsPage() {
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
                         <button onClick={() => { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-                        <button onClick={() => deleteMut.mutate(item.id)} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+                        <button onClick={() => { setDrawerOpen(false); setConfirmId(item.id); }} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
                       </div>
                     </div>
                   )}
@@ -160,7 +162,7 @@ export default function MicroblogsPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No posts yet.</p>}
 
-      <Drawer
+      {confirmId === null && (<Drawer
         open={drawerOpen}
          onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
         title={editId ? "Edit Post" : "Add Post"}
@@ -200,7 +202,16 @@ export default function MicroblogsPage() {
             <p className={errCls("content")}>{errors.content}</p>
           </div>
         </form>
-      </Drawer>
+      </Drawer>)}
+
+      <ConfirmModal
+        open={confirmId !== null}
+        title="Delete post"
+        message="Are you sure you want to delete this post?"
+        confirmLabel="Delete"
+        onConfirm={() => { if (confirmId !== null) deleteMut.mutate(confirmId); setConfirmId(null); }}
+        onCancel={() => setConfirmId(null)}
+      />
     </div>
   );
 }

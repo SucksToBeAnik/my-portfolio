@@ -10,6 +10,7 @@ import { getLifeEvents, createLifeEvent, updateLifeEvent, deleteLifeEvent, reord
 import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { Drawer } from "@/components/Drawer";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { ImageUpload } from "@/components/ImageUpload";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
@@ -37,6 +38,7 @@ export default function LifeEventsPage() {
   const [form, setForm] = useState<Partial<Item>>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["life-events"], queryFn: getLifeEvents });
 
@@ -159,7 +161,7 @@ export default function LifeEventsPage() {
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
                         <button onClick={() => { setForm(item); setEditId(item.id); setErrors({}); setDrawerOpen(true); }} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-                        <button onClick={() => deleteMut.mutate(item.id)} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+                        <button onClick={() => { setDrawerOpen(false); setConfirmId(item.id); }} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
                       </div>
                     </div>
                   )}
@@ -173,7 +175,7 @@ export default function LifeEventsPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No life events yet.</p>}
 
-      <Drawer
+      {confirmId === null && (<Drawer
         open={drawerOpen}
          onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
         title={editId ? "Edit Event" : "Add Event"}
@@ -224,7 +226,16 @@ export default function LifeEventsPage() {
             <p className={errCls("description")}>{errors.description}</p>
           </div>
         </form>
-      </Drawer>
+      </Drawer>)}
+
+      <ConfirmModal
+        open={confirmId !== null}
+        title="Delete life event"
+        message="Are you sure you want to delete this life event?"
+        confirmLabel="Delete"
+        onConfirm={() => { if (confirmId !== null) deleteMut.mutate(confirmId); setConfirmId(null); }}
+        onCancel={() => setConfirmId(null)}
+      />
     </div>
   );
 }

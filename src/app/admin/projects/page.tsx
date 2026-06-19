@@ -11,6 +11,7 @@ import { ContentEditor } from "@/components/ContentEditor";
 import { Spinner } from "@/components/Spinner";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Drawer } from "@/components/Drawer";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 interface Project {
@@ -40,6 +41,7 @@ export default function ProjectsPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pendingImage, setPendingImage] = useState<File | null>(null);
   const [pendingVideo, setPendingVideo] = useState<File | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["projects"],
@@ -173,7 +175,7 @@ export default function ProjectsPage() {
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
                         <button onClick={() => openEdit(item)} className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"><PencilSimple weight="thin" className="w-4 h-4" /></button>
-                        <button onClick={() => deleteMut.mutate(item.id)} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
+                        <button onClick={() => { setDrawerOpen(false); setConfirmId(item.id); }} className="p-2.5 text-red-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"><Trash weight="thin" className="w-4 h-4" /></button>
                       </div>
                     </div>
                   )}
@@ -187,7 +189,7 @@ export default function ProjectsPage() {
 
       {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No projects yet.</p>}
 
-      <Drawer
+      {confirmId === null && (<Drawer
         open={drawerOpen}
          onClose={() => { setForm(empty); setEditId(null); setDrawerOpen(false); setErrors({}); }}
         title={editId ? "Edit Project" : "Add Project"}
@@ -237,7 +239,16 @@ export default function ProjectsPage() {
             <p className={errCls("description")}>{errors.description}</p>
           </div>
         </form>
-      </Drawer>
+      </Drawer>)}
+
+      <ConfirmModal
+        open={confirmId !== null}
+        title="Delete project"
+        message="Are you sure you want to delete this project?"
+        confirmLabel="Delete"
+        onConfirm={() => { if (confirmId !== null) deleteMut.mutate(confirmId); setConfirmId(null); }}
+        onCancel={() => setConfirmId(null)}
+      />
     </div>
   );
 }
