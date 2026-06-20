@@ -11,11 +11,11 @@ export function Breadcrumb({ crumbs }: { crumbs: { label: string; href?: string 
         <span key={i} className="flex items-center gap-1.5">
           <span className="text-fg/20">/</span>
           {crumb.href ? (
-            <Link href={crumb.href} className="hover:text-fg transition-colors">
+            <Link href={crumb.href} className="hover:text-fg transition-colors uppercase tracking-wider">
               {crumb.label}
             </Link>
           ) : (
-            <span className="text-fg/60">{crumb.label}</span>
+            <span className="text-fg/60 uppercase tracking-wider">{crumb.label}</span>
           )}
         </span>
       ))}

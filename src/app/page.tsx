@@ -22,7 +22,7 @@ function stripHtml(html: string) {
 export default async function Home() {
   const [recentPosts, featuredProjects, readingBooks, workingOnRow] = await Promise.all([
     db
-      .select({ id: microblogs.id, title: microblogs.title })
+      .select({ id: microblogs.id, title: microblogs.title, content: microblogs.content })
       .from(microblogs)
       .where(eq(microblogs.published, true))
       .orderBy(desc(microblogs.publishedAt))
@@ -47,22 +47,22 @@ export default async function Home() {
     <div className="space-y-16">
       {/* Hero */}
       <section className="space-y-5">
-        <Image
-          src="/profile.jpeg"
-          alt="Suckstobeanik"
-          width={56}
-          height={56}
-          className="rounded-full object-cover w-14 h-14"
-        />
+        <div className="flex items-start justify-between">
+          <Image
+            src="/profile.jpeg"
+            alt="Suckstobeanik"
+            width={56}
+            height={56}
+            className="rounded-full object-cover w-14 h-14"
+          />
+          <AskPrompt />
+        </div>
 
         <div className="space-y-3">
           <h1 className="text-4xl font-heading">@suckstobeanik</h1>
           <p className="text-base leading-relaxed text-fg/80 max-w-lg">
             I&apos;m a software engineer who loves building simple solutions. Here, I share a little
             bit of everything that interests me.
-            <span className="block">
-              <AskPrompt />
-            </span>
           </p>
         </div>
 
@@ -103,20 +103,24 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Now */}
       {(workingOn || reading) && (
-        <div className="text-xs text-fg/50 text-right space-y-1">
-          {workingOn && (
-            <p>
-              Working on <span className="font-medium text-fg/60">{workingOn}</span>
-            </p>
-          )}
-          {reading && (
-            <p>
-              Reading <span className="font-medium text-fg/60">{reading.title}</span> by{" "}
-              {reading.author}
-            </p>
-          )}
-        </div>
+        <section className="space-y-2">
+          <p className="text-xs font-heading uppercase tracking-wider text-muted">Now</p>
+          <div className="space-y-1 text-sm">
+            {workingOn && (
+              <p className="text-fg/80">
+                Working on <span className="font-medium text-fg">{workingOn}</span>
+              </p>
+            )}
+            {reading && (
+              <p className="text-fg/80">
+                Reading <span className="font-medium text-fg">{reading.title}</span> by{" "}
+                {reading.author}
+              </p>
+            )}
+          </div>
+        </section>
       )}
 
       {/* Blogs & Projects */}
@@ -128,18 +132,23 @@ export default async function Home() {
               href="/microblog"
               className="group inline-flex items-center gap-2 text-sm text-muted hover:text-fg transition-colors"
             >
-              <span>Blogs</span>
+              <span>Latest posts</span>
               <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
             </Link>
 
-            <div className="space-y-0">
+            <div className="space-y-3">
               {recentPosts.map((post) => (
                 <Link
                   key={post.id}
                   href={`/microblog/${post.id}`}
-                  className="block py-2.5 text-sm text-fg hover:text-muted transition-colors"
+                  className="block py-2.5 text-fg hover:text-muted transition-colors"
                 >
-                  {post.title}
+                  <p className="text-sm font-heading">{post.title}</p>
+                  {post.content && (
+                    <p className="text-xs text-muted mt-1 leading-relaxed line-clamp-2">
+                      {stripHtml(post.content)}
+                    </p>
+                  )}
                 </Link>
               ))}
             </div>
@@ -166,7 +175,7 @@ export default async function Home() {
                 >
                   <FolderOpen weight="thin" className="w-4 h-4 text-muted shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-sm">{project.title}</p>
+                    <p className="text-sm font-heading">{project.title}</p>
                     {project.description && (
                       <p className="text-xs text-muted line-clamp-1">
                         {stripHtml(project.description)}

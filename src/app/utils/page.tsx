@@ -49,7 +49,7 @@ export default function UtilsPage() {
             <House weight="thin" className="w-3.5 h-3.5" />
           </Link>
           <span className="text-fg/20">/</span>
-          <span className="text-fg/60">utils</span>
+          <span className="text-fg/60 uppercase tracking-wider">utils</span>
         </div>
         <div className="flex gap-3 shrink-0">
           <button
