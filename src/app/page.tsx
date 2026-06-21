@@ -146,12 +146,14 @@ export default async function Home() {
 
       {/* Page 2: Projects / Posts — snaps to top of viewport */}
       <div className="min-h-screen snap-start px-6 pb-32">
-        <ContentTabs
-          projects={allProjects}
-          posts={allPosts}
-          projectHearts={projectHearts}
-          postHearts={postHearts}
-        />
+        <Suspense>
+          <ContentTabs
+            projects={allProjects}
+            posts={allPosts}
+            projectHearts={projectHearts}
+            postHearts={postHearts}
+          />
+        </Suspense>
       </div>
     </div>
   );
