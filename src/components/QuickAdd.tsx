@@ -16,6 +16,16 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { createBook } from "@/actions/books";
 import { BookSearch, type BookResult } from "@/components/BookSearch";
+import { StarRating } from "@/components/StarRating";
+import { TagPicker } from "@/components/TagPicker";
+
+const BOOK_CATEGORIES = ["fiction", "non-fiction", "sci-fi", "fantasy", "self-help", "business", "biography", "history", "philosophy", "poetry"];
+const STACK_PLATFORMS = [
+  "Frontend", "Backend", "Framework", "Design", "DevOps", "Database",
+  "AI/ML", "Testing", "Analytics", "Security", "Infrastructure", "Productivity",
+  "Web", "macOS", "iOS", "Android", "Windows", "Linux",
+  "CLI", "API", "Desktop", "Mobile", "Browser", "Cross-platform",
+];
 import { createMedia, lookupIMDb, searchIMDb } from "@/actions/media";
 import { createMicroblog } from "@/actions/microblogs";
 import { createSite } from "@/actions/sites";
@@ -65,7 +75,7 @@ export function QuickAdd() {
 
   // focus refs
   const titleRef        = useRef<HTMLInputElement>(null);
-  const stackNameRef    = useRef<HTMLInputElement>(null);
+  const stackUrlRef     = useRef<HTMLInputElement>(null);
   const mediaSearchRef  = useRef<HTMLInputElement>(null);
   const bookSearchRef   = useRef<HTMLInputElement | null>(null);
 
@@ -73,13 +83,23 @@ export function QuickAdd() {
 
   const [bookStatus, setBookStatus] = useState<"reading" | "read" | "want_to_read">("want_to_read");
   const [bookPicked, setBookPicked] = useState<BookResult | null>(null);
+  const [bookRating, setBookRating] = useState<number | null>(null);
+  const [bookReview, setBookReview] = useState("");
+  const [bookCategory, setBookCategory] = useState("");
 
   const [title, setTitle]       = useState("");
   const [content, setContent]   = useState("");
   const [published, setPublished] = useState(false);
 
-  const [stackName, setStackName]   = useState("");
-  const [stackUrl, setStackUrl]     = useState("");
+  const [stackName, setStackName]         = useState("");
+  const [stackUrl, setStackUrl]           = useState("");
+  const [stackImageUrl, setStackImageUrl] = useState("");
+  const [stackDesc, setStackDesc]         = useState("");
+  const [stackPlatform, setStackPlatform] = useState("");
+  const [stackFetching, setStackFetching] = useState(false);
+  const stackFetchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const [mediaRating, setMediaRating] = useState<number | null>(null);
 
   const [mediaSearch, setMediaSearch]   = useState("");
   const [mediaResults, setMediaResults] = useState<IMDbResult[]>([]);
@@ -98,11 +118,10 @@ export function QuickAdd() {
     setError("");
     setLoading(false);
     setTitle(""); setContent(""); setPublished(false);
-    setBookStatus("want_to_read");
-    setBookPicked(null);
-    setStackName(""); setStackUrl("");
+    setBookStatus("want_to_read"); setBookPicked(null); setBookRating(null); setBookReview(""); setBookCategory("");
+    setStackName(""); setStackUrl(""); setStackImageUrl(""); setStackDesc(""); setStackPlatform(""); setStackFetching(false);
     setMediaSearch(""); setMediaResults([]); setMediaPicked(null);
-    setMediaStatus("planned"); setMediaReview("");
+    setMediaStatus("planned"); setMediaReview(""); setMediaRating(null);
     setMediaSearching(false); setMediaLooking(false);
   }
 
@@ -168,7 +187,7 @@ export function QuickAdd() {
   useEffect(() => {
     if (step !== "form") return;
     setTimeout(() => {
-      if (selectedType === "stack") stackNameRef.current?.focus();
+      if (selectedType === "stack") stackUrlRef.current?.focus();
       else if (selectedType === "media") mediaSearchRef.current?.focus();
       else if (selectedType === "book") bookSearchRef.current?.focus();
       else if (selectedType !== "site") titleRef.current?.focus();
@@ -253,13 +272,16 @@ export function QuickAdd() {
           author: bookPicked.authors.join(", ") || "Unknown",
           coverUrl: bookPicked.coverUrl ?? undefined,
           status: bookStatus,
+          rating: bookRating ?? undefined,
+          review: bookReview.trim() || undefined,
+          category: bookCategory || undefined,
         });
       } else if (selectedType === "til") {
         await createTil({ title, content });
       } else if (selectedType === "post") {
         await createMicroblog({ title, content, published });
       } else if (selectedType === "stack") {
-        await createStack({ name: stackName, url: stackUrl });
+        await createStack({ name: stackName, url: stackUrl, imageUrl: stackImageUrl || undefined, description: stackDesc.trim() || undefined, platform: stackPlatform || undefined });
       } else if (selectedType === "media" && mediaPicked) {
         await createMedia({
           title: mediaPicked.title,
@@ -272,6 +294,7 @@ export function QuickAdd() {
           seasons: mediaPicked.seasons ?? undefined,
           imdbId: mediaPicked.imdbId,
           review: mediaReview.trim() || undefined,
+          rating: mediaRating ?? undefined,
         });
       }
       const queryKey = TYPE_QUERY_KEYS[selectedType];
@@ -427,6 +450,24 @@ export function QuickAdd() {
                     ))}
                   </div>
                 </div>
+                <div className="flex flex-col gap-1">
+                  <label className={labelCls}>Rating <span className="normal-case">(optional)</span></label>
+                  <StarRating value={bookRating} onChange={setBookRating} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className={labelCls}>Review <span className="normal-case">(optional)</span></label>
+                  <textarea
+                    value={bookReview}
+                    onChange={(e) => setBookReview(e.target.value)}
+                    rows={3}
+                    placeholder="Your thoughts..."
+                    className={`${inputCls} resize-none`}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className={labelCls}>Category <span className="normal-case">(optional)</span></label>
+                  <TagPicker compact value={bookCategory} onChange={setBookCategory} tags={BOOK_CATEGORIES} />
+                </div>
               </>
             )}
 
@@ -466,12 +507,70 @@ export function QuickAdd() {
             {selectedType === "stack" && (
               <>
                 <div className="flex flex-col gap-1">
-                  <label className={labelCls}>Name</label>
-                  <input ref={stackNameRef} value={stackName} onChange={(e) => setStackName(e.target.value)} required placeholder="Tool name..." className={inputCls} />
+                  <label className={labelCls}>URL</label>
+                  <div className="relative">
+                    <input
+                      ref={stackUrlRef}
+                      type="url"
+                      value={stackUrl}
+                      onChange={(e) => {
+                        const url = e.target.value;
+                        setStackUrl(url);
+                        clearTimeout(stackFetchTimer.current);
+                        if (!url.trim()) return;
+                        const normalized = url.startsWith("http") ? url : `https://${url}`;
+                        stackFetchTimer.current = setTimeout(async () => {
+                          setStackFetching(true);
+                          try {
+                            const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(normalized)}`);
+                            const json = await res.json();
+                            if (json.status === "success") {
+                              if (json.data.title && !stackName) setStackName(json.data.title);
+                              if (json.data.logo?.url) setStackImageUrl(json.data.logo.url);
+                            }
+                          } catch {}
+                          setStackFetching(false);
+                        }, 600);
+                      }}
+                      required
+                      placeholder="https://..."
+                      className={inputCls}
+                    />
+                    {stackFetching && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted pointer-events-none">
+                        fetching...
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {stackImageUrl && (
+                    <img src={stackImageUrl} alt="" className="w-8 h-8 rounded object-contain bg-hover-bg shrink-0" />
+                  )}
+                  <div className="flex flex-col gap-1 flex-1 min-w-0">
+                    <label className={labelCls}>Name</label>
+                    <input
+                      value={stackName}
+                      onChange={(e) => setStackName(e.target.value)}
+                      required
+                      placeholder="Tool name..."
+                      className={inputCls}
+                    />
+                  </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className={labelCls}>URL</label>
-                  <input type="url" value={stackUrl} onChange={(e) => setStackUrl(e.target.value)} required placeholder="https://..." className={inputCls} />
+                  <label className={labelCls}>Description <span className="normal-case">(optional)</span></label>
+                  <textarea
+                    value={stackDesc}
+                    onChange={(e) => setStackDesc(e.target.value)}
+                    rows={2}
+                    placeholder="What do you use it for?"
+                    className={`${inputCls} resize-none`}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className={labelCls}>Platform <span className="normal-case">(optional)</span></label>
+                  <TagPicker compact value={stackPlatform} onChange={setStackPlatform} tags={STACK_PLATFORMS} />
                 </div>
               </>
             )}
@@ -546,6 +645,11 @@ export function QuickAdd() {
                       <button key={s} type="button" onClick={() => setMediaStatus(s)} className={`${toggleCls(mediaStatus === s)} capitalize`}>{s}</button>
                     ))}
                   </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className={labelCls}>Rating <span className="normal-case">(optional)</span></label>
+                  <StarRating value={mediaRating} onChange={setMediaRating} />
                 </div>
 
                 <div className="flex flex-col gap-1">

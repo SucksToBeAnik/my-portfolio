@@ -3,7 +3,7 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { DotsSixVertical, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { createStack, deleteStack, getStacks, reorderStacks, updateStack } from "@/actions/stacks";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -14,6 +14,8 @@ import { TagPicker } from "@/components/TagPicker";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 const platformTags = [
+  "Frontend", "Backend", "Framework", "Design", "DevOps", "Database",
+  "AI/ML", "Testing", "Analytics", "Security", "Infrastructure", "Productivity",
   "Web", "macOS", "iOS", "Android", "Windows", "Linux",
   "CLI", "API", "Desktop", "Mobile", "Browser", "Cross-platform",
 ];
@@ -38,6 +40,8 @@ export default function StacksPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [metaFetching, setMetaFetching] = useState(false);
+  const metaTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { data: items = [], isLoading } = useQuery({ queryKey: ["stacks"], queryFn: getStacks });
 
@@ -321,13 +325,39 @@ export default function StacksPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs text-fg/50">URL</label>
-                <input
-                  value={f("url")}
-                  onChange={(e) => s("url", e.target.value)}
-                  className={inputCls}
-                  required
-                  placeholder="https://"
-                />
+                <div className="relative">
+                  <input
+                    value={f("url")}
+                    onChange={(e) => {
+                      const url = e.target.value;
+                      s("url", url);
+                      if (editId) return;
+                      clearTimeout(metaTimer.current);
+                      if (!url.trim()) return;
+                      const normalized = url.startsWith("http") ? url : `https://${url}`;
+                      metaTimer.current = setTimeout(async () => {
+                        setMetaFetching(true);
+                        try {
+                          const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(normalized)}`);
+                          const json = await res.json();
+                          if (json.status === "success") {
+                            if (json.data.title && !f("name")) s("name", json.data.title);
+                            if (json.data.logo?.url && !f("imageUrl")) s("imageUrl", json.data.logo.url);
+                          }
+                        } catch {}
+                        setMetaFetching(false);
+                      }, 600);
+                    }}
+                    className={inputCls}
+                    required
+                    placeholder="https://"
+                  />
+                  {metaFetching && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-fg/40 pointer-events-none">
+                      fetching...
+                    </span>
+                  )}
+                </div>
                 <p className={errCls("url")}>{errors.url}</p>
               </div>
               <ImageUpload
