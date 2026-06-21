@@ -3,13 +3,14 @@
 import {
   BookOpenText,
   ChatCircleDots,
-  FolderOpen,
   Heart,
   House,
+  Lightbulb,
   MagnifyingGlass,
   Moon,
-  NotePencil,
+  Briefcase,
   SunDim,
+  Television,
   Wrench,
 } from "@phosphor-icons/react";
 import dynamic from "next/dynamic";
@@ -25,22 +26,17 @@ const ChatPopup = dynamic(() => import("@/components/ChatPopup").then((m) => m.C
 
 const navItems = [
   { href: "/", label: "Home", icon: House },
-  { href: "/projects", label: "Projects", icon: FolderOpen },
   { href: "/life", label: "Life", icon: Heart },
   { href: "/books", label: "Books", icon: BookOpenText },
-  { href: "/writings", label: "Writings", icon: NotePencil },
+  { href: "/til", label: "TIL", icon: Lightbulb },
+  { href: "/media", label: "Watch", icon: Television },
   { href: "/utils", label: "Utils", icon: Wrench },
 ];
 
 const subTabs: Record<string, { label: string; href: string }[]> = {
-  "/writings": [
-    { label: "Microblog", href: "/writings?tab=microblog" },
-    { label: "TIL", href: "/writings?tab=til" },
-  ],
   "/utils": [
     { label: "Stacks", href: "/utils?tab=stacks" },
     { label: "Sites", href: "/utils?tab=sites" },
-    { label: "Media", href: "/utils?tab=media" },
   ],
 };
 
@@ -49,11 +45,13 @@ function NavItem({
   label,
   icon: Icon,
   isActive,
+  onClick,
 }: {
   href: string;
   label: string;
   icon: React.ElementType;
   isActive: boolean;
+  onClick?: (e: React.MouseEvent) => void;
 }) {
   const tabs = subTabs[href];
   const [open, setOpen] = useState(false);
@@ -61,7 +59,6 @@ function NavItem({
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
-  // close on click outside
   useEffect(() => {
     if (!open) return;
     function onPointerDown(e: PointerEvent) {
@@ -77,7 +74,8 @@ function NavItem({
     return (
       <Link
         href={href}
-        className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0"
+        onClick={onClick}
+        className="relative flex items-center gap-1.5 px-1.5 sm:px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0"
       >
         <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
         <span className="hidden sm:inline">{label}</span>
@@ -98,7 +96,7 @@ function NavItem({
       }}
     >
       {open && (
-        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 flex flex-col items-stretch bg-nav-bg backdrop-blur-xl border border-nav-border rounded-2xl px-1.5 py-1.5 shadow-xl min-w-max">
+        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 flex flex-col items-stretch bg-nav-popup-bg backdrop-blur-xl border border-nav-border rounded-2xl px-1.5 py-1.5 shadow-xl min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.href}
@@ -116,7 +114,7 @@ function NavItem({
       )}
       <Link
         href={href}
-        className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0 select-none"
+        className="relative flex items-center gap-1.5 px-1.5 sm:px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0 select-none"
       >
         <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
         <span className="hidden sm:inline">{label}</span>
@@ -127,8 +125,56 @@ function NavItem({
 
 export function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const [chatOpen, setChatOpen] = useState(false);
+  const [panelTwo, setPanelTwo] = useState(false);
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setPanelTwo(false);
+      return;
+    }
+
+    let removeScroll: (() => void) | null = null;
+
+    function attach(container: HTMLElement) {
+      if (removeScroll) return; // already attached
+      let timer: ReturnType<typeof setTimeout>;
+      function onScroll() {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          setPanelTwo(container.scrollTop > container.clientHeight / 2);
+        }, 50);
+      }
+      container.addEventListener("scroll", onScroll, { passive: true });
+      removeScroll = () => {
+        clearTimeout(timer);
+        container.removeEventListener("scroll", onScroll);
+      };
+    }
+
+    const existing = document.getElementById("snap-container");
+    if (existing) {
+      attach(existing as HTMLElement);
+      return () => removeScroll?.();
+    }
+
+    // Container not in DOM yet (page still loading) — watch for it
+    const observer = new MutationObserver(() => {
+      const el = document.getElementById("snap-container");
+      if (!el) return;
+      observer.disconnect();
+      attach(el as HTMLElement);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      removeScroll?.();
+    };
+  }, [pathname]);
+
   useEffect(() => {
     const handler = () => setChatOpen(true);
     window.addEventListener("openchat", handler);
@@ -154,7 +200,35 @@ export function BottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 flex justify-center pb-4 pointer-events-none z-50">
         <div className="flex items-center justify-center w-full max-w-[700px] mx-4 px-1.5 py-1.5 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
           <div className="flex items-center gap-0 sm:gap-0.5">
-            {navItems.map((item) => (
+            <NavItem
+              href={navItems[0].href}
+              label={navItems[0].label}
+              icon={navItems[0].icon}
+              isActive={pathname === navItems[0].href && !panelTwo}
+              onClick={pathname === "/" ? (e) => {
+                e.preventDefault();
+                setPanelTwo(false);
+                document.getElementById("snap-container")?.scrollTo({ top: 0, behavior: "smooth" });
+              } : undefined}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (pathname === "/") {
+                  setPanelTwo(true);
+                  const container = document.getElementById("snap-container");
+                  container?.scrollTo({ top: container.clientHeight, behavior: "smooth" });
+                } else {
+                  setPanelTwo(true);
+                  router.push("/?showcase=1");
+                }
+              }}
+              className="relative flex items-center gap-1.5 px-1.5 sm:px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 cursor-pointer shrink-0"
+            >
+              <Briefcase weight={panelTwo ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Work</span>
+            </button>
+            {navItems.slice(1).map((item) => (
               <NavItem
                 key={item.href}
                 href={item.href}
@@ -163,14 +237,6 @@ export function BottomNav() {
                 isActive={pathname === item.href}
               />
             ))}
-            <button
-              type="button"
-              onClick={() => setChatOpen((p) => !p)}
-              className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 cursor-pointer shrink-0"
-            >
-              <ChatCircleDots weight={chatOpen ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline">Ask</span>
-            </button>
           </div>
 
           <div className="flex items-center shrink-0 ml-1">
@@ -196,6 +262,15 @@ export function BottomNav() {
             >
               <MagnifyingGlass weight="thin" className="w-4 h-4 sm:hidden" />
               <span className="hidden sm:inline">⌘K</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setChatOpen((p) => !p)}
+              className="flex items-center gap-1 px-1.5 py-1.5 text-[10px] text-nav-text/30 hover:text-nav-text-hover transition-colors cursor-pointer"
+              aria-label="Ask"
+            >
+              <ChatCircleDots weight={chatOpen ? "fill" : "thin"} className="w-4 h-4 sm:hidden shrink-0" />
+              <span className="hidden sm:inline">⌘/</span>
             </button>
           </div>
         </div>

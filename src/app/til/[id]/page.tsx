@@ -24,7 +24,7 @@ function formatDate(date: Date) {
   return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
-export default async function TilPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TilDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const til = await db
     .select()
@@ -38,7 +38,7 @@ export default async function TilPage({ params }: { params: Promise<{ id: string
   return (
     <div className="space-y-6 md:space-y-8">
       <Link
-        href="/writings?tab=til"
+        href="/til"
         className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
       >
         <ArrowLeft weight="thin" className="w-3.5 h-3.5" />

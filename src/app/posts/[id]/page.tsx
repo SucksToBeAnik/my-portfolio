@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .limit(1)
     .then((r) => r[0]);
   return {
-    title: post ? `${post.title} — Microblog — Suckstobeanik` : "Microblog — Suckstobeanik",
+    title: post ? `${post.title} — Posts — Suckstobeanik` : "Posts — Suckstobeanik",
   };
 }
 
@@ -39,7 +39,7 @@ function readTime(html: string) {
   return `${min} min read`;
 }
 
-export default async function MicroblogPostPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const post = (
     await db
@@ -76,11 +76,11 @@ export default async function MicroblogPostPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-6 md:space-y-8">
       <Link
-        href="/writings?tab=microblog"
+        href="/?tab=posts"
         className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
       >
         <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
-        Writings
+        Posts
       </Link>
 
       <article className="space-y-6">
@@ -112,7 +112,7 @@ export default async function MicroblogPostPage({ params }: { params: Promise<{ 
       <div className="flex items-center justify-between gap-4 pt-4 border-t border-hairline">
         {prev ? (
           <Link
-            href={`/microblog/${prev.id}`}
+            href={`/posts/${prev.id}`}
             className="flex items-center gap-1.5 text-xs text-muted hover:text-fg transition-colors group"
           >
             <ArrowLeft
@@ -126,7 +126,7 @@ export default async function MicroblogPostPage({ params }: { params: Promise<{ 
         )}
         {next ? (
           <Link
-            href={`/microblog/${next.id}`}
+            href={`/posts/${next.id}`}
             className="flex items-center gap-1.5 text-xs text-muted hover:text-fg transition-colors group text-right"
           >
             <span className="truncate max-w-[200px]">{next.title}</span>

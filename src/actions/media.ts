@@ -67,6 +67,7 @@ export async function createMedia(data: z.infer<typeof mediaSchema>) {
   await db.insert(media).values({ ...parsed, sortOrder: maxOrder + 1 });
   revalidatePath("/admin/media");
   revalidatePath("/utils");
+  revalidatePath("/media");
 }
 
 export async function updateMedia(id: number, data: z.infer<typeof mediaSchema>) {
@@ -74,12 +75,14 @@ export async function updateMedia(id: number, data: z.infer<typeof mediaSchema>)
   await db.update(media).set(parsed).where(eq(media.id, id));
   revalidatePath("/admin/media");
   revalidatePath("/utils");
+  revalidatePath("/media");
 }
 
 export async function deleteMedia(id: number) {
   await db.delete(media).where(eq(media.id, id));
   revalidatePath("/admin/media");
   revalidatePath("/utils");
+  revalidatePath("/media");
 }
 
 export async function reorderMedia(items: { id: number; sortOrder: number }[]) {
@@ -88,6 +91,7 @@ export async function reorderMedia(items: { id: number; sortOrder: number }[]) {
   );
   revalidatePath("/admin/media");
   revalidatePath("/utils");
+  revalidatePath("/media");
 }
 
 export async function lookupIMDb(imdbId: string) {

@@ -26,7 +26,7 @@ export async function createProject(data: z.infer<typeof schema>) {
   const parsed = schema.parse(data);
   await db.insert(projects).values(parsed);
   revalidatePath("/admin/projects");
-  revalidatePath("/projects");
+  revalidatePath("/");
   revalidatePath("/");
 }
 
@@ -37,14 +37,14 @@ export async function updateProject(id: number, data: z.infer<typeof schema>) {
     .set({ ...parsed, updatedAt: new Date() })
     .where(eq(projects.id, id));
   revalidatePath("/admin/projects");
-  revalidatePath("/projects");
+  revalidatePath("/");
   revalidatePath("/");
 }
 
 export async function deleteProject(id: number) {
   await db.delete(projects).where(eq(projects.id, id));
   revalidatePath("/admin/projects");
-  revalidatePath("/projects");
+  revalidatePath("/");
   revalidatePath("/");
 }
 
@@ -53,6 +53,6 @@ export async function reorderProjects(items: { id: number; sortOrder: number }[]
     await db.update(projects).set({ sortOrder: item.sortOrder }).where(eq(projects.id, item.id));
   }
   revalidatePath("/admin/projects");
-  revalidatePath("/projects");
+  revalidatePath("/");
   revalidatePath("/");
 }

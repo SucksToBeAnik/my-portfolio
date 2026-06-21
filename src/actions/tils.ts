@@ -37,7 +37,7 @@ export async function createTil(data: z.infer<typeof schema>) {
 
   await db.insert(tils).values({ ...parsed, sortOrder: maxOrder + 1 });
   revalidatePath("/admin/tils");
-  revalidatePath("/writings");
+  revalidatePath("/til");
 }
 
 export async function updateTil(id: number, data: z.infer<typeof schema>) {
@@ -47,13 +47,13 @@ export async function updateTil(id: number, data: z.infer<typeof schema>) {
     .set({ ...parsed, updatedAt: new Date() })
     .where(eq(tils.id, id));
   revalidatePath("/admin/tils");
-  revalidatePath("/writings");
+  revalidatePath("/til");
 }
 
 export async function deleteTil(id: number) {
   await db.delete(tils).where(eq(tils.id, id));
   revalidatePath("/admin/tils");
-  revalidatePath("/writings");
+  revalidatePath("/til");
 }
 
 export async function reorderTils(items: { id: number; sortOrder: number }[]) {
@@ -61,5 +61,5 @@ export async function reorderTils(items: { id: number; sortOrder: number }[]) {
     items.map(({ id, sortOrder }) => db.update(tils).set({ sortOrder }).where(eq(tils.id, id))),
   );
   revalidatePath("/admin/tils");
-  revalidatePath("/writings");
+  revalidatePath("/til");
 }
