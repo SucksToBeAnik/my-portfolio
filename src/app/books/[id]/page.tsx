@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { books } from "@/db/schema";
 
+export const revalidate = 3600;
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const book = await db

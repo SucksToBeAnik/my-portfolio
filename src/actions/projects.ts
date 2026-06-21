@@ -27,7 +27,6 @@ export async function createProject(data: z.infer<typeof schema>) {
   await db.insert(projects).values(parsed);
   revalidatePath("/admin/projects");
   revalidatePath("/");
-  revalidatePath("/");
 }
 
 export async function updateProject(id: number, data: z.infer<typeof schema>) {
@@ -38,13 +37,11 @@ export async function updateProject(id: number, data: z.infer<typeof schema>) {
     .where(eq(projects.id, id));
   revalidatePath("/admin/projects");
   revalidatePath("/");
-  revalidatePath("/");
 }
 
 export async function deleteProject(id: number) {
   await db.delete(projects).where(eq(projects.id, id));
   revalidatePath("/admin/projects");
-  revalidatePath("/");
   revalidatePath("/");
 }
 
@@ -53,6 +50,5 @@ export async function reorderProjects(items: { id: number; sortOrder: number }[]
     await db.update(projects).set({ sortOrder: item.sortOrder }).where(eq(projects.id, item.id));
   }
   revalidatePath("/admin/projects");
-  revalidatePath("/");
   revalidatePath("/");
 }
