@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import { SessionProvider } from "next-auth/react";
 import { BottomNav } from "@/components/BottomNav";
+import { NavigationProgress } from "@/components/NavigationProgress";
 import { PageShell } from "@/components/PageShell";
 import { QuickAddGate } from "@/components/QuickAddGate";
 import { SearchOverlay } from "@/components/SearchOverlay";
@@ -54,6 +56,9 @@ export default function RootLayout({
         <SessionProvider>
           <ThemeProvider>
             <QueryProvider>
+              <Suspense fallback={null}>
+                <NavigationProgress />
+              </Suspense>
               <PageShell>{children}</PageShell>
               <BottomNav />
               <SearchOverlay />
