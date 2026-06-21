@@ -12,6 +12,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { createBook } from "@/actions/books";
@@ -56,6 +57,7 @@ const TYPE_QUERY_KEYS: Partial<Record<ContentType, string[]>> = {
 };
 
 export function QuickAdd() {
+  const { data: session } = useSession();
   const qc = useQueryClient();
   const [open, setOpen]               = useState(false);
   const [step, setStep]               = useState<Step>("type");
@@ -307,6 +309,7 @@ export function QuickAdd() {
     }
   }
 
+  if (!session?.user) return null;
   if (!open) return null;
 
   const typeInfo = TYPES.find((t) => t.id === selectedType);

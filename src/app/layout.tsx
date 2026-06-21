@@ -4,7 +4,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { BottomNav } from "@/components/BottomNav";
 import { PageShell } from "@/components/PageShell";
-import { QuickAddGate } from "@/components/QuickAddGate";
+import { QuickAdd } from "@/components/QuickAdd";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { QueryProvider } from "@/lib/QueryProvider";
 import { ThemeProvider } from "@/lib/ThemeProvider";
@@ -57,7 +57,7 @@ export default function RootLayout({
 <PageShell>{children}</PageShell>
               <BottomNav />
               <SearchOverlay />
-              <QuickAddGate />
+              <QuickAdd />
             </QueryProvider>
           </ThemeProvider>
         </SessionProvider>

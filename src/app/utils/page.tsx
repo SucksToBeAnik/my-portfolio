@@ -3,6 +3,7 @@
 import { House } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { Suspense } from "react";
 import { FilterPopover } from "@/components/FilterPopover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -32,6 +33,14 @@ function siteGroup(createdAt: Date): number {
 }
 
 export default function UtilsPage() {
+  return (
+    <Suspense>
+      <UtilsPageInner />
+    </Suspense>
+  );
+}
+
+function UtilsPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const raw = searchParams.get("tab");

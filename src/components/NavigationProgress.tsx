@@ -1,20 +1,18 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export function NavigationProgress() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [visible, setVisible] = useState(false);
   const [width, setWidth] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const prev = useRef(pathname + searchParams.toString());
+  const prev = useRef(pathname);
 
   useEffect(() => {
-    const current = pathname + searchParams.toString();
-    if (current === prev.current) return;
-    prev.current = current;
+    if (pathname === prev.current) return;
+    prev.current = pathname;
 
     // Navigation completed — finish bar
     setVisible(true);
@@ -24,7 +22,7 @@ export function NavigationProgress() {
       setVisible(false);
       setWidth(0);
     }, 300);
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   if (!visible) return null;
 
