@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatCircleDots, PaperPlaneRight, X } from "@phosphor-icons/react";
+import { ArrowSquareOut, ChatCircleDots, PaperPlaneRight, X } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
@@ -28,6 +28,41 @@ function getCookie(name: string): string | undefined {
   const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
   return match ? decodeURIComponent(match[2]) : undefined;
 }
+
+const mdComponents: React.ComponentProps<typeof ReactMarkdown>["components"] = {
+  p: ({ children }) => <p className="text-fg/80 mb-1.5 last:mb-0 leading-relaxed">{children}</p>,
+  strong: ({ children }) => <strong className="font-semibold text-fg">{children}</strong>,
+  em: ({ children }) => <em className="italic text-fg/70">{children}</em>,
+  ul: ({ children }) => <ul className="my-1.5 pl-4 space-y-0.5 list-disc marker:text-fg/30">{children}</ul>,
+  ol: ({ children }) => <ol className="my-1.5 pl-4 space-y-0.5 list-decimal marker:text-fg/30">{children}</ol>,
+  li: ({ children }) => <li className="text-fg/80 leading-relaxed">{children}</li>,
+  a: ({ href, children }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-fg/70 underline underline-offset-2 hover:text-fg transition-colors inline-flex items-center gap-0.5"
+    >
+      {children}
+      <ArrowSquareOut weight="bold" className="w-2.5 h-2.5 shrink-0" />
+    </a>
+  ),
+  code: ({ className, children }) => {
+    const isBlock = !!className;
+    if (isBlock) return <code className={`${className} text-fg/90 text-[10px]`}>{children}</code>;
+    return <code className="bg-fg/10 text-fg text-[10px] px-1 py-0.5 rounded font-mono">{children}</code>;
+  },
+  pre: ({ children }) => (
+    <pre className="bg-fg/5 rounded-lg p-2.5 overflow-x-auto my-2 text-[10px] font-mono">{children}</pre>
+  ),
+  h1: ({ children }) => <h1 className="text-sm font-heading font-semibold text-fg mb-1 mt-2">{children}</h1>,
+  h2: ({ children }) => <h2 className="text-xs font-heading font-semibold text-fg mb-1 mt-2">{children}</h2>,
+  h3: ({ children }) => <h3 className="text-xs font-semibold text-fg mb-0.5 mt-1.5">{children}</h3>,
+  blockquote: ({ children }) => (
+    <blockquote className="border-l-2 border-fg/20 pl-3 my-1.5 text-fg/60 italic">{children}</blockquote>
+  ),
+  hr: () => <hr className="border-hairline my-2" />,
+};
 
 export function ChatPopup({ open, onClose }: ChatPopupProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -206,15 +241,17 @@ export function ChatPopup({ open, onClose }: ChatPopupProps) {
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
                 className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
-                  m.role === "user" ? "bg-fg text-bg" : "bg-hover-bg text-fg"
+                  m.role === "user"
+                    ? "bg-fg/15 text-fg"
+                    : "bg-hover-bg text-fg"
                 }`}
               >
                 {m.content ? (
                   m.role === "user" ? (
                     m.content
                   ) : (
-                    <div className="prose prose-invert prose-xs max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:bg-fg/5 [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_code]:text-fg [&_code]:text-[10px] [&_strong]:text-fg [&_a]:text-fg/70 [&_a]:underline [&_ul]:pl-4 [&_ol]:pl-4 [&_li]:text-fg/80 [&_p]:text-fg/80 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0">
-                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                    <div className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} components={mdComponents}>
                         {m.content}
                       </ReactMarkdown>
                     </div>

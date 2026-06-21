@@ -19,7 +19,7 @@ function fmt(label: string, data: any[]) {
   return `\n### ${label}\n${JSON.stringify(data, null, 0)}\n`;
 }
 
-export function buildSystemPrompt(ctx: SiteContext): string {
+export function buildSystemPrompt(ctx: SiteContext, isAdmin = false): string {
   const tilSection = ctx.recentTils.length
     ? `\n### Recent TILs (Today I Learned)\n${ctx.recentTils.map((t) => `- [${new Date(t.createdAt).toISOString().slice(0, 10)}] **${t.title}**: ${t.content}`).join("\n")}\n`
     : "";
@@ -27,6 +27,26 @@ export function buildSystemPrompt(ctx: SiteContext): string {
   const mediaSection = ctx.recentMedia.length
     ? `\n### Movies & Series\n${ctx.recentMedia.map((m) => `- ${m.title} (${m.type}, ${m.year ?? "?"}) — ${m.status}${m.rating ? `, ${m.rating}/5` : ""}${m.seasons ? `, ${m.seasons} seasons` : ""}`).join("\n")}\n`
     : "";
+
+  const sitesSection = ctx.allSites.length
+    ? `\n### Saved Sites\n${ctx.allSites.map((s) => `- ${s.url}${s.tags ? ` [${s.tags}]` : ""}${s.description ? ` — ${s.description}` : ""}`).join("\n")}\n`
+    : "";
+
+  const data = `${fmt("Projects", ctx.allProjects)}${tilSection}${mediaSection}${fmt("Books", ctx.allBooks)}${fmt("Recent Posts", ctx.recentPosts)}${fmt("Life Events", ctx.allLifeEvents)}${fmt("Tools & Stack", ctx.allStacks)}${sitesSection}`;
+
+  if (isAdmin) {
+    return `You are a personal site assistant for Anik (the site owner). The person asking IS Anik — respond as a helpful assistant, not impersonating him.
+
+## Rules
+- Be direct and efficient; use lists and structure liberally
+- Answer strictly from the data below — never fabricate
+- When listing items (sites, tools, movies etc.), include the URL or key detail so Anik can act on it
+- If asked to find something, search across ALL data sections thoroughly
+
+## Site Data
+${getProfile()}
+${data}`;
+  }
 
   return `You are Anik's personal site assistant. Speak in first person as Anik — visitors are talking directly to you.
 
@@ -38,5 +58,5 @@ export function buildSystemPrompt(ctx: SiteContext): string {
 
 ## Profile
 ${getProfile()}
-${fmt("Projects", ctx.allProjects)}${tilSection}${mediaSection}${fmt("Books", ctx.allBooks)}${fmt("Recent Posts", ctx.recentPosts)}${fmt("Life Events", ctx.allLifeEvents)}${fmt("Tools & Stack", ctx.allStacks)}`;
+${data}`;
 }

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { FilterPopover } from "@/components/FilterPopover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getSites } from "@/actions/sites";
+import { getSites, saveSiteDescription } from "@/actions/sites";
 import { getStacks } from "@/actions/stacks";
 import { fetchMicrolink } from "@/lib/microlink-cache";
 import { LinkPreview } from "@/components/LinkPreview";
@@ -166,15 +166,20 @@ interface SiteMeta {
   logo: string | null;
 }
 
-function SiteItem({ url, tags, createdAt }: { url: string; tags: string | null; createdAt: Date }) {
+function SiteItem({ url, tags, createdAt, savedDescription }: { url: string; tags: string | null; createdAt: Date; savedDescription?: string | null }) {
   const domain = getDomain(url);
   const [meta, setMeta] = useState<SiteMeta | null>(null);
 
   useEffect(() => {
     fetchMicrolink(url).then((data) => {
-      if (data) setMeta({ title: data.title, logo: data.logo });
+      if (data) {
+        setMeta({ title: data.title, logo: data.logo });
+        if (data.description && !savedDescription) {
+          saveSiteDescription(url, data.description).catch(() => {});
+        }
+      }
     });
-  }, [url]);
+  }, [url, savedDescription]);
 
   const fallbackFavicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
   const displayFavicon = meta?.logo || fallbackFavicon;
@@ -273,7 +278,7 @@ function SitesContent() {
                   style={{ animationDelay: `${i * 30}ms` }}
                   className="animate-fade-up"
                 >
-                  <SiteItem url={site.url} tags={site.tags} createdAt={site.createdAt} />
+                  <SiteItem url={site.url} tags={site.tags} createdAt={site.createdAt} savedDescription={site.description} />
                 </div>
               ))}
             </div>

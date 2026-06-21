@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { books, lifeEvents, media, microblogs, projects, stacks, tils } from "@/db/schema";
+import { books, lifeEvents, media, microblogs, projects, sites, stacks, tils } from "@/db/schema";
 
 export async function loadContext() {
   const [
@@ -11,6 +11,7 @@ export async function loadContext() {
     recentPosts,
     allLifeEvents,
     allStacks,
+    allSites,
   ] = await Promise.all([
     db.select({ title: projects.title, description: projects.description, url: projects.url, workedOn: projects.workedOn }).from(projects).orderBy(projects.sortOrder),
     db.select({ title: books.title, author: books.author, status: books.status, rating: books.rating, category: books.category }).from(books).orderBy(books.sortOrder),
@@ -19,9 +20,10 @@ export async function loadContext() {
     db.select({ title: microblogs.title, publishedAt: microblogs.publishedAt }).from(microblogs).where(eq(microblogs.published, true)).orderBy(desc(microblogs.publishedAt)).limit(5),
     db.select({ title: lifeEvents.title, description: lifeEvents.description, startDate: lifeEvents.startDate, endDate: lifeEvents.endDate, type: lifeEvents.type, current: lifeEvents.current }).from(lifeEvents).orderBy(lifeEvents.sortOrder),
     db.select({ name: stacks.name, description: stacks.description, platform: stacks.platform }).from(stacks).orderBy(stacks.sortOrder),
+    db.select({ url: sites.url, tags: sites.tags, description: sites.description }).from(sites).orderBy(desc(sites.createdAt)),
   ]);
 
-  return { allProjects, allBooks, recentTils, recentMedia, recentPosts, allLifeEvents, allStacks };
+  return { allProjects, allBooks, recentTils, recentMedia, recentPosts, allLifeEvents, allStacks, allSites };
 }
 
 export type SiteContext = Awaited<ReturnType<typeof loadContext>>;

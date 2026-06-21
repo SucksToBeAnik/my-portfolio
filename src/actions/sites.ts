@@ -1,6 +1,6 @@
 "use server";
 
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
@@ -40,4 +40,12 @@ export async function deleteSite(id: number) {
   await db.delete(sites).where(eq(sites.id, id));
   revalidatePath("/admin/sites");
   revalidatePath("/utils");
+}
+
+// Called client-side after microlink fetch — only saves if description is still null
+export async function saveSiteDescription(url: string, description: string) {
+  await db
+    .update(sites)
+    .set({ description })
+    .where(eq(sites.url, url));
 }

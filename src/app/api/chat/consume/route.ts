@@ -1,6 +1,12 @@
 import { cookies } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export async function POST() {
+  const session = await auth();
+  if (session?.user) {
+    return Response.json({ remaining: 999 });
+  }
+
   const cookieStore = await cookies();
   const raw = cookieStore.get("query_remaining")?.value;
   let remaining = raw ? parseInt(raw, 10) : 50;
