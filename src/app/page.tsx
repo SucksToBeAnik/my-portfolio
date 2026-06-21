@@ -121,7 +121,7 @@ export default async function Home() {
           {(workingOn || reading) && (
             <section className="space-y-2">
               <p className="text-xs font-heading uppercase tracking-wider text-muted">Now</p>
-              <div className="space-y-1 text-sm">
+              <div className="space-y-1 text-xs">
                 {workingOn && (
                   <p className="text-fg/80">
                     Working on <span className="font-medium text-fg">{workingOn}</span>
