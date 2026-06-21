@@ -180,6 +180,7 @@ export function BottomNav() {
   useEffect(() => {
     const handler = () => {
       window.dispatchEvent(new CustomEvent("closesearch"));
+      window.dispatchEvent(new CustomEvent("closequickadd"));
       setChatOpen(true);
     };
     window.addEventListener("openchat", handler);
@@ -197,7 +198,10 @@ export function BottomNav() {
       if (e.key === "/" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         const willOpen = !chatOpenRef.current;
-        if (willOpen) window.dispatchEvent(new CustomEvent("closesearch"));
+        if (willOpen) {
+          window.dispatchEvent(new CustomEvent("closesearch"));
+          window.dispatchEvent(new CustomEvent("closequickadd"));
+        }
         setChatOpen(willOpen);
       }
     }

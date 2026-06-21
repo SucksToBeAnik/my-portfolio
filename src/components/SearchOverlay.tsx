@@ -16,7 +16,10 @@ export function SearchOverlay() {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         const willOpen = !openRef.current;
-        if (willOpen) window.dispatchEvent(new CustomEvent("closechat"));
+        if (willOpen) {
+          window.dispatchEvent(new CustomEvent("closechat"));
+          window.dispatchEvent(new CustomEvent("closequickadd"));
+        }
         setOpen(willOpen);
       }
       // When search is open, cmd+/ closes it and hands off to chat
@@ -29,7 +32,10 @@ export function SearchOverlay() {
     }
     function handleOpenSearch() {
       const willOpen = !openRef.current;
-      if (willOpen) window.dispatchEvent(new CustomEvent("closechat"));
+      if (willOpen) {
+        window.dispatchEvent(new CustomEvent("closechat"));
+        window.dispatchEvent(new CustomEvent("closequickadd"));
+      }
       setOpen(willOpen);
     }
     function handleCloseSearch() {

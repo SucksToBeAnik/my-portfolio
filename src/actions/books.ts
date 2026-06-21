@@ -59,3 +59,27 @@ export async function reorderBooks(
   revalidatePath("/admin/books");
   revalidatePath("/books");
 }
+
+export async function searchBooks(query: string) {
+  if (!query.trim()) return [];
+  try {
+    const res = await fetch(
+      `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=8&fields=key,title,author_name,cover_i,first_publish_year`,
+    );
+    const data = await res.json();
+    if (!data.docs) return [];
+    return (data.docs as any[])
+      .map((item) => ({
+        id: item.key as string,
+        title: item.title as string,
+        authors: (item.author_name as string[] | undefined) ?? [],
+        coverUrl: item.cover_i
+          ? `https://covers.openlibrary.org/b/id/${item.cover_i}-M.jpg`
+          : null,
+        publishedDate: item.first_publish_year ? String(item.first_publish_year) : null,
+      }))
+      .filter((item) => item.title);
+  } catch {
+    return [];
+  }
+}

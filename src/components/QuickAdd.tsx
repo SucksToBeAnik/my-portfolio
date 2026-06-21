@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { createBook } from "@/actions/books";
+import { BookSearch, type BookResult } from "@/components/BookSearch";
 import { createMedia, lookupIMDb, searchIMDb } from "@/actions/media";
 import { createMicroblog } from "@/actions/microblogs";
 import { createSite } from "@/actions/sites";
@@ -28,10 +29,10 @@ type IMDbResult = Awaited<ReturnType<typeof searchIMDb>>[number];
 
 const TYPES: { id: ContentType; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "site",  label: "Site",  icon: Globe,        desc: "Save a URL"           },
+  { id: "media", label: "Media", icon: Television,    desc: "Movie or series"      },
   { id: "book",  label: "Book",  icon: BookOpenText,  desc: "Add to reading list"  },
   { id: "til",   label: "TIL",   icon: Lightbulb,     desc: "Something you learned"},
   { id: "post",  label: "Post",  icon: Quotes,        desc: "Short microblog post" },
-  { id: "media", label: "Media", icon: Television,    desc: "Movie or series"      },
   { id: "stack", label: "Stack", icon: Wrench,        desc: "Tool or service"      },
 ];
 
@@ -63,16 +64,17 @@ export function QuickAdd() {
   useEffect(() => { activeIdxRef.current = activeIdx; }, [activeIdx]);
 
   // focus refs
-  const titleRef       = useRef<HTMLInputElement>(null);
-  const stackNameRef   = useRef<HTMLInputElement>(null);
-  const mediaSearchRef = useRef<HTMLInputElement>(null);
+  const titleRef        = useRef<HTMLInputElement>(null);
+  const stackNameRef    = useRef<HTMLInputElement>(null);
+  const mediaSearchRef  = useRef<HTMLInputElement>(null);
+  const bookSearchRef   = useRef<HTMLInputElement | null>(null);
 
   // ── form fields ──────────────────────────────────────────
 
-  const [title, setTitle]       = useState("");
-  const [author, setAuthor]     = useState("");
   const [bookStatus, setBookStatus] = useState<"reading" | "read" | "want_to_read">("want_to_read");
+  const [bookPicked, setBookPicked] = useState<BookResult | null>(null);
 
+  const [title, setTitle]       = useState("");
   const [content, setContent]   = useState("");
   const [published, setPublished] = useState(false);
 
@@ -95,8 +97,9 @@ export function QuickAdd() {
     setSelectedType(null);
     setError("");
     setLoading(false);
-    setTitle(""); setAuthor(""); setBookStatus("want_to_read");
-    setContent(""); setPublished(false);
+    setTitle(""); setContent(""); setPublished(false);
+    setBookStatus("want_to_read");
+    setBookPicked(null);
     setStackName(""); setStackUrl("");
     setMediaSearch(""); setMediaResults([]); setMediaPicked(null);
     setMediaStatus("planned"); setMediaReview("");
@@ -115,10 +118,15 @@ export function QuickAdd() {
     function onKeyDown(e: KeyboardEvent) {
       // cmd+i to toggle
       if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === "i") {
-        const tag = (e.target as HTMLElement).tagName;
-        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        if ((e.target as HTMLElement).isContentEditable) return;
         e.preventDefault();
-        if (openRef.current) { close(); } else { setOpen(true); }
+        if (openRef.current) {
+          close();
+        } else {
+          window.dispatchEvent(new CustomEvent("closechat"));
+          window.dispatchEvent(new CustomEvent("closesearch"));
+          setOpen(true);
+        }
         return;
       }
 
@@ -147,8 +155,13 @@ export function QuickAdd() {
         }
       }
     }
+    function onCloseQuickAdd() { if (openRef.current) close(); }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("closequickadd", onCloseQuickAdd);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("closequickadd", onCloseQuickAdd);
+    };
   }, []);
 
   // ── focus first field when form opens ────────────────────
@@ -157,6 +170,7 @@ export function QuickAdd() {
     setTimeout(() => {
       if (selectedType === "stack") stackNameRef.current?.focus();
       else if (selectedType === "media") mediaSearchRef.current?.focus();
+      else if (selectedType === "book") bookSearchRef.current?.focus();
       else if (selectedType !== "site") titleRef.current?.focus();
     }, 50);
   }, [step, selectedType]);
@@ -226,11 +240,20 @@ export function QuickAdd() {
       setError("Search and select a movie or series first.");
       return;
     }
+    if (selectedType === "book" && !bookPicked) {
+      setError("Search and select a book first.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
-      if (selectedType === "book") {
-        await createBook({ title, author, status: bookStatus });
+      if (selectedType === "book" && bookPicked) {
+        await createBook({
+          title: bookPicked.title,
+          author: bookPicked.authors.join(", ") || "Unknown",
+          coverUrl: bookPicked.coverUrl ?? undefined,
+          status: bookStatus,
+        });
       } else if (selectedType === "til") {
         await createTil({ title, content });
       } else if (selectedType === "post") {
@@ -275,7 +298,7 @@ export function QuickAdd() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] sm:pt-[16vh]"
+      className="fixed inset-0 z-[110] flex items-start justify-center pt-[12vh] sm:pt-[16vh]"
       onClick={close}
     >
       <div className="fixed inset-0 bg-bg/60 backdrop-blur-sm" />
@@ -367,14 +390,33 @@ export function QuickAdd() {
             {/* BOOK */}
             {selectedType === "book" && (
               <>
-                <div className="flex flex-col gap-1">
-                  <label className={labelCls}>Title</label>
-                  <input ref={titleRef} value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Book title..." className={inputCls} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className={labelCls}>Author</label>
-                  <input value={author} onChange={(e) => setAuthor(e.target.value)} required placeholder="Author name..." className={inputCls} />
-                </div>
+                {!bookPicked ? (
+                  <div className="flex flex-col gap-1">
+                    <label className={labelCls}>Search</label>
+                    <BookSearch
+                      inputRef={bookSearchRef}
+                      inputClassName={inputCls}
+                      onSelect={(book) => setBookPicked(book)}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 p-2.5 rounded-xl border border-hairline bg-hover-bg">
+                    {bookPicked.coverUrl && (
+                      <img src={bookPicked.coverUrl} alt="" className="w-8 h-12 object-cover rounded shrink-0" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm truncate">{bookPicked.title}</p>
+                      <p className="text-[10px] text-muted truncate">{bookPicked.authors.join(", ")}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setBookPicked(null); setTimeout(() => bookSearchRef.current?.focus(), 50); }}
+                      className="text-[10px] text-muted hover:text-fg transition-colors cursor-pointer shrink-0"
+                    >
+                      Change
+                    </button>
+                  </div>
+                )}
                 <div className="flex flex-col gap-1">
                   <label className={labelCls}>Status</label>
                   <div className="flex gap-1.5">

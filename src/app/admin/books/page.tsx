@@ -15,6 +15,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { createBook, deleteBook, getBooks, reorderBooks, updateBook } from "@/actions/books";
+import { BookSearch } from "@/components/BookSearch";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { Drawer } from "@/components/Drawer";
 import { ContentEditor } from "@/components/ContentEditor";
@@ -402,6 +403,22 @@ export default function BooksPage() {
             }}
             className="space-y-4"
           >
+            {!editId && (
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Search to prefill</label>
+                <BookSearch
+                  inputClassName={inputCls}
+                  onSelect={(book) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      title: book.title,
+                      author: book.authors[0] ?? "",
+                      coverUrl: book.coverUrl ?? prev.coverUrl ?? "",
+                    }))
+                  }
+                />
+              </div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-xs text-fg/50">Title</label>
