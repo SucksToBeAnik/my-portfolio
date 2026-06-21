@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { getHeartsForEntities } from "@/actions/hearts";
 import { ClickableImage } from "@/components/ClickableImage";
 import { HeartButton } from "@/components/HeartButton";
 import { ProjectLink } from "@/components/ProjectLink";
@@ -57,6 +59,22 @@ export function ContentTabs({
   const tabParam = searchParams.get("tab");
   const tab = tabParam === "posts" ? "posts" : "projects";
 
+  const [heartedMap, setHeartedMap] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const projectIds = projects.map((p) => p.id);
+    const postIds = posts.map((p) => p.id);
+    Promise.all([
+      projectIds.length ? getHeartsForEntities("project", projectIds) : {} as Record<number, { count: number; hearted: boolean }>,
+      postIds.length ? getHeartsForEntities("microblog", postIds) : {} as Record<number, { count: number; hearted: boolean }>,
+    ]).then(([ph, mh]) => {
+      const map: Record<string, boolean> = {};
+      for (const [id, val] of Object.entries(ph)) map[`project-${id}`] = val.hearted;
+      for (const [id, val] of Object.entries(mh)) map[`microblog-${id}`] = val.hearted;
+      setHeartedMap(map);
+    });
+  }, []);
+
   function switchTab(t: "projects" | "posts") {
     const url = t === "posts" ? "/?tab=posts" : "/";
     router.replace(url, { scroll: false });
@@ -102,7 +120,7 @@ export function ContentTabs({
                 <div className="flex sm:flex-col justify-between sm:items-end items-start gap-4 sm:gap-0 text-xs text-muted sm:text-right">
                   <div className="flex sm:block items-center gap-4 sm:space-y-4">
                     {project.workedOn && <p>{fmtDate(project.workedOn)}</p>}
-                    <HeartButton entityType="project" entityId={project.id} initialCount={heartCount} />
+                    <HeartButton entityType="project" entityId={project.id} initialCount={heartCount} initialHearted={heartedMap[`project-${project.id}`]} />
                   </div>
                   <div className="flex sm:block gap-2 sm:space-y-1">
                     {project.url && <ProjectLink url={project.url} label="Website" />}
@@ -179,7 +197,7 @@ export function ContentTabs({
                   )}
                 </Link>
                 <div className="mt-2">
-                  <HeartButton entityType="microblog" entityId={post.id} initialCount={heartCount} />
+                  <HeartButton entityType="microblog" entityId={post.id} initialCount={heartCount} initialHearted={heartedMap[`microblog-${post.id}`]} />
                 </div>
               </article>
             );

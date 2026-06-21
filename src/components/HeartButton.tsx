@@ -8,15 +8,18 @@ interface HeartButtonProps {
   entityType: string;
   entityId: number;
   initialCount: number;
+  initialHearted?: boolean;
 }
 
-export function HeartButton({ entityType, entityId, initialCount }: HeartButtonProps) {
+export function HeartButton({ entityType, entityId, initialCount, initialHearted }: HeartButtonProps) {
   const [hearted, setHearted] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [heartedLoaded, setHeartedLoaded] = useState(false);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    if (initialHearted !== undefined) return;
+    // Fallback for pages that don't batch-load hearted state
     const visitorId =
       document.cookie
         .split("; ")
@@ -27,7 +30,13 @@ export function HeartButton({ entityType, entityId, initialCount }: HeartButtonP
       setHearted(data.hearted);
       setHeartedLoaded(true);
     });
-  }, [entityType, entityId]);
+  }, [entityType, entityId, initialHearted]);
+
+  useEffect(() => {
+    if (initialHearted === undefined) return;
+    setHearted(initialHearted);
+    setHeartedLoaded(true);
+  }, [initialHearted]);
 
   function handleClick() {
     startTransition(async () => {

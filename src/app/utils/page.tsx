@@ -5,9 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { FilterPopover } from "@/components/FilterPopover";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getSites } from "@/actions/sites";
 import { getStacks } from "@/actions/stacks";
+import { fetchMicrolink } from "@/lib/microlink-cache";
 import { LinkPreview } from "@/components/LinkPreview";
 import { Spinner } from "@/components/Spinner";
 
@@ -168,23 +169,11 @@ interface SiteMeta {
 function SiteItem({ url, tags, createdAt }: { url: string; tags: string | null; createdAt: Date }) {
   const domain = getDomain(url);
   const [meta, setMeta] = useState<SiteMeta | null>(null);
-  const fetchedUrl = useRef("");
 
   useEffect(() => {
-    if (fetchedUrl.current === url) return;
-    fetchedUrl.current = url;
-    setMeta(null);
-    fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`)
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.status === "success") {
-          setMeta({
-            title: json.data.title || null,
-            logo: json.data.logo?.url || null,
-          });
-        }
-      })
-      .catch(() => {});
+    fetchMicrolink(url).then((data) => {
+      if (data) setMeta({ title: data.title, logo: data.logo });
+    });
   }, [url]);
 
   const fallbackFavicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;

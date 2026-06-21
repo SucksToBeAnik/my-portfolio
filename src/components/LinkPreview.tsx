@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { fetchMicrolink } from "@/lib/microlink-cache";
 
 interface LinkPreviewProps {
   url: string;
@@ -57,20 +58,9 @@ export function LinkPreview({
 
       if (!fetchedRef.current) {
         fetchedRef.current = true;
-        fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`)
-          .then((r) => r.json())
-          .then((json) => {
-            if (json.status === "success") {
-              setData({
-                title: json.data.title || null,
-                description: json.data.description || null,
-                image: json.data.image?.url || null,
-                logo: json.data.logo?.url || null,
-                domain: getDomain(url),
-              });
-            }
-          })
-          .catch(() => {});
+        fetchMicrolink(url).then((meta) => {
+          if (meta) setData({ ...meta, domain: getDomain(url) });
+        });
       }
     }, 400);
   }
