@@ -9,6 +9,10 @@
   animation: fadeUp 0.2s ease-out backwards;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   --bg: #121212;
   --fg: #ffffff;
