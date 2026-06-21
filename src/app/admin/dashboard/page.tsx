@@ -48,7 +48,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-heading">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-heading">Dashboard</h1>
+        <span className="flex items-center gap-1.5 text-[10px] text-muted">
+          Quick add
+          <kbd className="px-1.5 py-0.5 bg-hover-bg border border-hairline rounded text-[9px] leading-none">⌘I</kbd>
+        </span>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {sections.map((s) => (

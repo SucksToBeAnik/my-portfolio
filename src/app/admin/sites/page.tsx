@@ -153,12 +153,17 @@ export default function SitesPage() {
 
   useEffect(() => {
     function handlePaste(e: ClipboardEvent) {
-      const text = e.clipboardData?.getData("text");
+      const text = e.clipboardData?.getData("text")?.trim();
       if (!text) return;
+      const normalized = text.startsWith("http") ? text : `https://${text}`;
       try {
-        new URL(text);
-        createMut.mutate(text);
-      } catch {}
+        const { hostname } = new URL(normalized);
+        if (!hostname.includes(".")) throw new Error();
+      } catch {
+        toast.error("Not a valid URL");
+        return;
+      }
+      createMut.mutate(normalized);
     }
     window.addEventListener("paste", handlePaste);
     return () => window.removeEventListener("paste", handlePaste);

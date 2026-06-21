@@ -4,7 +4,9 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { BottomNav } from "@/components/BottomNav";
 import { PageShell } from "@/components/PageShell";
+import { QuickAdd } from "@/components/QuickAdd";
 import { SearchOverlay } from "@/components/SearchOverlay";
+import { auth } from "@/lib/auth";
 import { QueryProvider } from "@/lib/QueryProvider";
 import { ThemeProvider } from "@/lib/ThemeProvider";
 
@@ -24,11 +26,12 @@ export const metadata: Metadata = {
   description: "Software engineer and builder.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
     <html lang="en" className={`${spaceMono.variable} ${inter.variable}`} data-theme="dark">
       <head>
@@ -56,6 +59,7 @@ export default function RootLayout({
               <PageShell>{children}</PageShell>
               <BottomNav />
               <SearchOverlay />
+              {session?.user && <QuickAdd />}
             </QueryProvider>
           </ThemeProvider>
         </SessionProvider>
