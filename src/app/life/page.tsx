@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { lifeEvents } from "@/db/schema";
 
 export const metadata = {
-  title: "Life — Suckstobeanik",
+  title: "Life | Suckstobeanik",
   description: "Personal milestones, achievements, and travels.",
 };
 

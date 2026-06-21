@@ -8,7 +8,7 @@ import { db } from "@/db";
 import { tils } from "@/db/schema";
 
 export const metadata = {
-  title: "TIL — Suckstobeanik",
+  title: "TIL | Suckstobeanik",
   description: "Things I've learned — short notes and discoveries.",
 };
 

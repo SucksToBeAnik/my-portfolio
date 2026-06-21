@@ -15,7 +15,9 @@ export function SearchOverlay() {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setOpen((p) => !p);
+        const willOpen = !openRef.current;
+        if (willOpen) window.dispatchEvent(new CustomEvent("closechat"));
+        setOpen(willOpen);
       }
       // When search is open, cmd+/ closes it and hands off to chat
       if ((e.metaKey || e.ctrlKey) && e.key === "/" && openRef.current) {
@@ -26,13 +28,20 @@ export function SearchOverlay() {
       }
     }
     function handleOpenSearch() {
-      setOpen((p) => !p);
+      const willOpen = !openRef.current;
+      if (willOpen) window.dispatchEvent(new CustomEvent("closechat"));
+      setOpen(willOpen);
+    }
+    function handleCloseSearch() {
+      setOpen(false);
     }
     window.addEventListener("keydown", handleKeyDown, { capture: true });
     window.addEventListener("opensearch", handleOpenSearch);
+    window.addEventListener("closesearch", handleCloseSearch);
     return () => {
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
       window.removeEventListener("opensearch", handleOpenSearch);
+      window.removeEventListener("closesearch", handleCloseSearch);
     };
   }, []);
 

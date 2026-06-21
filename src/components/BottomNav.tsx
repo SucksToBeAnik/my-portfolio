@@ -128,6 +128,8 @@ export function BottomNav() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const [chatOpen, setChatOpen] = useState(false);
+  const chatOpenRef = useRef(false);
+  useEffect(() => { chatOpenRef.current = chatOpen; }, [chatOpen]);
   const [panelTwo, setPanelTwo] = useState(false);
 
   useEffect(() => {
@@ -176,23 +178,36 @@ export function BottomNav() {
   }, [pathname]);
 
   useEffect(() => {
-    const handler = () => setChatOpen(true);
+    const handler = () => {
+      window.dispatchEvent(new CustomEvent("closesearch"));
+      setChatOpen(true);
+    };
     window.addEventListener("openchat", handler);
     return () => window.removeEventListener("openchat", handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setChatOpen(false);
+    window.addEventListener("closechat", handler);
+    return () => window.removeEventListener("closechat", handler);
   }, []);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "/" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setChatOpen((o) => !o);
+        const willOpen = !chatOpenRef.current;
+        if (willOpen) window.dispatchEvent(new CustomEvent("closesearch"));
+        setChatOpen(willOpen);
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  if (pathname.startsWith("/admin")) return null;
+  if (pathname.startsWith("/admin")) {
+    return <ChatPopup open={chatOpen} onClose={() => setChatOpen(false)} />;
+  }
 
   return (
     <>

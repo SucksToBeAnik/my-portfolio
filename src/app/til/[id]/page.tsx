@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .limit(1)
     .then((r) => r[0]);
   return {
-    title: til ? `${til.title} — TIL — Suckstobeanik` : "TIL — Suckstobeanik",
+    title: til ? `${til.title} | TIL | Suckstobeanik` : "TIL | Suckstobeanik",
   };
 }
 

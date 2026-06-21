@@ -42,8 +42,9 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
 
   const activeItems = query
     ? items.filter((i) => {
-        const q = query.toLowerCase();
-        return i.title.toLowerCase().includes(q) || i.subtitle.toLowerCase().includes(q);
+        const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+        const haystack = `${i.title} ${i.subtitle}`.toLowerCase();
+        return words.every((w) => haystack.includes(w));
       })
     : [];
 
@@ -61,6 +62,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
       setQuery("");
       setLoaded(false);
       setActiveIndex(-1);
+      invalidateSearchCache();
       getSearchItems().then((data) => {
         setItems(data);
         setLoaded(true);
@@ -69,13 +71,9 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
     }
   }, [open]);
 
+  // auto-select first result when query changes
   useEffect(() => {
-    invalidateSearchCache();
-  }, []);
-
-  // reset selection when results change
-  useEffect(() => {
-    setActiveIndex(-1);
+    setActiveIndex(0);
     itemRefs.current = [];
   }, [query]);
 
@@ -100,10 +98,10 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
         onClose();
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
-        setActiveIndex((i) => (i + 1) % flatItems.length);
+        if (flatItems.length > 0) setActiveIndex((i) => (i + 1) % flatItems.length);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setActiveIndex((i) => (i <= 0 ? flatItems.length - 1 : i - 1));
+        if (flatItems.length > 0) setActiveIndex((i) => (i <= 0 ? flatItems.length - 1 : i - 1));
       } else if (e.key === "Enter" && activeIndex >= 0 && flatItems[activeIndex]) {
         e.preventDefault();
         handleSelect(flatItems[activeIndex].url);

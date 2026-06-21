@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Utils — Suckstobeanik",
+  title: "Utils | Suckstobeanik",
   description: "Stacks and sites I use.",
 };
 

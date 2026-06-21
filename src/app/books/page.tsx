@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { books } from "@/db/schema";
 
 export const metadata = {
-  title: "Books — Suckstobeanik",
+  title: "Books | Suckstobeanik",
   description: "Book catalog with ratings and reviews.",
 };
 

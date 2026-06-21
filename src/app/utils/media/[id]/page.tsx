@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const item = await getMediaItem(Number(id));
   if (!item) return {};
-  return { title: `${item.title} — Suckstobeanik` };
+  return { title: `${item.title} | Suckstobeanik` };
 }
 
 const statusLabels: Record<string, string> = {

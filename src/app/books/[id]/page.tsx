@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .where(eq(books.id, Number(id)))
     .limit(1)
     .then((r) => r[0]);
-  return { title: book ? `${book.title} — Books — Suckstobeanik` : "Books — Suckstobeanik" };
+  return { title: book ? `${book.title} | Books | Suckstobeanik` : "Books | Suckstobeanik" };
 }
 
 function ratingStars(rating: number | null) {

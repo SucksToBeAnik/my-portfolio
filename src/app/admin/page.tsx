@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Admin — Suckstobeanik",
+  title: "Admin | Suckstobeanik",
 };
 
 export default function AdminPage() {
