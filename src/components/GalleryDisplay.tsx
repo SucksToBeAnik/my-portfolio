@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImageViewer } from "@/components/ImageViewer";
 
 interface GalleryItem {
@@ -18,7 +18,53 @@ function year(dateStr: string | null): string {
   return Number.isNaN(d.getTime()) ? "" : String(d.getFullYear());
 }
 
+function Overlays({ item }: { item: GalleryItem }) {
+  return (
+    <>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+        <p className="text-[11px] font-heading uppercase tracking-wider text-white">
+          {item.title}
+          {year(item.takenAt) ? `, ${year(item.takenAt)}` : ""}
+        </p>
+      </div>
+    </>
+  );
+}
+
 function GalleryCard({ item, onClick }: { item: GalleryItem; onClick: () => void }) {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [loaded, setLoaded] = useState(false);
+  const hasDims = !!(item.width && item.height);
+
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setLoaded(true);
+    }
+  }, []);
+
+  if (hasDims) {
+    return (
+      <div
+        className="break-inside-avoid group relative w-full cursor-pointer overflow-hidden"
+        style={{ aspectRatio: `${item.width} / ${item.height}` }}
+        onClick={onClick}
+      >
+        {!loaded && <div className="absolute inset-0 bg-hover-bg animate-pulse" />}
+        <img
+          ref={imgRef}
+          src={item.imageUrl}
+          alt={item.title}
+          loading="lazy"
+          className={`absolute inset-0 w-full h-full object-cover ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
+          onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
+        />
+        <Overlays item={item} />
+      </div>
+    );
+  }
+
   return (
     <div className="break-inside-avoid group relative w-full cursor-pointer" onClick={onClick}>
       <img
@@ -27,13 +73,7 @@ function GalleryCard({ item, onClick }: { item: GalleryItem; onClick: () => void
         loading="lazy"
         className="w-full h-auto block"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-        <p className="text-[11px] font-heading uppercase tracking-wider text-white">
-          {item.title}
-          {year(item.takenAt) ? `, ${year(item.takenAt)}` : ""}
-        </p>
-      </div>
+      <Overlays item={item} />
     </div>
   );
 }
