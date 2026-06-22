@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ImageViewer } from "@/components/ImageViewer";
 
 interface GalleryItem {
@@ -19,31 +19,13 @@ function year(dateStr: string | null): string {
 }
 
 function GalleryCard({ item, onClick }: { item: GalleryItem; onClick: () => void }) {
-  const imgRef = useRef<HTMLImageElement>(null);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    if (imgRef.current?.complete) {
-      setLoaded(true);
-    }
-  }, []);
-
   return (
     <div className="break-inside-avoid group relative w-full cursor-pointer" onClick={onClick}>
-      {!loaded && (
-        <div
-          className="w-full bg-hover-bg animate-pulse"
-          style={item.width && item.height ? { aspectRatio: `${item.width} / ${item.height}` } : { minHeight: "150px" }}
-        />
-      )}
       <img
-        ref={imgRef}
         src={item.imageUrl}
         alt={item.title}
         loading="lazy"
-        className={`w-full h-auto block ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
-        onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(true)}
+        className="w-full h-auto block"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
