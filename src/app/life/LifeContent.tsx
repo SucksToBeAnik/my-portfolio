@@ -63,7 +63,7 @@ export function LifeContent({
     "tab",
     parseAsStringLiteral(["timeline", "gallery"] as const)
       .withDefault("timeline")
-      .withOptions({ history: "replace", scroll: false }),
+      .withOptions({ history: "replace", scroll: false, shallow: false }),
   );
 
   return (
