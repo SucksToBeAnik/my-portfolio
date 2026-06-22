@@ -45,7 +45,7 @@ function GalleryCard({ item, onClick }: { item: GalleryItem; onClick: () => void
 
   return (
     <div
-      className="break-inside-avoid group relative w-full cursor-pointer overflow-hidden"
+      className="break-inside-avoid group relative w-full cursor-pointer overflow-hidden mb-2"
       style={hasDims ? { aspectRatio: `${item.width} / ${item.height}` } : undefined}
       onClick={onClick}
     >
@@ -77,7 +77,7 @@ export function GalleryDisplay({ items }: { items: GalleryItem[] }) {
 
   return (
     <>
-      <div className="columns-2 gap-2 space-y-2">
+      <div className="columns-2 gap-2">
         {items.map((item) => (
           <GalleryCard
             key={item.id}
