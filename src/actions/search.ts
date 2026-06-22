@@ -10,7 +10,7 @@ export interface SearchIndexItem {
   title: string;
   subtitle: string;
   url: string;
-  type: "project" | "book" | "microblog" | "til" | "lifeEvent" | "stack" | "media" | "page";
+  type: "project" | "book" | "microblog" | "til" | "lifeEvent" | "stack" | "media" | "gallery" | "page";
 }
 
 const staticPages: SearchIndexItem[] = [
@@ -180,7 +180,7 @@ export async function getSearchIndex() {
       title: g.title,
       subtitle: g.takenAt ? new Date(g.takenAt).getFullYear().toString() : "",
       url: "/life?tab=gallery",
-      type: "page" as const,
+      type: "gallery" as const,
     })),
   ];
 

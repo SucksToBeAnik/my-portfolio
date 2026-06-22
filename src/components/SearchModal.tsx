@@ -5,6 +5,7 @@ import {
   Compass,
   FolderOpen,
   Heart,
+  Image,
   Lightbulb,
   MagnifyingGlass,
   Quotes,
@@ -25,9 +26,10 @@ const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
   lifeEvent: { icon: Heart, label: "Life" },
   stack: { icon: Wrench, label: "Stacks" },
   media: { icon: Television, label: "Media" },
+  gallery: { icon: Image, label: "Gallery" },
 };
 
-const typeOrder = ["page", "project", "book", "microblog", "til", "lifeEvent", "stack", "media"];
+const typeOrder = ["page", "project", "book", "microblog", "til", "lifeEvent", "stack", "media", "gallery"];
 
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
