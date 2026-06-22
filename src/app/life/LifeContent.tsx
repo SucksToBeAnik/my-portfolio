@@ -1,7 +1,8 @@
 "use client";
 
 import { Briefcase, GraduationCap, MapPin, PushPin, Star } from "@phosphor-icons/react/dist/ssr";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { GalleryDisplay } from "@/components/GalleryDisplay";
 import { LifeImage } from "@/components/LifeImage";
@@ -61,21 +62,18 @@ export function LifeContent({
   items: LifeItem[];
   galleryItems: GalleryItem[];
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const tab: Tab = searchParams.get("tab") === "gallery" ? "gallery" : "timeline";
-
-  function switchTab(t: Tab) {
-    router.replace(t === "gallery" ? "/life?tab=gallery" : "/life", { scroll: false });
-  }
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-8 md:mb-16">
         <Breadcrumb crumbs={[{ label: "My Life" }]} />
         <div className="flex gap-3 shrink-0">
-          <button
-            onClick={() => switchTab("timeline")}
+          <Link
+            href="/life"
+            replace
+            scroll={false}
             className={`pb-1 text-xs font-heading uppercase tracking-wider transition-all cursor-pointer border-b-2 ${
               tab === "timeline"
                 ? "border-fg text-fg"
@@ -83,9 +81,11 @@ export function LifeContent({
             }`}
           >
             Timeline
-          </button>
-          <button
-            onClick={() => switchTab("gallery")}
+          </Link>
+          <Link
+            href="/life?tab=gallery"
+            replace
+            scroll={false}
             className={`pb-1 text-xs font-heading uppercase tracking-wider transition-all cursor-pointer border-b-2 ${
               tab === "gallery"
                 ? "border-fg text-fg"
@@ -93,12 +93,11 @@ export function LifeContent({
             }`}
           >
             Gallery
-          </button>
+          </Link>
         </div>
       </div>
 
-      <>
-        <div style={{ display: tab !== "timeline" ? "none" : "" }}>
+      <div style={{ display: tab !== "timeline" ? "none" : "" }}>
             {items.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
 
             <div className="relative pl-8 space-y-10 before:absolute before:left-[15.5px] before:top-0 before:bottom-2 before:w-px before:bg-hairline">
@@ -159,10 +158,9 @@ export function LifeContent({
             </div>
           </div>
 
-        <div style={{ display: tab !== "gallery" ? "none" : "" }}>
-          <GalleryDisplay items={galleryItems} />
-        </div>
-      </>
+      <div style={{ display: tab !== "gallery" ? "none" : "" }}>
+        <GalleryDisplay items={galleryItems} />
+      </div>
     </div>
   );
 }
