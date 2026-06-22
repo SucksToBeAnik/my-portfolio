@@ -35,7 +35,7 @@ function Overlays({ item }: { item: GalleryItem }) {
 function GalleryCard({ item, onClick }: { item: GalleryItem; onClick: () => void }) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
-  const hasDims = !!(item.width && item.height);
+  const ratio = item.width && item.height ? `${item.width} / ${item.height}` : "4 / 3";
 
   useEffect(() => {
     if (imgRef.current?.complete) {
@@ -46,20 +46,16 @@ function GalleryCard({ item, onClick }: { item: GalleryItem; onClick: () => void
   return (
     <div
       className="break-inside-avoid group relative w-full cursor-pointer overflow-hidden mb-2"
-      style={hasDims ? { aspectRatio: `${item.width} / ${item.height}` } : undefined}
+      style={{ aspectRatio: ratio }}
       onClick={onClick}
     >
-      {!loaded && (
-        <div
-          className={`bg-hover-bg animate-pulse ${hasDims ? "absolute inset-0" : "w-full min-h-[150px]"}`}
-        />
-      )}
+      {!loaded && <div className="absolute inset-0 bg-hover-bg animate-pulse" />}
       <img
         ref={imgRef}
         src={item.imageUrl}
         alt={item.title}
         loading="lazy"
-        className={`${hasDims ? "absolute inset-0 w-full h-full object-cover" : "w-full h-auto block"} ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
+        className={`absolute inset-0 w-full h-full object-cover ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
         onLoad={() => setLoaded(true)}
         onError={() => setLoaded(true)}
       />
