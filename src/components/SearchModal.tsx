@@ -31,13 +31,36 @@ const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
 
 const typeOrder = ["page", "project", "book", "microblog", "til", "lifeEvent", "stack", "media", "gallery"];
 
+const TYPE_ALIAS: Record<string, string> = {
+  page: "page",
+  pages: "page",
+  project: "project",
+  projects: "project",
+  book: "book",
+  books: "book",
+  microblog: "microblog",
+  microblogs: "microblog",
+  til: "til",
+  tils: "til",
+  life: "lifeEvent",
+  stack: "stack",
+  stacks: "stack",
+  media: "media",
+  gallery: "gallery",
+  galleries: "gallery",
+};
+
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function highlight(text: string, query: string): React.ReactNode {
   if (!query.trim()) return text;
-  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const words = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w && !w.startsWith("@"));
+  if (words.length === 0) return text;
   const pattern = words.map((w) => `\\b${escapeRegex(w)}`).join("|");
   const regex = new RegExp(pattern, "gi");
   const parts: React.ReactNode[] = [];
@@ -75,7 +98,19 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
 
   const activeItems = query
     ? items.filter((i) => {
-        const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+        const raw = query.toLowerCase().split(/\s+/).filter(Boolean);
+        const typeFilters: string[] = [];
+        const words: string[] = [];
+        for (const w of raw) {
+          const match = w.match(/^@(\w+)$/);
+          if (match && TYPE_ALIAS[match[1]]) {
+            typeFilters.push(TYPE_ALIAS[match[1]]);
+          } else {
+            words.push(w);
+          }
+        }
+        if (typeFilters.length > 0 && !typeFilters.includes(i.type)) return false;
+        if (words.length === 0) return true;
         const haystack = `${i.title} ${i.subtitle}`.toLowerCase();
         return words.every((w) => new RegExp(`\\b${escapeRegex(w)}`).test(haystack));
       })
@@ -161,7 +196,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search pages, projects, books..."
+            placeholder='Search or use @gallery, @stacks, @til...'
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
