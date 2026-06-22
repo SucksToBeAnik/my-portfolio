@@ -12,7 +12,7 @@ import {
   Wrench,
 } from "@phosphor-icons/react";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { SearchIndexItem } from "@/actions/search";
 import { getSearchItems, invalidateSearchCache } from "@/lib/search-index";
 
@@ -40,8 +40,8 @@ function highlight(text: string, query: string): React.ReactNode {
   const regex = new RegExp(pattern, "gi");
   const parts: React.ReactNode[] = [];
   let last = 0;
-  let match: RegExpExecArray | null;
   let key = 0;
+  let match: RegExpExecArray | null;
   while ((match = regex.exec(text)) !== null) {
     if (match.index > last) {
       parts.push(<span key={key++}>{text.slice(last, match.index)}</span>);
@@ -71,38 +71,21 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
   const router = useRouter();
   const _pathname = usePathname();
 
-  const deduped = useMemo(
-    () => Array.from(new Map(items.map((i) => [`${i.type}-${i.id}`, i])).values()),
-    [items],
-  );
+  const activeItems = query
+    ? items.filter((i) => {
+        const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+        const haystack = `${i.title} ${i.subtitle}`.toLowerCase();
+        return words.every((w) => new RegExp(`\\b${escapeRegex(w)}`).test(haystack));
+      })
+    : [];
 
-  const activeItems = useMemo(() => {
-    if (!query) return [];
-    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-    const haystackCache = new Map<SearchIndexItem, string>();
-    return deduped.filter((i) => {
-      let haystack = haystackCache.get(i);
-      if (!haystack) {
-        haystack = `${i.title} ${i.subtitle}`.toLowerCase();
-        haystackCache.set(i, haystack);
-      }
-      return words.every((w) => new RegExp(`\\b${escapeRegex(w)}`).test(haystack));
-    });
-  }, [query, deduped]);
+  const grouped = activeItems.reduce<Record<string, SearchIndexItem[]>>((acc, item) => {
+    if (!acc[item.type]) acc[item.type] = [];
+    acc[item.type].push(item);
+    return acc;
+  }, {});
 
-  const grouped = useMemo(() => {
-    const map: Record<string, SearchIndexItem[]> = {};
-    for (const item of activeItems) {
-      if (!map[item.type]) map[item.type] = [];
-      map[item.type].push(item);
-    }
-    return map;
-  }, [activeItems]);
-
-  const flatItems = useMemo(
-    () => typeOrder.flatMap((type) => grouped[type] ?? []),
-    [grouped],
-  );
+  const flatItems = typeOrder.flatMap((type) => grouped[type] ?? []);
 
   useEffect(() => {
     if (open) {
