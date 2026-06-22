@@ -7,6 +7,7 @@ import {
   House,
   Lightbulb,
   MagnifyingGlass,
+  MapPin,
   Moon,
   Briefcase,
   SunDim,
@@ -27,6 +28,7 @@ const ChatPopup = dynamic(() => import("@/components/ChatPopup").then((m) => m.C
 const navItems = [
   { href: "/", label: "Home", icon: House },
   { href: "/life", label: "Life", icon: Heart },
+  { href: "/travel", label: "Travel", icon: MapPin },
   { href: "/books", label: "Books", icon: BookOpenText },
   { href: "/til", label: "TIL", icon: Lightbulb },
   { href: "/media", label: "Watch", icon: Television },

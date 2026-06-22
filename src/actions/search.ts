@@ -17,6 +17,7 @@ const staticPages: SearchIndexItem[] = [
   { id: 0, title: "Home", subtitle: "About me & quick links", url: "/", type: "page" },
   { id: 1, title: "Projects", subtitle: "Things I've built", url: "/projects", type: "page" },
   { id: 2, title: "Life", subtitle: "Personal timeline", url: "/life", type: "page" },
+  { id: 21, title: "Travel", subtitle: "Interactive map of places I've been", url: "/travel", type: "page" },
   { id: 3, title: "Books", subtitle: "Book catalog & reviews", url: "/books", type: "page" },
   { id: 4, title: "Writings", subtitle: "Microblog posts & TIL", url: "/writings", type: "page" },
   { id: 5, title: "Utils", subtitle: "Stacks & sites I use", url: "/utils", type: "page" },
