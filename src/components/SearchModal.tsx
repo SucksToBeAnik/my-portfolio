@@ -101,37 +101,49 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
   const [items, setItems] = useState<SearchIndexItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const [showTypeHint, setShowTypeHint] = useState(false);
-  const [typeFilter, setTypeFilter] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const fetchRef = useRef(0);
   const router = useRouter();
 
-  const typeSuggestions = showTypeHint
-    ? TYPE_SUGGESTIONS.filter((s) => s.startsWith(`@${typeFilter}`))
+  const lastWord = query.split(/\s+/).pop() ?? "";
+  const isTypePicking = lastWord.startsWith("@") && lastWord.length > 1;
+
+  const matchingTypes = isTypePicking
+    ? TYPE_SUGGESTIONS.filter((s) => s.startsWith(lastWord))
     : [];
 
-  const activeItems = query
-    ? items.filter((i) => {
-        const raw = query.toLowerCase().split(/\s+/).filter(Boolean);
-        const typeFilters: string[] = [];
-        const words: string[] = [];
-        for (const w of raw) {
-          const match = w.match(/^@(\w+)$/);
-          if (match && TYPE_ALIAS[match[1]]) {
-            typeFilters.push(TYPE_ALIAS[match[1]]);
-          } else {
-            words.push(w);
-          }
-        }
-        if (typeFilters.length > 0 && !typeFilters.includes(i.type)) return false;
-        if (words.length === 0) return true;
-        const haystack = `${i.title} ${i.subtitle}`.toLowerCase();
-        return words.every((w) => new RegExp(`\\b${escapeRegex(w)}`).test(haystack));
+  const activeItems: SearchIndexItem[] = isTypePicking
+    ? matchingTypes.map((s, i) => {
+        const typeKey = (TYPE_ALIAS[s.slice(1)] ?? "page") as SearchIndexItem["type"];
+        return {
+          id: -(i + 1),
+          title: s,
+          subtitle: `Filter by ${s.slice(1)}`,
+          url: `__type__:${s.slice(1)}`,
+          type: typeKey,
+        };
       })
-    : [];
+    : query
+      ? items.filter((i) => {
+          const raw = query.toLowerCase().split(/\s+/).filter(Boolean);
+          const typeFilters: string[] = [];
+          const words: string[] = [];
+          for (const w of raw) {
+            const match = w.match(/^@(\w+)$/);
+            if (match && TYPE_ALIAS[match[1]]) {
+              typeFilters.push(TYPE_ALIAS[match[1]]);
+            } else {
+              words.push(w);
+            }
+          }
+          if (typeFilters.length > 0 && !typeFilters.includes(i.type)) return false;
+          if (words.length === 0) return true;
+          const haystack = `${i.title} ${i.subtitle}`.toLowerCase();
+          return words.every((w) => new RegExp(`\\b${escapeRegex(w)}`).test(haystack));
+        })
+      : [];
 
   const grouped = activeItems.reduce<Record<string, SearchIndexItem[]>>((acc, item) => {
     if (!acc[item.type]) acc[item.type] = [];
@@ -158,9 +170,9 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
   }, [open]);
 
   useEffect(() => {
-    setActiveIndex(0);
+    setActiveIndex(flatItems.length > 0 ? 0 : -1);
     itemRefs.current = [];
-  }, [query]);
+  }, [query, flatItems.length]);
 
   useEffect(() => {
     if (activeIndex >= 0) {
@@ -170,10 +182,17 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
 
   const handleSelect = useCallback(
     (url: string) => {
+      if (url.startsWith("__type__:")) {
+        const type = url.slice(9);
+        const words = query.split(/\s+/);
+        words[words.length - 1] = `@${type}`;
+        setQuery(words.join(" ") + " ");
+        return;
+      }
       onClose();
       router.push(url);
     },
-    [onClose, router],
+    [onClose, router, query],
   );
 
   const handleKeyDown = useCallback(
@@ -210,67 +229,22 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline">
           <MagnifyingGlass weight="thin" className="w-4 h-4 text-muted shrink-0" />
-          <div className="flex-1 relative">
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder='Search or use @gallery, @stacks, @til...'
-              value={query}
-              onChange={(e) => {
-                const val = e.target.value;
-                setQuery(val);
-                const last = val.split(/\s+/).pop() ?? "";
-                if (last.startsWith("@")) {
-                  setShowTypeHint(true);
-                  setTypeFilter(last.slice(1));
-                } else {
-                  setShowTypeHint(false);
-                  setTypeFilter("");
-                }
-              }}
-              onKeyDown={(e) => {
-                if (showTypeHint && typeSuggestions.length > 0 && e.key === "Enter") {
-                  e.preventDefault();
-                  const words = query.split(/\s+/);
-                  words[words.length - 1] = typeSuggestions[0];
-                  setQuery(words.join(" ") + " ");
-                  setShowTypeHint(false);
-                  setTypeFilter("");
-                  return;
-                }
-                handleKeyDown(e);
-              }}
-              className="flex-1 text-sm bg-transparent text-fg placeholder-fg/30 focus:outline-none w-full"
-            />
-            {showTypeHint && typeSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-bg border border-hairline rounded-xl shadow-xl overflow-hidden z-10">
-                {typeSuggestions.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => {
-                      const words = query.split(/\s+/);
-                      words[words.length - 1] = s;
-                      setQuery(words.join(" ") + " ");
-                      setShowTypeHint(false);
-                      setTypeFilter("");
-                      inputRef.current?.focus();
-                    }}
-                    className="w-full px-3 py-2 text-xs text-left text-fg hover:bg-hover-bg transition-colors cursor-pointer font-heading"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder='Search or use @gallery, @stacks, @til...'
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1 text-sm bg-transparent text-fg placeholder-fg/30 focus:outline-none"
+          />
           <kbd className="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] text-muted bg-hover-bg rounded border border-hairline">
             ESC
           </kbd>
         </div>
 
         <div ref={listRef} className="max-h-[50vh] overflow-y-auto">
-          {!loaded && query && (
+          {!loaded && query && !isTypePicking && (
             <div className="flex items-center justify-center py-8 text-xs text-muted">
               Loading...
             </div>
@@ -278,7 +252,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
 
           {loaded && query && activeItems.length === 0 && (
             <div className="flex items-center justify-center py-8 text-xs text-muted">
-              No results found.
+              {isTypePicking ? "No matching type filters." : "No results found."}
             </div>
           )}
 
