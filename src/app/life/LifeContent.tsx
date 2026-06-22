@@ -1,14 +1,11 @@
 "use client";
 
 import { Briefcase, GraduationCap, MapPin, PushPin, Star } from "@phosphor-icons/react/dist/ssr";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { GalleryDisplay } from "@/components/GalleryDisplay";
 import { LifeImage } from "@/components/LifeImage";
 import { LinkPreview } from "@/components/LinkPreview";
-
-type Tab = "timeline" | "gallery";
 
 function formatDate(date: string) {
   const d = new Date(date);
@@ -62,18 +59,21 @@ export function LifeContent({
   items: LifeItem[];
   galleryItems: GalleryItem[];
 }) {
-  const searchParams = useSearchParams();
-  const tab: Tab = searchParams.get("tab") === "gallery" ? "gallery" : "timeline";
+  const [tab, setTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral(["timeline", "gallery"] as const)
+      .withDefault("timeline")
+      .withOptions({ history: "replace", scroll: false }),
+  );
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-8 md:mb-16">
         <Breadcrumb crumbs={[{ label: "My Life" }]} />
         <div className="flex gap-3 shrink-0">
-          <Link
-            href="/life"
-            replace
-            scroll={false}
+          <button
+            type="button"
+            onClick={() => setTab("timeline")}
             className={`pb-1 text-xs font-heading uppercase tracking-wider transition-all cursor-pointer border-b-2 ${
               tab === "timeline"
                 ? "border-fg text-fg"
@@ -81,11 +81,10 @@ export function LifeContent({
             }`}
           >
             Timeline
-          </Link>
-          <Link
-            href="/life?tab=gallery"
-            replace
-            scroll={false}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("gallery")}
             className={`pb-1 text-xs font-heading uppercase tracking-wider transition-all cursor-pointer border-b-2 ${
               tab === "gallery"
                 ? "border-fg text-fg"
@@ -93,7 +92,7 @@ export function LifeContent({
             }`}
           >
             Gallery
-          </Link>
+          </button>
         </div>
       </div>
 

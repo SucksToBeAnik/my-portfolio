@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { BottomNav } from "@/components/BottomNav";
 import { PageShell } from "@/components/PageShell";
 import { QuickAdd } from "@/components/QuickAdd";
@@ -63,16 +64,18 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <SessionProvider>
-          <ThemeProvider>
-            <QueryProvider>
-<PageShell>{children}</PageShell>
-              <BottomNav />
-              <SearchOverlay />
-              <QuickAdd />
-            </QueryProvider>
-          </ThemeProvider>
-        </SessionProvider>
+        <NuqsAdapter>
+          <SessionProvider>
+            <ThemeProvider>
+              <QueryProvider>
+                <PageShell>{children}</PageShell>
+                <BottomNav />
+                <SearchOverlay />
+                <QuickAdd />
+              </QueryProvider>
+            </ThemeProvider>
+          </SessionProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );
