@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { Briefcase, GraduationCap, MapPin, PushPin, Star } from "@phosphor-icons/react/dist/ssr";
-import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { useSearchParams } from "next/navigation";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { GalleryDisplay } from "@/components/GalleryDisplay";
 import { LifeImage } from "@/components/LifeImage";
@@ -59,12 +60,31 @@ export function LifeContent({
   items: LifeItem[];
   galleryItems: GalleryItem[];
 }) {
-  const [tab, setTab] = useQueryState(
-    "tab",
-    parseAsStringLiteral(["timeline", "gallery"] as const)
-      .withDefault("timeline")
-      .withOptions({ history: "replace", scroll: false, shallow: false }),
-  );
+  const [tab, setTab] = useState<"timeline" | "gallery">("timeline");
+  // Re-sync whenever Next.js performs a real router navigation to this page
+  // (e.g. clicking Life in the nav from another page). Tab switches bypass
+  // the router via replaceState so they won't trigger this effect.
+  const searchParams = useSearchParams();
+  const skipNextSync = useRef(false);
+  useEffect(() => {
+    if (skipNextSync.current) { skipNextSync.current = false; return; }
+    setTab(new URLSearchParams(window.location.search).get("tab") === "gallery" ? "gallery" : "timeline");
+  }, [searchParams]);
+
+  // Keep browser back/forward in sync too
+  useEffect(() => {
+    function onPopState() {
+      setTab(new URLSearchParams(window.location.search).get("tab") === "gallery" ? "gallery" : "timeline");
+    }
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  function switchTab(t: "timeline" | "gallery") {
+    skipNextSync.current = true;
+    setTab(t);
+    window.history.replaceState(null, "", t === "gallery" ? "/life?tab=gallery" : "/life");
+  }
 
   return (
     <div className="space-y-8">
