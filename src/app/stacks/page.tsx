@@ -27,8 +27,16 @@ export default async function StacksPage() {
 
   return (
     <div className="space-y-8">
-      <div className="mb-8 md:mb-16">
+      <div className="flex items-center justify-between mb-8 md:mb-16">
         <Breadcrumb crumbs={[{ label: "Stacks" }]} />
+        {all.length > 0 && (
+          <Link
+            href="/sites"
+            className="text-xs text-muted hover:text-fg transition-colors inline-flex items-center gap-1 shrink-0"
+          >
+            See sites I find useful <ArrowRight weight="thin" className="w-3 h-3" />
+          </Link>
+        )}
       </div>
 
       {all.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
@@ -70,15 +78,6 @@ export default async function StacksPage() {
           </a>
         ))}
       </div>
-
-      {all.length > 0 && (
-        <p className="text-xs text-muted pt-6 border-t border-hairline">
-          See{" "}
-          <Link href="/sites" className="text-fg hover:underline inline-flex items-center gap-1">
-            sites I find useful <ArrowRight weight="thin" className="w-3 h-3" />
-          </Link>
-        </p>
-      )}
     </div>
   );
 }
