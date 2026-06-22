@@ -12,7 +12,7 @@ import {
   Wrench,
 } from "@phosphor-icons/react";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SearchIndexItem } from "@/actions/search";
 import { getSearchItems, invalidateSearchCache } from "@/lib/search-index";
 
@@ -29,6 +29,36 @@ const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
 
 const typeOrder = ["page", "project", "book", "microblog", "til", "lifeEvent", "stack", "media"];
 
+function escapeRegex(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlight(text: string, query: string): React.ReactNode {
+  if (!query.trim()) return text;
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const pattern = words.map((w) => `\\b${escapeRegex(w)}`).join("|");
+  const regex = new RegExp(pattern, "gi");
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > last) {
+      parts.push(<span key={key++}>{text.slice(last, match.index)}</span>);
+    }
+    parts.push(
+      <mark key={key++} className="bg-fg/20 text-fg rounded-sm">
+        {match[0]}
+      </mark>,
+    );
+    last = regex.lastIndex;
+  }
+  if (last < text.length) {
+    parts.push(<span key={key}>{text.slice(last)}</span>);
+  }
+  return parts.length > 0 ? parts : text;
+}
+
 export function SearchModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<SearchIndexItem[]>([]);
@@ -37,33 +67,52 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const fetchRef = useRef(0);
   const router = useRouter();
   const _pathname = usePathname();
 
-  const activeItems = query
-    ? items.filter((i) => {
-        const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-        const haystack = `${i.title} ${i.subtitle}`.toLowerCase();
-        return words.every((w) => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(haystack));
-      })
-    : [];
+  const deduped = useMemo(
+    () => Array.from(new Map(items.map((i) => [`${i.type}-${i.id}`, i])).values()),
+    [items],
+  );
 
-  const grouped = activeItems.reduce<Record<string, SearchIndexItem[]>>((acc, item) => {
-    if (!acc[item.type]) acc[item.type] = [];
-    acc[item.type].push(item);
-    return acc;
-  }, {});
+  const activeItems = useMemo(() => {
+    if (!query) return [];
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const haystackCache = new Map<SearchIndexItem, string>();
+    return deduped.filter((i) => {
+      let haystack = haystackCache.get(i);
+      if (!haystack) {
+        haystack = `${i.title} ${i.subtitle}`.toLowerCase();
+        haystackCache.set(i, haystack);
+      }
+      return words.every((w) => new RegExp(`\\b${escapeRegex(w)}`).test(haystack));
+    });
+  }, [query, deduped]);
 
-  // flat ordered list matching render order
-  const flatItems = typeOrder.flatMap((type) => grouped[type] ?? []);
+  const grouped = useMemo(() => {
+    const map: Record<string, SearchIndexItem[]> = {};
+    for (const item of activeItems) {
+      if (!map[item.type]) map[item.type] = [];
+      map[item.type].push(item);
+    }
+    return map;
+  }, [activeItems]);
+
+  const flatItems = useMemo(
+    () => typeOrder.flatMap((type) => grouped[type] ?? []),
+    [grouped],
+  );
 
   useEffect(() => {
     if (open) {
+      const id = ++fetchRef.current;
       setQuery("");
       setLoaded(false);
       setActiveIndex(-1);
       invalidateSearchCache();
       getSearchItems().then((data) => {
+        if (id !== fetchRef.current) return;
         setItems(data);
         setLoaded(true);
       });
@@ -71,13 +120,11 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
     }
   }, [open]);
 
-  // auto-select first result when query changes
   useEffect(() => {
     setActiveIndex(0);
     itemRefs.current = [];
   }, [query]);
 
-  // scroll active item into view
   useEffect(() => {
     if (activeIndex >= 0) {
       itemRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
@@ -178,9 +225,9 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
                       >
                         <config.icon weight="thin" className="w-4 h-4 text-muted shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm truncate">{item.title}</p>
+                          <p className="text-sm truncate">{highlight(item.title, query)}</p>
                           {item.subtitle && (
-                            <p className="text-xs text-muted truncate">{item.subtitle}</p>
+                            <p className="text-xs text-muted truncate">{highlight(item.subtitle, query)}</p>
                           )}
                         </div>
                       </button>
