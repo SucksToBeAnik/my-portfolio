@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Briefcase, GraduationCap, MapPin, PushPin, Star } from "@phosphor-icons/react/dist/ssr";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -65,10 +66,15 @@ export function LifeContent({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const raw = searchParams.get("tab");
-  const tab: Tab = raw === "gallery" ? "gallery" : "timeline";
+  const [tab, setTab] = useState<Tab>("timeline");
+
+  useEffect(() => {
+    const raw = searchParams.get("tab");
+    setTab(raw === "gallery" ? "gallery" : "timeline");
+  }, [searchParams]);
 
   function switchTab(t: Tab) {
+    setTab(t);
     router.replace(t === "gallery" ? "/life?tab=gallery" : "/life", { scroll: false });
   }
 
