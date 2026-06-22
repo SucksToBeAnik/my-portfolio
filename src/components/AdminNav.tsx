@@ -6,6 +6,7 @@ import {
   FolderOpen,
   Globe,
   Heart,
+  Image,
   Lightbulb,
   Quotes,
   SquaresFour,
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/admin/stacks", label: "Stacks", icon: Wrench },
   { href: "/admin/sites", label: "Sites", icon: Globe },
   { href: "/admin/media", label: "Media", icon: FilmStrip },
+  { href: "/admin/gallery", label: "Gallery", icon: Image },
   { href: "/admin/tils", label: "TIL", icon: Lightbulb },
 ];
 

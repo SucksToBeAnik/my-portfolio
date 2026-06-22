@@ -2,7 +2,7 @@
 
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { books, lifeEvents, media, microblogs, projects, stacks, tils } from "@/db/schema";
+import { books, gallery, lifeEvents, media, microblogs, projects, stacks, tils } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 export interface SearchIndexItem {
@@ -68,36 +68,59 @@ const adminPages: SearchIndexItem[] = [
     url: "/admin/media",
     type: "page",
   },
+  {
+    id: 109,
+    title: "Admin / Gallery",
+    subtitle: "Manage gallery images",
+    url: "/admin/gallery",
+    type: "page",
+  },
 ];
 
 export async function getSearchIndex() {
-  const [allProjects, allBooks, allMicroblogs, allLifeEvents, allStacks, allTils, allMedia, session] =
-    await Promise.all([
-      db
-        .select({ id: projects.id, title: projects.title, description: projects.description })
-        .from(projects)
-        .orderBy(desc(projects.sortOrder)),
-      db
-        .select({ id: books.id, title: books.title, author: books.author })
-        .from(books)
-        .orderBy(desc(books.sortOrder)),
-      db
-        .select({ id: microblogs.id, title: microblogs.title })
-        .from(microblogs)
-        .where(eq(microblogs.published, true))
-        .orderBy(desc(microblogs.publishedAt)),
-      db
-        .select({ id: lifeEvents.id, title: lifeEvents.title, description: lifeEvents.description })
-        .from(lifeEvents)
-        .orderBy(desc(lifeEvents.sortOrder)),
-      db
-        .select({ id: stacks.id, name: stacks.name, description: stacks.description })
-        .from(stacks)
-        .orderBy(desc(stacks.sortOrder)),
-      db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.sortOrder)),
-      db.select({ id: media.id, title: media.title, year: media.year, type: media.type }).from(media).orderBy(desc(media.sortOrder)),
-      auth(),
-    ]);
+  const [
+    allProjects,
+    allBooks,
+    allMicroblogs,
+    allLifeEvents,
+    allStacks,
+    allTils,
+    allMedia,
+    allGallery,
+    session,
+  ] = await Promise.all([
+    db
+      .select({ id: projects.id, title: projects.title, description: projects.description })
+      .from(projects)
+      .orderBy(desc(projects.sortOrder)),
+    db
+      .select({ id: books.id, title: books.title, author: books.author })
+      .from(books)
+      .orderBy(desc(books.sortOrder)),
+    db
+      .select({ id: microblogs.id, title: microblogs.title })
+      .from(microblogs)
+      .where(eq(microblogs.published, true))
+      .orderBy(desc(microblogs.publishedAt)),
+    db
+      .select({ id: lifeEvents.id, title: lifeEvents.title, description: lifeEvents.description })
+      .from(lifeEvents)
+      .orderBy(desc(lifeEvents.sortOrder)),
+    db
+      .select({ id: stacks.id, name: stacks.name, description: stacks.description })
+      .from(stacks)
+      .orderBy(desc(stacks.sortOrder)),
+    db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.sortOrder)),
+    db
+      .select({ id: media.id, title: media.title, year: media.year, type: media.type })
+      .from(media)
+      .orderBy(desc(media.sortOrder)),
+    db
+      .select({ id: gallery.id, title: gallery.title, takenAt: gallery.takenAt })
+      .from(gallery)
+      .orderBy(desc(gallery.sortOrder)),
+    auth(),
+  ]);
 
   const items: SearchIndexItem[] = [
     ...staticPages,
@@ -150,6 +173,13 @@ export async function getSearchIndex() {
       subtitle: `${m.type === "series" ? "Series" : "Movie"}${m.year ? ` · ${m.year}` : ""}`,
       url: "/utils?tab=media",
       type: "media" as const,
+    })),
+    ...allGallery.map((g) => ({
+      id: g.id,
+      title: g.title,
+      subtitle: g.takenAt ? new Date(g.takenAt).getFullYear().toString() : "",
+      url: "/life?tab=gallery",
+      type: "page" as const,
     })),
   ];
 

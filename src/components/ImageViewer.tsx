@@ -55,7 +55,7 @@ export function ImageViewer({
         <img
           src={src}
           alt={alt}
-          className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+          className="max-w-full max-h-[90vh] object-contain shadow-2xl"
         />
       </div>
     </div>

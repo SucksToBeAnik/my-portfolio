@@ -140,6 +140,17 @@ export const tils = sqliteTable("tils", {
     .$defaultFn(() => new Date()),
 });
 
+export const gallery = sqliteTable("gallery", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  imageUrl: text("image_url").notNull(),
+  takenAt: text("taken_at"),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export const media = sqliteTable("media", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   imdbId: text("imdb_id"),
