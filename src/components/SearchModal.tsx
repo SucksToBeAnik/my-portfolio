@@ -44,7 +44,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
     ? items.filter((i) => {
         const words = query.toLowerCase().split(/\s+/).filter(Boolean);
         const haystack = `${i.title} ${i.subtitle}`.toLowerCase();
-        return words.every((w) => haystack.includes(w));
+        return words.every((w) => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(haystack));
       })
     : [];
 
