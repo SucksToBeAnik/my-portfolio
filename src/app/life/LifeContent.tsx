@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { Briefcase, GraduationCap, MapPin, PushPin, Star } from "@phosphor-icons/react/dist/ssr";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -64,21 +63,9 @@ export function LifeContent({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [tab, setTab] = useState<Tab | null>(null);
-  const programmaticRef = useRef(false);
-
-  useEffect(() => {
-    if (programmaticRef.current) {
-      programmaticRef.current = false;
-      return;
-    }
-    const raw = searchParams.get("tab");
-    setTab(raw === "gallery" ? "gallery" : "timeline");
-  }, [searchParams]);
+  const tab: Tab = searchParams.get("tab") === "gallery" ? "gallery" : "timeline";
 
   function switchTab(t: Tab) {
-    programmaticRef.current = true;
-    setTab(t);
     router.replace(t === "gallery" ? "/life?tab=gallery" : "/life", { scroll: false });
   }
 
@@ -110,9 +97,8 @@ export function LifeContent({
         </div>
       </div>
 
-      {tab !== null && (
-        <>
-          <div style={{ display: tab !== "timeline" ? "none" : "" }}>
+      <>
+        <div style={{ display: tab !== "timeline" ? "none" : "" }}>
             {items.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
 
             <div className="relative pl-8 space-y-10 before:absolute before:left-[15.5px] before:top-0 before:bottom-2 before:w-px before:bg-hairline">
@@ -173,11 +159,10 @@ export function LifeContent({
             </div>
           </div>
 
-          <div style={{ display: tab !== "gallery" ? "none" : "" }}>
-            <GalleryDisplay items={galleryItems} />
-          </div>
-        </>
-      )}
+        <div style={{ display: tab !== "gallery" ? "none" : "" }}>
+          <GalleryDisplay items={galleryItems} />
+        </div>
+      </>
     </div>
   );
 }
