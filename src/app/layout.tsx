@@ -23,6 +23,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Suckstobeanik",
   description: "Software engineer and builder.",
+  openGraph: {
+    title: "Suckstobeanik",
+    description: "Software engineer and builder.",
+    siteName: "Suckstobeanik",
+    images: [{ url: "/profile.jpeg", width: 512, height: 512 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Suckstobeanik",
+    description: "Software engineer and builder.",
+    images: ["/profile.jpeg"],
+  },
 };
 
 export default function RootLayout({

@@ -8,6 +8,15 @@ import { media } from "@/db/schema";
 export const metadata = {
   title: "Watch | Suckstobeanik",
   description: "Movies and series I've watched or plan to watch.",
+  openGraph: {
+    title: "Watch | Suckstobeanik",
+    description: "Movies and series I've watched or plan to watch.",
+    url: "/media",
+  },
+  twitter: {
+    title: "Watch | Suckstobeanik",
+    description: "Movies and series I've watched or plan to watch.",
+  },
 };
 
 export const revalidate = 3600;

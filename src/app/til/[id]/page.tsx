@@ -4,19 +4,31 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { tils } from "@/db/schema";
+import { stripHtml, truncate } from "@/lib/seo";
 
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const til = await db
-    .select({ title: tils.title })
+    .select({ title: tils.title, content: tils.content })
     .from(tils)
     .where(eq(tils.id, Number(id)))
     .limit(1)
     .then((r) => r[0]);
+  if (!til) return { title: "TIL | Suckstobeanik" };
   return {
-    title: til ? `${til.title} | TIL | Suckstobeanik` : "TIL | Suckstobeanik",
+    title: `${til.title} | TIL | Suckstobeanik`,
+    description: truncate(stripHtml(til.content)),
+    openGraph: {
+      title: `${til.title} | TIL | Suckstobeanik`,
+      description: truncate(stripHtml(til.content)),
+      url: `/til/${id}`,
+    },
+    twitter: {
+      title: `${til.title} | TIL | Suckstobeanik`,
+      description: truncate(stripHtml(til.content)),
+    },
   };
 }
 
@@ -36,7 +48,20 @@ export default async function TilDetailPage({ params }: { params: Promise<{ id: 
   if (!til) notFound();
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: til.title,
+            datePublished: til.createdAt,
+            author: { "@type": "Person", name: "Suckstobeanik" },
+          }),
+        }}
+      />
+      <div className="space-y-6 md:space-y-8">
       <Link
         href="/til"
         className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
@@ -60,5 +85,6 @@ export default async function TilDetailPage({ params }: { params: Promise<{ id: 
         />
       </article>
     </div>
+    </>
   );
 }

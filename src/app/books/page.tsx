@@ -6,6 +6,15 @@ import { books } from "@/db/schema";
 export const metadata = {
   title: "Books | Suckstobeanik",
   description: "Book catalog with ratings and reviews.",
+  openGraph: {
+    title: "Books | Suckstobeanik",
+    description: "Book catalog with ratings and reviews.",
+    url: "/books",
+  },
+  twitter: {
+    title: "Books | Suckstobeanik",
+    description: "Book catalog with ratings and reviews.",
+  },
 };
 
 export const revalidate = 3600;

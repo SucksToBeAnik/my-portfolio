@@ -6,19 +6,35 @@ import { getHeartsCounts } from "@/actions/heart-counts";
 import { HeartButton } from "@/components/HeartButton";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
+import { stripHtml, truncate } from "@/lib/seo";
 
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const post = await db
-    .select({ title: microblogs.title })
+    .select({ title: microblogs.title, content: microblogs.content, publishedAt: microblogs.publishedAt, imageUrl: microblogs.imageUrl })
     .from(microblogs)
     .where(eq(microblogs.id, Number(id)))
     .limit(1)
     .then((r) => r[0]);
+  if (!post) return { title: "Posts | Suckstobeanik" };
   return {
-    title: post ? `${post.title} | Posts | Suckstobeanik` : "Posts | Suckstobeanik",
+    title: `${post.title} | Posts | Suckstobeanik`,
+    description: truncate(stripHtml(post.content)),
+    openGraph: {
+      title: `${post.title} | Posts | Suckstobeanik`,
+      description: truncate(stripHtml(post.content)),
+      url: `/posts/${id}`,
+      type: "article",
+      publishedTime: post.publishedAt?.toISOString(),
+      images: post.imageUrl ? [{ url: post.imageUrl }] : undefined,
+    },
+    twitter: {
+      title: `${post.title} | Posts | Suckstobeanik`,
+      description: truncate(stripHtml(post.content)),
+      images: post.imageUrl ? [post.imageUrl] : undefined,
+    },
   };
 }
 
@@ -74,7 +90,21 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     )[0] ?? null;
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: post.title,
+            datePublished: post.publishedAt,
+            author: { "@type": "Person", name: "Suckstobeanik" },
+            ...(post.imageUrl ? { image: post.imageUrl } : {}),
+          }),
+        }}
+      />
+      <div className="space-y-6 md:space-y-8">
       <Link
         href="/?tab=posts"
         className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
@@ -140,5 +170,6 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         )}
       </div>
     </div>
+    </>
   );
 }

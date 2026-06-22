@@ -8,6 +8,15 @@ import { lifeEvents } from "@/db/schema";
 export const metadata = {
   title: "Life | Suckstobeanik",
   description: "Personal milestones, achievements, and travels.",
+  openGraph: {
+    title: "Life | Suckstobeanik",
+    description: "Personal milestones, achievements, and travels.",
+    url: "/life",
+  },
+  twitter: {
+    title: "Life | Suckstobeanik",
+    description: "Personal milestones, achievements, and travels.",
+  },
 };
 
 export const revalidate = 3600;

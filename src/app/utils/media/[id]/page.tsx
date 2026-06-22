@@ -2,6 +2,7 @@ import { ArrowLeft, Stack, Star } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMediaItem } from "@/actions/media";
+import { truncate } from "@/lib/seo";
 import { SourceLink } from "./SourceLink";
 
 export const revalidate = 3600;
@@ -10,7 +11,22 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const item = await getMediaItem(Number(id));
   if (!item) return {};
-  return { title: `${item.title} | Suckstobeanik` };
+  const description = item.review || item.plot || `${item.title} (${item.year ?? ""})`;
+  return {
+    title: `${item.title} | Watch | Suckstobeanik`,
+    description: truncate(description),
+    openGraph: {
+      title: `${item.title} | Watch | Suckstobeanik`,
+      description: truncate(description),
+      url: `/utils/media/${id}`,
+      images: item.posterUrl ? [{ url: item.posterUrl }] : undefined,
+    },
+    twitter: {
+      title: `${item.title} | Watch | Suckstobeanik`,
+      description: truncate(description),
+      images: item.posterUrl ? [item.posterUrl] : undefined,
+    },
+  };
 }
 
 const statusLabels: Record<string, string> = {
@@ -26,7 +42,21 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
   if (!item) notFound();
 
   return (
-    <div className="space-y-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": item.type === "movie" ? "Movie" : "TVSeries",
+            name: item.title,
+            ...(item.year ? { datePublished: item.year } : {}),
+            ...(item.posterUrl ? { image: item.posterUrl } : {}),
+            ...(item.rating ? { aggregateRating: { "@type": "AggregateRating", ratingValue: item.rating } } : {}),
+          }),
+        }}
+      />
+      <div className="space-y-8">
       <div className="flex items-center justify-between">
         <Link
           href="/utils?tab=media"
@@ -99,5 +129,6 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
         </div>
       )}
     </div>
+    </>
   );
 }

@@ -1,6 +1,15 @@
 export const metadata = {
   title: "Utils | Suckstobeanik",
   description: "Stacks and sites I use.",
+  openGraph: {
+    title: "Utils | Suckstobeanik",
+    description: "Stacks and sites I use.",
+    url: "/utils",
+  },
+  twitter: {
+    title: "Utils | Suckstobeanik",
+    description: "Stacks and sites I use.",
+  },
 };
 
 export default function UtilsLayout({ children }: { children: React.ReactNode }) {

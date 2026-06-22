@@ -4,18 +4,35 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { books } from "@/db/schema";
+import { stripHtml, truncate } from "@/lib/seo";
 
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const book = await db
-    .select({ title: books.title, author: books.author })
+    .select({ title: books.title, author: books.author, review: books.review, coverUrl: books.coverUrl, rating: books.rating })
     .from(books)
     .where(eq(books.id, Number(id)))
     .limit(1)
     .then((r) => r[0]);
-  return { title: book ? `${book.title} | Books | Suckstobeanik` : "Books | Suckstobeanik" };
+  if (!book) return { title: "Books | Suckstobeanik" };
+  const description = book.review ? stripHtml(book.review) : `By ${book.author}`;
+  return {
+    title: `${book.title} | Books | Suckstobeanik`,
+    description: truncate(description),
+    openGraph: {
+      title: `${book.title} | Books | Suckstobeanik`,
+      description: truncate(description),
+      url: `/books/${id}`,
+      images: book.coverUrl ? [{ url: book.coverUrl, width: 400, height: 600 }] : undefined,
+    },
+    twitter: {
+      title: `${book.title} | Books | Suckstobeanik`,
+      description: truncate(description),
+      images: book.coverUrl ? [book.coverUrl] : undefined,
+    },
+  };
 }
 
 function ratingStars(rating: number | null) {
@@ -44,7 +61,21 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
   if (!book) notFound();
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Book",
+            name: book.title,
+            author: book.author,
+            ...(book.coverUrl ? { image: book.coverUrl } : {}),
+            ...(book.rating ? { review: { "@type": "Review", reviewRating: { "@type": "Rating", ratingValue: book.rating } } } : {}),
+          }),
+        }}
+      />
+      <div className="space-y-6 md:space-y-8">
       <Link
         href="/books"
         className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
@@ -91,5 +122,6 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
         />
       )}
     </div>
+    </>
   );
 }

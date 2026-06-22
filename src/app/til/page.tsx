@@ -9,7 +9,16 @@ import { tils } from "@/db/schema";
 
 export const metadata = {
   title: "TIL | Suckstobeanik",
-  description: "Things I've learned — short notes and discoveries.",
+  description: "Things I've learned \u2014 short notes and discoveries.",
+  openGraph: {
+    title: "TIL | Suckstobeanik",
+    description: "Things I've learned \u2014 short notes and discoveries.",
+    url: "/til",
+  },
+  twitter: {
+    title: "TIL | Suckstobeanik",
+    description: "Things I've learned \u2014 short notes and discoveries.",
+  },
 };
 
 export const revalidate = 3600;

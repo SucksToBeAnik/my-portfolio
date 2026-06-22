@@ -18,6 +18,17 @@ export const metadata = {
   title: "Suckstobeanik",
   description:
     "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
+  openGraph: {
+    title: "Suckstobeanik",
+    description:
+      "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
+    url: "/",
+  },
+  twitter: {
+    title: "Suckstobeanik",
+    description:
+      "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
+  },
 };
 
 export default async function Home() {
@@ -51,10 +62,28 @@ export default async function Home() {
   ]);
 
   return (
-    // Negative margins cancel <main>'s pt-16 px-6 pb-32 so this div starts at the
-    // true viewport top. h-screen + overflow-y-scroll makes it the scroll container.
-    // snap-y mandatory gives true PDF-page behavior: each panel locks to the viewport.
-    <div id="snap-container" className="-mx-6 -mt-16 -mb-32 h-screen overflow-y-scroll snap-y snap-mandatory overscroll-none no-scrollbar">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Person",
+            name: "Suckstobeanik",
+            url: "https://suckstobeanik.vercel.app",
+            image: "/profile.jpeg",
+            sameAs: [
+              "https://github.com/SucksToBeAnik",
+              "https://www.linkedin.com/in/al-jami-islam-anik-485758285",
+              "https://x.com/suckstobeanik",
+            ],
+          }),
+        }}
+      />
+      {/* Negative margins cancel <main>'s pt-16 px-6 pb-32 so this div starts at the */}
+      {/* true viewport top. h-screen + overflow-y-scroll makes it the scroll container. */}
+      {/* snap-y mandatory gives true PDF-page behavior: each panel locks to the viewport. */}
+      <div id="snap-container" className="-mx-6 -mt-16 -mb-32 h-screen overflow-y-scroll snap-y snap-mandatory overscroll-none no-scrollbar">
       <Suspense><ShowcaseScroll /></Suspense>
 
       {/* Page 1: Hero — exactly one viewport tall */}
@@ -156,5 +185,6 @@ export default async function Home() {
         </Suspense>
       </div>
     </div>
+    </>
   );
 }
