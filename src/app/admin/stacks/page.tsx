@@ -13,6 +13,19 @@ import { Spinner } from "@/components/Spinner";
 import { TagPicker } from "@/components/TagPicker";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
+const CATEGORIES = [
+  "Editor / IDE",
+  "Language / Runtime",
+  "Framework",
+  "Database",
+  "Design",
+  "DevOps / Infrastructure",
+  "AI / ML",
+  "Terminal / CLI",
+  "Productivity",
+  "Hardware",
+];
+
 const platformTags = [
   "Frontend", "Backend", "Framework", "Design", "DevOps", "Database",
   "AI/ML", "Testing", "Analytics", "Security", "Infrastructure", "Productivity",
@@ -27,10 +40,11 @@ interface Item {
   description: string | null;
   imageUrl: string | null;
   platform: string | null;
+  category: string | null;
   sortOrder: number | null;
 }
 
-const empty = { name: "", url: "", description: "", imageUrl: "", platform: "" };
+const empty = { name: "", url: "", description: "", imageUrl: "", platform: "", category: "" };
 
 export default function StacksPage() {
   const qc = useQueryClient();
@@ -191,13 +205,14 @@ export default function StacksPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{item.name}</p>
-                        {item.platform && (
-                          <div className="flex flex-wrap gap-1 mt-0.5">
-                            {item.platform.split(",").map((p) => p.trim()).filter(Boolean).map((p) => (
-                              <span key={p} className="text-[10px] px-1.5 py-0.5 bg-hover-bg rounded text-fg/50">{p}</span>
-                            ))}
-                          </div>
-                        )}
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {item.category && (
+                            <span className="text-[10px] px-1.5 py-0.5 bg-fg/10 rounded text-fg/60">{item.category}</span>
+                          )}
+                          {item.platform && item.platform.split(",").map((p) => p.trim()).filter(Boolean).map((p) => (
+                            <span key={p} className="text-[10px] px-1.5 py-0.5 bg-hover-bg rounded text-fg/50">{p}</span>
+                          ))}
+                        </div>
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
                         <button
@@ -368,7 +383,20 @@ export default function StacksPage() {
                 onFilePending={setPendingFile}
               />
               <div className="space-y-1.5">
-                <label className="text-xs text-fg/50">Platform</label>
+                <label className="text-xs text-fg/50">Category</label>
+                <select
+                  value={f("category") as string}
+                  onChange={(e) => s("category", e.target.value)}
+                  className={inputCls}
+                >
+                  <option value="">None</option>
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Platform tags</label>
                 <TagPicker
                   value={f("platform") as string}
                   onChange={(v) => s("platform", v)}

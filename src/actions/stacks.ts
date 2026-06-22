@@ -12,6 +12,7 @@ const stackSchema = z.object({
   description: z.string().optional(),
   imageUrl: z.string().optional(),
   platform: z.string().optional(),
+  category: z.string().optional(),
 });
 
 export async function getStacks() {

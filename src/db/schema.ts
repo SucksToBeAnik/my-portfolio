@@ -106,6 +106,7 @@ export const stacks = sqliteTable("stacks", {
   imageUrl: text("image_url"),
   url: text("url").notNull(),
   platform: text("platform"),
+  category: text("category"),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
