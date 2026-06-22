@@ -55,7 +55,7 @@ export default async function WatchPage() {
             {group.items.map((item) => (
               <Link
                 key={item.id}
-                href={`/utils/media/${item.id}`}
+                href={`/media/${item.id}`}
                 className="group relative flex flex-col border border-hairline rounded-xl overflow-hidden transition-colors hover:bg-hover-bg"
               >
                 <div className="aspect-[2/3] bg-hover-bg overflow-hidden">

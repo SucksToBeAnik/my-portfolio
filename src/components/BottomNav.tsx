@@ -30,15 +30,10 @@ const navItems = [
   { href: "/books", label: "Books", icon: BookOpenText },
   { href: "/til", label: "TIL", icon: Lightbulb },
   { href: "/media", label: "Watch", icon: Television },
-  { href: "/utils", label: "Utils", icon: Wrench },
+  { href: "/stacks", label: "Stacks", icon: Wrench },
 ];
 
-const subTabs: Record<string, { label: string; href: string }[]> = {
-  "/utils": [
-    { label: "Stacks", href: "/utils?tab=stacks" },
-    { label: "Sites", href: "/utils?tab=sites" },
-  ],
-};
+const subTabs: Record<string, { label: string; href: string }[]> = {};
 
 function NavItem({
   href,

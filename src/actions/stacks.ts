@@ -28,20 +28,20 @@ export async function createStack(data: z.infer<typeof stackSchema>) {
 
   await db.insert(stacks).values({ ...parsed, sortOrder: maxOrder + 1 });
   revalidatePath("/admin/stacks");
-  revalidatePath("/utils");
+  revalidatePath("/stacks");
 }
 
 export async function updateStack(id: number, data: z.infer<typeof stackSchema>) {
   const parsed = stackSchema.parse(data);
   await db.update(stacks).set(parsed).where(eq(stacks.id, id));
   revalidatePath("/admin/stacks");
-  revalidatePath("/utils");
+  revalidatePath("/stacks");
 }
 
 export async function deleteStack(id: number) {
   await db.delete(stacks).where(eq(stacks.id, id));
   revalidatePath("/admin/stacks");
-  revalidatePath("/utils");
+  revalidatePath("/stacks");
 }
 
 export async function reorderStacks(ids: number[]) {
@@ -49,5 +49,5 @@ export async function reorderStacks(ids: number[]) {
     ids.map((id, index) => db.update(stacks).set({ sortOrder: index }).where(eq(stacks.id, id))),
   );
   revalidatePath("/admin/stacks");
-  revalidatePath("/utils");
+  revalidatePath("/stacks");
 }

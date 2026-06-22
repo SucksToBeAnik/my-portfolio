@@ -19,7 +19,8 @@ const staticPages: SearchIndexItem[] = [
   { id: 2, title: "Life", subtitle: "Personal timeline", url: "/life", type: "page" },
   { id: 3, title: "Books", subtitle: "Book catalog & reviews", url: "/books", type: "page" },
   { id: 4, title: "Writings", subtitle: "Microblog posts & TIL", url: "/writings", type: "page" },
-  { id: 5, title: "Utils", subtitle: "Stacks & sites I use", url: "/utils", type: "page" },
+  { id: 5, title: "Stacks", subtitle: "Tools, software, and gear I use", url: "/stacks", type: "page" },
+  { id: 22, title: "Sites", subtitle: "Websites I find useful", url: "/sites", type: "page" },
 ];
 
 const adminPages: SearchIndexItem[] = [
@@ -157,7 +158,7 @@ export async function getSearchIndex() {
       id: s.id,
       title: s.name,
       subtitle: s.description ? s.description.replace(/<[^>]*>/g, "").slice(0, 120) : "",
-      url: "/utils",
+      url: "/stacks",
       type: "stack" as const,
     })),
     ...allTils.map((t) => ({
@@ -171,7 +172,7 @@ export async function getSearchIndex() {
       id: m.id,
       title: m.title,
       subtitle: `${m.type === "series" ? "Series" : "Movie"}${m.year ? ` · ${m.year}` : ""}`,
-      url: "/utils?tab=media",
+      url: "/media",
       type: "media" as const,
     })),
     ...allGallery.map((g) => ({

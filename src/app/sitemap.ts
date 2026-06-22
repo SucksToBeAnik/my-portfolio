@@ -50,10 +50,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/utils`,
+      url: `${BASE_URL}/stacks`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/sites`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
     },
   ];
 
@@ -79,7 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const mediaPages = mediaRows.map((m) => ({
-    url: `${BASE_URL}/utils/media/${m.id}`,
+    url: `${BASE_URL}/media/${m.id}`,
     lastModified: m.updatedAt,
     changeFrequency: "monthly" as const,
     priority: 0.5,
