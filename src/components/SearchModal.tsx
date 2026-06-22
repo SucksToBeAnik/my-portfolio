@@ -12,7 +12,7 @@ import {
   Television,
   Wrench,
 } from "@phosphor-icons/react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SearchIndexItem } from "@/actions/search";
 import { getSearchItems, invalidateSearchCache } from "@/lib/search-index";
@@ -49,6 +49,18 @@ const TYPE_ALIAS: Record<string, string> = {
   gallery: "gallery",
   galleries: "gallery",
 };
+
+const TYPE_SUGGESTIONS = [
+  "@pages",
+  "@projects",
+  "@books",
+  "@microblog",
+  "@til",
+  "@life",
+  "@stacks",
+  "@media",
+  "@gallery",
+];
 
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -89,12 +101,17 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
   const [items, setItems] = useState<SearchIndexItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [showTypeHint, setShowTypeHint] = useState(false);
+  const [typeFilter, setTypeFilter] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const fetchRef = useRef(0);
   const router = useRouter();
-  const _pathname = usePathname();
+
+  const typeSuggestions = showTypeHint
+    ? TYPE_SUGGESTIONS.filter((s) => s.startsWith(`@${typeFilter}`))
+    : [];
 
   const activeItems = query
     ? items.filter((i) => {
@@ -193,15 +210,60 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-hairline">
           <MagnifyingGlass weight="thin" className="w-4 h-4 text-muted shrink-0" />
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder='Search or use @gallery, @stacks, @til...'
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="flex-1 text-sm bg-transparent text-fg placeholder-fg/30 focus:outline-none"
-          />
+          <div className="flex-1 relative">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder='Search or use @gallery, @stacks, @til...'
+              value={query}
+              onChange={(e) => {
+                const val = e.target.value;
+                setQuery(val);
+                const last = val.split(/\s+/).pop() ?? "";
+                if (last.startsWith("@")) {
+                  setShowTypeHint(true);
+                  setTypeFilter(last.slice(1));
+                } else {
+                  setShowTypeHint(false);
+                  setTypeFilter("");
+                }
+              }}
+              onKeyDown={(e) => {
+                if (showTypeHint && typeSuggestions.length > 0 && e.key === "Enter") {
+                  e.preventDefault();
+                  const words = query.split(/\s+/);
+                  words[words.length - 1] = typeSuggestions[0];
+                  setQuery(words.join(" ") + " ");
+                  setShowTypeHint(false);
+                  setTypeFilter("");
+                  return;
+                }
+                handleKeyDown(e);
+              }}
+              className="flex-1 text-sm bg-transparent text-fg placeholder-fg/30 focus:outline-none w-full"
+            />
+            {showTypeHint && typeSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-bg border border-hairline rounded-xl shadow-xl overflow-hidden z-10">
+                {typeSuggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => {
+                      const words = query.split(/\s+/);
+                      words[words.length - 1] = s;
+                      setQuery(words.join(" ") + " ");
+                      setShowTypeHint(false);
+                      setTypeFilter("");
+                      inputRef.current?.focus();
+                    }}
+                    className="w-full px-3 py-2 text-xs text-left text-fg hover:bg-hover-bg transition-colors cursor-pointer font-heading"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <kbd className="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] text-muted bg-hover-bg rounded border border-hairline">
             ESC
           </kbd>
