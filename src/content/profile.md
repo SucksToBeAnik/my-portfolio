@@ -9,14 +9,7 @@
 - **LinkedIn:** [linkedin.com/in/al-jami-islam-anik-485758285](https://www.linkedin.com/in/al-jami-islam-anik-485758285)
 
 ## Bio
-I am Al Jami Islam Anik, a software engineer from Dhaka, Bangladesh. I have built frontend systems from scratch orchestrating from project structure to full fledged apps used by live users. I am also a huge enthusiast for AI/ML, both theoretical and applied. I love to watch series and movies on my free time. I also love to travel whenever I get the opportunity.
-
-## Skills
-- **Languages:** TypeScript, JavaScript, Python
-- **Frameworks:** React, Next.js, FastAPI
-- **AI/ML:** Transformers, RAG, Agentic Systems, LLMs, SLMs
-- **Tools:** Git, Docker, Ollama, Turso, Drizzle ORM
-- **Databases:** PostgreSQL, SQLite, Turso
+I am Al Jami Islam Anik, a software engineer from Dhaka, Bangladesh. I build frontend systems from scratch — from project structure to full-fledged apps used by real users. I'm deeply interested in AI/ML, both theoretical and applied. Outside of code, I love watching series and movies, reading, photography, and writing. I also love to travel whenever I get the opportunity.
 
 ## Experience
 - **Software Engineer** at AskTuring.ai — Worked on RAG systems and built multiple frontend systems from scratch
@@ -26,20 +19,18 @@ I am Al Jami Islam Anik, a software engineer from Dhaka, Bangladesh. I have buil
 - **Completed B.Sc. in Computer Science** — BRAC University (2022-2026), CGPA 3.72
 - **Higher Secondary** — 2018-2020
 
+## Hobbies
+- **Writing** — I enjoy writing in my free time, whether it's technical content or personal thoughts
+- **Photography** — I take photos of places I visit and moments from my life; some are featured in my site's gallery
+- **Reading** — I maintain a catalog of books I've read, am reading, or want to read
+- **Movies & Series** — I keep track of everything I watch with ratings and reviews on my site
+
 ## Interests
 - Building things for the web
 - Minimalist design
 - AI/ML and agentic systems
 - CLI tools and developer experience
 - Learning new programming paradigms
-
-## Projects
-- **Einstein** — Agentic research assistant combining 21 patterns of agentic system design
-- **Saul Goodman** — CLI tool with RAG that parses documents, generates grounded drafts, and learns from feedback
-- **Vibetune** — CLI app that generates music based on your vibe for Instagram reels and YouTube shorts
-- **SLM From Scratch** — Understanding and utilizing the transformer architecture to train a small language model from scratch
-- **Termemenal** — CLI meme generator using Ollama's image gen models
-- **Mimic Author** — Prompt-chained agentic app for learning Unit, Integration, and Component Testing
 
 ## Contact
 - **GitHub:** github.com/SucksToBeAnik
