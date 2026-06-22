@@ -23,30 +23,38 @@ export function GalleryDisplay({ items }: { items: GalleryItem[] }) {
     return <p className="text-xs text-muted">Nothing here yet.</p>;
   }
 
+  const col1 = items.filter((_, i) => i % 2 === 0);
+  const col2 = items.filter((_, i) => i % 2 !== 0);
+
+  function renderItem(item: GalleryItem) {
+    return (
+      <div
+        key={item.id}
+        className="group relative w-full cursor-pointer"
+        onClick={() => setViewer(item)}
+      >
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          loading="lazy"
+          className="w-full h-auto block"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+          <p className="text-[11px] font-heading uppercase tracking-wider text-white">
+            {item.title}
+            {year(item.takenAt) ? `, ${year(item.takenAt)}` : ""}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="columns-2 gap-2">
-        {items.map((item) => (
-          <div
-            key={item.id}
-            className="break-inside-avoid group relative w-full cursor-pointer mb-2"
-            onClick={() => setViewer(item)}
-          >
-            <img
-              src={item.imageUrl}
-              alt={item.title}
-              loading="lazy"
-              className="w-full h-auto block"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-              <p className="text-[11px] font-heading uppercase tracking-wider text-white">
-                {item.title}
-                {year(item.takenAt) ? `, ${year(item.takenAt)}` : ""}
-              </p>
-            </div>
-          </div>
-        ))}
+      <div className="flex gap-2 items-start">
+        <div className="flex-1 flex flex-col gap-2">{col1.map(renderItem)}</div>
+        <div className="flex-1 flex flex-col gap-2">{col2.map(renderItem)}</div>
       </div>
 
       {viewer && (
