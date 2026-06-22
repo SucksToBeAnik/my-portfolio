@@ -108,7 +108,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
   const router = useRouter();
 
   const lastWord = query.split(/\s+/).pop() ?? "";
-  const isTypePicking = lastWord.startsWith("@") && lastWord.length > 1;
+  const isTypePicking = lastWord.startsWith("@");
 
   const matchingTypes = isTypePicking
     ? TYPE_SUGGESTIONS.filter((s) => s.startsWith(lastWord))
