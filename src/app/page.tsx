@@ -7,6 +7,7 @@ import { getHeartsCounts } from "@/actions/heart-counts";
 import { AskPrompt } from "@/components/AskPrompt";
 import { ContentTabs } from "@/components/ContentTabs";
 import { ScrollDown } from "@/components/ScrollDown";
+import { SeeWorkLink } from "@/components/SeeWorkLink";
 import { ShowcaseScroll } from "@/components/ShowcaseScroll";
 import { LinkPreview } from "@/components/LinkPreview";
 import { db } from "@/db";
@@ -107,6 +108,7 @@ export default async function Home() {
                 I&apos;m a software engineer who loves building simple solutions. Here, I share a little
                 bit of everything that interests me.
               </p>
+              <SeeWorkLink />
             </div>
 
             <div className="flex items-center gap-2 text-fg/60">

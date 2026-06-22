@@ -72,8 +72,8 @@ export function LifeContent({
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between mb-4">
-        <Breadcrumb crumbs={[{ label: "Life" }]} />
+      <div className="flex items-center justify-between mb-8 md:mb-16">
+        <Breadcrumb crumbs={[{ label: "My Life" }]} />
         <div className="flex gap-3 shrink-0">
           <button
             onClick={() => switchTab("timeline")}

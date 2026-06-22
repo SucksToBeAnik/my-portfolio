@@ -31,7 +31,7 @@ export default async function TilPage() {
   return (
     <div className="space-y-8">
       <div className="mb-8 md:mb-16">
-        <Breadcrumb crumbs={[{ label: "TIL" }]} />
+        <Breadcrumb crumbs={[{ label: "Today I Learned" }]} />
       </div>
 
       {items.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}

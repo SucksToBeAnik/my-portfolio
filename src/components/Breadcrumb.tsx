@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export function Breadcrumb({ crumbs }: { crumbs: { label: string; href?: string }[] }) {
   return (
-    <div className="flex items-center gap-1.5 text-xs font-heading text-muted mb-4">
+    <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
       <Link href="/" className="hover:text-fg transition-colors">
         <House weight="thin" className="w-3.5 h-3.5" />
       </Link>

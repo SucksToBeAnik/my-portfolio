@@ -56,14 +56,14 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
           }),
         }}
       />
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8">
       <div className="flex items-center justify-between">
         <Link
           href="/utils?tab=media"
           className="flex items-center gap-1.5 text-xs font-heading text-muted hover:text-fg transition-colors"
         >
           <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
-          Media
+          What I Watch
         </Link>
         {item.imdbUrl && <SourceLink url={item.imdbUrl} />}
       </div>

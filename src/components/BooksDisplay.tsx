@@ -1,9 +1,8 @@
 "use client";
 
+import { type ReactNode, useState } from "react";
 import { Star } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useState } from "react";
-import { Breadcrumb } from "@/components/Breadcrumb";
 import { FilterPopover } from "@/components/FilterPopover";
 
 type Book = {
@@ -37,7 +36,7 @@ const groups = [
   { label: "Want to Read", key: "want_to_read" },
 ];
 
-export function BooksDisplay({ books }: { books: Book[] }) {
+export function BooksDisplay({ books, header }: { books: Book[]; header?: ReactNode }) {
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
 
   const allCategories = Array.from(
@@ -58,9 +57,9 @@ export function BooksDisplay({ books }: { books: Book[] }) {
       : books;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <div className="flex items-center justify-between mb-8 md:mb-16">
-        <Breadcrumb crumbs={[{ label: "Books" }]} />
+        {header}
         <FilterPopover
           tags={allCategories}
           active={activeCategories}

@@ -1,9 +1,9 @@
 "use client";
 
-import { House } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Suspense } from "react";
+import { Breadcrumb } from "@/components/Breadcrumb";
 import { FilterPopover } from "@/components/FilterPopover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -51,15 +51,9 @@ function UtilsPageInner() {
   }
 
   return (
-    <>
+    <div className="space-y-8">
       <div className="flex items-center justify-between mb-8 md:mb-16">
-        <div className="flex items-center gap-1.5 text-xs font-heading text-muted">
-          <Link href="/" className="hover:text-fg transition-colors">
-            <House weight="thin" className="w-3.5 h-3.5" />
-          </Link>
-          <span className="text-fg/20">/</span>
-          <span className="text-fg/60 uppercase tracking-wider">utils</span>
-        </div>
+        <Breadcrumb crumbs={[{ label: "Stuff I Use" }]} />
         <div className="flex gap-3 shrink-0">
           <button
             onClick={() => switchTab("stacks")}
@@ -82,7 +76,7 @@ function UtilsPageInner() {
 
       {tab === "stacks" && <StacksContent />}
       {tab === "sites" && <SitesContent />}
-    </>
+    </div>
   );
 }
 

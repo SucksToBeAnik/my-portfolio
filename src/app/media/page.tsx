@@ -41,7 +41,7 @@ export default async function WatchPage() {
   return (
     <div className="space-y-8">
       <div className="mb-8 md:mb-16">
-        <Breadcrumb crumbs={[{ label: "Watch" }]} />
+        <Breadcrumb crumbs={[{ label: "What I Watch" }]} />
       </div>
 
       {grouped.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
