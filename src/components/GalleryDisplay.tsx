@@ -7,6 +7,8 @@ interface GalleryItem {
   id: number;
   title: string;
   imageUrl: string;
+  width: number | null;
+  height: number | null;
   takenAt: string | null;
 }
 
@@ -28,7 +30,12 @@ function GalleryCard({ item, onClick }: { item: GalleryItem; onClick: () => void
 
   return (
     <div className="break-inside-avoid group relative w-full cursor-pointer" onClick={onClick}>
-      {!loaded && <div className="w-full min-h-[150px] bg-hover-bg animate-pulse" />}
+      {!loaded && (
+        <div
+          className="w-full bg-hover-bg animate-pulse"
+          style={item.width && item.height ? { aspectRatio: `${item.width} / ${item.height}` } : { minHeight: "150px" }}
+        />
+      )}
       <img
         ref={imgRef}
         src={item.imageUrl}
