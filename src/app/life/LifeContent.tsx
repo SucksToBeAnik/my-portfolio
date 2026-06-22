@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Briefcase, GraduationCap, MapPin, PushPin, Star } from "@phosphor-icons/react/dist/ssr";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { GalleryDisplay } from "@/components/GalleryDisplay";
 import { LifeImage } from "@/components/LifeImage";
@@ -64,7 +64,6 @@ export function LifeContent({
   items: LifeItem[];
   galleryItems: GalleryItem[];
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("timeline");
 
@@ -75,7 +74,7 @@ export function LifeContent({
 
   function switchTab(t: Tab) {
     setTab(t);
-    router.replace(t === "gallery" ? "/life?tab=gallery" : "/life", { scroll: false });
+    history.replaceState(null, "", t === "gallery" ? "/life?tab=gallery" : "/life");
   }
 
   return (
