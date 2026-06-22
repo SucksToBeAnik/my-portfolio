@@ -22,10 +22,21 @@ interface Item {
   id: number;
   title: string;
   imageUrl: string;
+  width: number | null;
+  height: number | null;
   takenAt: string | null;
 }
 
-const empty = { title: "", imageUrl: "", takenAt: null as string | null };
+function getImageDimensions(url: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+const empty = { title: "", imageUrl: "", width: null, height: null, takenAt: null as string | null };
 
 export default function GalleryAdminPage() {
   const qc = useQueryClient();
@@ -275,8 +286,14 @@ export default function GalleryAdminPage() {
                 toast.error("Upload failed");
                 return;
               }
-              if (editId) updateMut.mutate({ id: editId, data: { ...form, imageUrl: imgUrl } });
-              else createMut.mutate({ ...form, imageUrl: imgUrl });
+              let dimensions = { width: form.width, height: form.height };
+              if (pendingImage && imgUrl) {
+                try {
+                  dimensions = await getImageDimensions(imgUrl);
+                } catch {}
+              }
+              if (editId) updateMut.mutate({ id: editId, data: { ...form, imageUrl: imgUrl, ...dimensions } });
+              else createMut.mutate({ ...form, imageUrl: imgUrl, ...dimensions });
             }}
             className="space-y-4"
           >

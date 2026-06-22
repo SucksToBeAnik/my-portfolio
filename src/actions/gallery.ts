@@ -9,6 +9,8 @@ import { gallery } from "@/db/schema";
 const schema = z.object({
   title: z.string().min(1),
   imageUrl: z.string().url().min(1),
+  width: z.number().int().positive().nullable().optional(),
+  height: z.number().int().positive().nullable().optional(),
   takenAt: z.string().nullable().optional(),
 });
 
@@ -26,7 +28,14 @@ export async function createGalleryItem(data: z.infer<typeof schema>) {
 
   await db
     .insert(gallery)
-    .values({ ...parsed, takenAt: parsed.takenAt ?? null, sortOrder: maxOrder + 1 });
+    .values({
+      title: parsed.title,
+      imageUrl: parsed.imageUrl,
+      width: parsed.width ?? null,
+      height: parsed.height ?? null,
+      takenAt: parsed.takenAt ?? null,
+      sortOrder: maxOrder + 1,
+    });
   revalidatePath("/admin/gallery");
   revalidatePath("/life");
 }
@@ -35,7 +44,13 @@ export async function updateGalleryItem(id: number, data: z.infer<typeof schema>
   const parsed = schema.parse(data);
   await db
     .update(gallery)
-    .set({ title: parsed.title, imageUrl: parsed.imageUrl, takenAt: parsed.takenAt ?? null })
+    .set({
+      title: parsed.title,
+      imageUrl: parsed.imageUrl,
+      width: parsed.width ?? null,
+      height: parsed.height ?? null,
+      takenAt: parsed.takenAt ?? null,
+    })
     .where(eq(gallery.id, id));
   revalidatePath("/admin/gallery");
   revalidatePath("/life");

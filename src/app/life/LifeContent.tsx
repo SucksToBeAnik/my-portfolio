@@ -51,6 +51,8 @@ interface GalleryItem {
   id: number;
   title: string;
   imageUrl: string;
+  width: number | null;
+  height: number | null;
   takenAt: string | null;
 }
 
