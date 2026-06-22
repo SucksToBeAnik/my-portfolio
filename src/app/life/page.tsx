@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { asc } from "drizzle-orm";
 import { LifeContent } from "./LifeContent";
 import { db } from "@/db";
@@ -25,5 +26,9 @@ export default async function LifePage() {
     db.select().from(gallery).orderBy(asc(gallery.sortOrder)),
   ]);
 
-  return <LifeContent items={items} galleryItems={galleryItems} />;
+  return (
+    <Suspense>
+      <LifeContent items={items} galleryItems={galleryItems} />
+    </Suspense>
+  );
 }
