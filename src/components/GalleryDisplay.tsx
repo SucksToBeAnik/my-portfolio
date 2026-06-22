@@ -43,35 +43,25 @@ function GalleryCard({ item, onClick }: { item: GalleryItem; onClick: () => void
     }
   }, []);
 
-  if (hasDims) {
-    return (
-      <div
-        className="break-inside-avoid group relative w-full cursor-pointer overflow-hidden"
-        style={{ aspectRatio: `${item.width} / ${item.height}` }}
-        onClick={onClick}
-      >
-        {!loaded && <div className="absolute inset-0 bg-hover-bg animate-pulse" />}
-        <img
-          ref={imgRef}
-          src={item.imageUrl}
-          alt={item.title}
-          loading="lazy"
-          className={`absolute inset-0 w-full h-full object-cover ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
-          onLoad={() => setLoaded(true)}
-          onError={() => setLoaded(true)}
-        />
-        <Overlays item={item} />
-      </div>
-    );
-  }
-
   return (
-    <div className="break-inside-avoid group relative w-full cursor-pointer" onClick={onClick}>
+    <div
+      className="break-inside-avoid group relative w-full cursor-pointer overflow-hidden"
+      style={hasDims ? { aspectRatio: `${item.width} / ${item.height}` } : undefined}
+      onClick={onClick}
+    >
+      {!loaded && (
+        <div
+          className={`bg-hover-bg animate-pulse ${hasDims ? "absolute inset-0" : "w-full min-h-[150px]"}`}
+        />
+      )}
       <img
+        ref={imgRef}
         src={item.imageUrl}
         alt={item.title}
         loading="lazy"
-        className="w-full h-auto block"
+        className={`${hasDims ? "absolute inset-0 w-full h-full object-cover" : "w-full h-auto block"} ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
       />
       <Overlays item={item} />
     </div>
