@@ -131,7 +131,7 @@ export default function SitesPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-8 md:mb-16">
-        <Breadcrumb crumbs={[{ label: "Sites I Find Useful" }]} />
+        <Breadcrumb crumbs={[{ label: "Stacks", href: "/stacks" }, { label: "Sites I Find Useful" }]} />
         <FilterPopover tags={allTags} active={activeTags} onChange={setActiveTags} />
       </div>
 

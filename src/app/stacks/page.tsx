@@ -48,7 +48,7 @@ export default async function StacksPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-8 md:mb-16">
-        <Breadcrumb crumbs={[{ label: "Stacks" }]} />
+        <Breadcrumb crumbs={[{ label: "Stacks I Use" }]} />
         {all.length > 0 && (
           <Link
             href="/sites"
