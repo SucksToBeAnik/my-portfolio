@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ArrowLeft } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
+import { Wrench } from "@phosphor-icons/react";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { FilterPopover } from "@/components/FilterPopover";
 import { getSites, saveSiteDescription } from "@/actions/sites";
@@ -131,7 +132,7 @@ export default function SitesPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-8 md:mb-16">
-        <Breadcrumb crumbs={[{ label: "Stacks", href: "/stacks" }, { label: "Sites I Find Useful" }]} />
+        <Breadcrumb crumbs={[{ icon: <Wrench weight="thin" className="w-3.5 h-3.5" />, href: "/stacks" }, { label: "Sites I Find Useful" }]} />
         <FilterPopover tags={allTags} active={activeTags} onChange={setActiveTags} />
       </div>
 
