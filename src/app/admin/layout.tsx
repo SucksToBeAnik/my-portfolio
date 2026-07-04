@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <AdminNav variant="sidebar" />
         </aside>
 
-        <main className="flex-1 min-w-0 overflow-y-auto px-4 py-5 pb-24 md:p-6">
+        <main className="flex-1 min-w-0 overflow-y-auto px-4 py-5 pb-24 md:px-6 md:py-2">
           {/* Mobile admin nav */}
           <div className="md:hidden mb-6">
             <AdminBreadcrumb />

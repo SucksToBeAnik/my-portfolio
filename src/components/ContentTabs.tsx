@@ -7,6 +7,7 @@ import { ClickableImage } from "@/components/ClickableImage";
 import { HeartButton } from "@/components/HeartButton";
 import { ProjectLink } from "@/components/ProjectLink";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { stripHtml } from "@/lib/seo";
 
 function fmtDate(dateStr: string | Date) {
   const d = new Date(dateStr);
@@ -91,7 +92,7 @@ export function ContentTabs({
       </div>
 
       {tab === "projects" && (
-        <div className="space-y-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {projects.length === 0 && (
             <p className="text-sm text-muted">Nothing here yet.</p>
           )}
@@ -100,45 +101,42 @@ export function ContentTabs({
             return (
               <article
                 key={project.id}
-                className="space-y-6 sm:grid sm:grid-cols-[100px_1fr] sm:gap-6"
+                className="rounded-xl border border-hairline overflow-hidden transition-transform duration-200 hover:scale-[1.02] flex flex-col"
               >
-                <div className="flex sm:flex-col justify-between sm:items-end items-start gap-4 sm:gap-0 text-xs text-muted sm:text-right">
-                  <div className="flex sm:block items-center gap-4 sm:space-y-4">
-                    {project.workedOn && <p>{fmtDate(project.workedOn)}</p>}
-                    <HeartButton entityType="project" entityId={project.id} initialCount={heartCount} initialHearted={heartedMap[`project-${project.id}`]} />
-                  </div>
-                  <div className="flex sm:flex-col gap-2 sm:items-end sm:space-y-1.5">
-                    {project.url && <ProjectLink url={project.url} label="Website" />}
-                    {project.githubUrl && <ProjectLink url={project.githubUrl} label="GitHub" />}
-                  </div>
-                </div>
+                {project.videoUrl ? (
+                  <VideoEmbed url={project.videoUrl} title={project.title} />
+                ) : project.imageUrl ? (
+                  <ClickableImage
+                    src={project.imageUrl}
+                    alt={project.title}
+                    className="w-full aspect-video overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                ) : (
+                  <div className="w-full aspect-video bg-hover-bg" />
+                )}
 
-                <div
-                  className={`space-y-4 sm:grid sm:gap-4 min-h-0 ${
-                    project.videoUrl
-                      ? "sm:grid-cols-[3fr_2fr]"
-                      : "sm:grid-cols-[1fr_1fr]"
-                  }`}
-                >
-                  {project.videoUrl ? (
-                    <VideoEmbed url={project.videoUrl} title={project.title} />
-                  ) : project.imageUrl ? (
-                    <ClickableImage
-                      src={project.imageUrl}
-                      alt={project.title}
-                      className="overflow-hidden rounded-lg max-h-[400px] cursor-pointer hover:opacity-80 transition-opacity"
-                    />
-                  ) : (
-                    <div className="bg-hover-bg rounded-lg max-h-[400px]" />
+                <div className="p-4 space-y-2 flex-1 flex flex-col">
+                  <h2 className="text-base font-heading leading-snug">{project.title}</h2>
+                  {project.description && (
+                    <p className="text-xs text-fg/70 leading-relaxed line-clamp-4 flex-1">
+                      {stripHtml(project.description)}
+                    </p>
                   )}
-                  <div className="overflow-y-auto max-h-[400px] space-y-2 pr-1">
-                    <h2 className="text-xl font-heading leading-snug">{project.title}</h2>
-                    {project.description && (
-                      <div
-                        className="text-xs text-fg/80 prose-content"
-                        dangerouslySetInnerHTML={{ __html: project.description }}
+
+                  <div className="flex items-center justify-between flex-wrap gap-2 pt-2 text-xs text-muted">
+                    <div className="flex items-center gap-3">
+                      {project.workedOn && <span>{fmtDate(project.workedOn)}</span>}
+                      <HeartButton
+                        entityType="project"
+                        entityId={project.id}
+                        initialCount={heartCount}
+                        initialHearted={heartedMap[`project-${project.id}`]}
                       />
-                    )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {project.url && <ProjectLink url={project.url} label="Website" />}
+                      {project.githubUrl && <ProjectLink url={project.githubUrl} label="GitHub" />}
+                    </div>
                   </div>
                 </div>
               </article>

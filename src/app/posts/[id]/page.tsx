@@ -143,7 +143,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         {prev ? (
           <Link
             href={`/posts/${prev.id}`}
-            className="group flex flex-col gap-1 rounded-xl bg-hover-bg p-3 hover:bg-fg/10 transition-colors"
+            className="group flex flex-col gap-1 rounded-xl bg-fg/5 p-3 hover:bg-fg/10 transition-colors"
           >
             <span className="flex items-center gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
               <ArrowLeft
@@ -160,7 +160,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         {next ? (
           <Link
             href={`/posts/${next.id}`}
-            className="group flex flex-col gap-1 rounded-xl bg-hover-bg p-3 text-right hover:bg-fg/10 transition-colors"
+            className="group flex flex-col gap-1 rounded-xl bg-fg/5 p-3 text-right hover:bg-fg/10 transition-colors"
           >
             <span className="flex items-center justify-end gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
               Next
