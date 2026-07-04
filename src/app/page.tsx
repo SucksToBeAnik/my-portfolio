@@ -7,6 +7,7 @@ import { getHeartsCounts } from "@/actions/heart-counts";
 import { AskPrompt } from "@/components/AskPrompt";
 import { ContentTabs } from "@/components/ContentTabs";
 import { ScrollDown } from "@/components/ScrollDown";
+import { SearchBar } from "@/components/SearchBar";
 import { SeeWorkLink } from "@/components/SeeWorkLink";
 import { ShowcaseScroll } from "@/components/ShowcaseScroll";
 import { LinkPreview } from "@/components/LinkPreview";
@@ -92,7 +93,7 @@ export default async function Home() {
         <div className="flex flex-col gap-16">
           {/* Hero */}
           <section className="space-y-5">
-            <div>
+            <div className="flex items-start justify-between">
               <Image
                 src="/profile.jpeg"
                 alt="Suckstobeanik"
@@ -100,6 +101,7 @@ export default async function Home() {
                 height={56}
                 className="rounded-full object-cover w-14 h-14"
               />
+              <SearchBar />
             </div>
 
             <div className="space-y-3">

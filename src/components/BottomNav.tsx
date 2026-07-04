@@ -6,7 +6,6 @@ import {
   Heart,
   House,
   Lightbulb,
-  MagnifyingGlass,
   Moon,
   Briefcase,
   SunDim,
@@ -270,21 +269,11 @@ export function BottomNav() {
             </button>
             <button
               type="button"
-              onClick={() => window.dispatchEvent(new CustomEvent("opensearch"))}
-              className="flex items-center gap-1 px-1.5 py-1.5 text-[10px] text-nav-text/30 hover:text-nav-text-hover transition-colors cursor-pointer"
-              aria-label="Search"
-            >
-              <MagnifyingGlass weight="thin" className="w-4 h-4 sm:hidden" />
-              <span className="hidden sm:inline">⌘K</span>
-            </button>
-            <button
-              type="button"
               onClick={() => setChatOpen((p) => !p)}
-              className="flex items-center gap-1 px-1.5 py-1.5 text-[10px] text-nav-text/30 hover:text-nav-text-hover transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-sm text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 cursor-pointer"
               aria-label="Ask"
             >
-              <ChatCircleDots weight={chatOpen ? "fill" : "thin"} className="w-4 h-4 sm:hidden shrink-0" />
-              <span className="hidden sm:inline">⌘/</span>
+              <ChatCircleDots weight={chatOpen ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
             </button>
           </div>
         </div>
