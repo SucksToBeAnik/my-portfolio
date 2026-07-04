@@ -1,4 +1,5 @@
 import { desc, eq } from "drizzle-orm";
+import { getShowcasedCv } from "@/actions/cvs";
 import { db } from "@/db";
 import {
   books,
@@ -25,6 +26,7 @@ export async function loadContext() {
     allStacks,
     allSites,
     allGallery,
+    showcasedCv,
   ] = await Promise.all([
     db.select({ title: projects.title, description: projects.description, url: projects.url, workedOn: projects.workedOn }).from(projects).orderBy(projects.sortOrder),
     db.select({ title: publications.title, description: publications.description, venue: publications.venue, url: publications.url, publishedOn: publications.publishedOn }).from(publications).orderBy(publications.sortOrder),
@@ -36,6 +38,7 @@ export async function loadContext() {
     db.select({ name: stacks.name, description: stacks.description, platform: stacks.platform, category: stacks.category }).from(stacks).orderBy(stacks.sortOrder),
     db.select({ url: sites.url, tags: sites.tags, description: sites.description }).from(sites).orderBy(desc(sites.createdAt)),
     db.select({ title: gallery.title, takenAt: gallery.takenAt }).from(gallery).orderBy(gallery.sortOrder),
+    getShowcasedCv(),
   ]);
 
   return {
@@ -49,6 +52,7 @@ export async function loadContext() {
     allStacks,
     allSites,
     allGallery,
+    showcasedCv,
   };
 }
 

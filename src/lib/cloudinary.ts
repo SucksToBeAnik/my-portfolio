@@ -1,6 +1,6 @@
 export async function uploadToCloudinary(
   file: File,
-  resourceType: "image" | "video" = "image",
+  resourceType: "image" | "video" | "raw" = "image",
 ): Promise<string> {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "jamiverse";
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "portfolio";
@@ -21,4 +21,8 @@ export async function uploadToCloudinary(
 
   const data = await res.json();
   return data.secure_url;
+}
+
+export function cloudinaryDownloadUrl(url: string): string {
+  return url.replace("/upload/", "/upload/fl_attachment/");
 }

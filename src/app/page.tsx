@@ -3,9 +3,11 @@ import { desc, eq } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
+import { getShowcasedCv } from "@/actions/cvs";
 import { getHeartsCounts } from "@/actions/heart-counts";
 import { AskButton } from "@/components/AskButton";
 import { ContentTabs } from "@/components/ContentTabs";
+import { CvLink } from "@/components/CvLink";
 import { LinkPreview } from "@/components/LinkPreview";
 import { SearchBar } from "@/components/SearchBar";
 import { SeeWorkLink } from "@/components/SeeWorkLink";
@@ -33,19 +35,27 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const [allProjects, allPublications, readingBooks, workingOnRow, workingOnUrlRow, latestTils] =
-    await Promise.all([
-      db.select().from(projects).orderBy(projects.sortOrder),
-      db.select().from(publications).orderBy(publications.sortOrder),
-      db
-        .select({ id: books.id, title: books.title, author: books.author })
-        .from(books)
-        .where(eq(books.status, "reading"))
-        .limit(1),
-      db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
-      db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
-      db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.createdAt)).limit(1),
-    ]);
+  const [
+    allProjects,
+    allPublications,
+    readingBooks,
+    workingOnRow,
+    workingOnUrlRow,
+    latestTils,
+    showcasedCv,
+  ] = await Promise.all([
+    db.select().from(projects).orderBy(projects.sortOrder),
+    db.select().from(publications).orderBy(publications.sortOrder),
+    db
+      .select({ id: books.id, title: books.title, author: books.author })
+      .from(books)
+      .where(eq(books.status, "reading"))
+      .limit(1),
+    db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
+    db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
+    db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.createdAt)).limit(1),
+    getShowcasedCv(),
+  ]);
 
   const reading = readingBooks[0] ?? null;
   const workingOn = workingOnRow[0]?.value ?? null;
@@ -109,7 +119,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2 text-fg/60">
+            <div className="flex items-center gap-3 text-fg/60">
               <LinkPreview url="https://github.com/SucksToBeAnik" position="bottom">
                 <Link
                   href="https://github.com/SucksToBeAnik"
@@ -143,6 +153,7 @@ export default async function Home() {
                   <XLogo weight="thin" className="w-5 h-5" />
                 </Link>
               </LinkPreview>
+              {showcasedCv && <CvLink url={showcasedCv.fileUrl} />}
             </div>
           </section>
 

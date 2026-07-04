@@ -4,10 +4,12 @@ import { updateWorkingOn } from "@/actions/site-config";
 import { db } from "@/db";
 import {
   books,
+  cvs,
   lifeEvents,
   media,
   microblogs,
   projects,
+  publications,
   siteConfig,
   sites,
   stacks,
@@ -20,6 +22,7 @@ export const metadata = {
 
 export default async function DashboardPage() {
   const [projectCount] = await db.select({ c: count() }).from(projects);
+  const [publicationCount] = await db.select({ c: count() }).from(publications);
   const [lifeCount] = await db.select({ c: count() }).from(lifeEvents);
   const [bookCount] = await db.select({ c: count() }).from(books);
   const [microblogCount] = await db.select({ c: count() }).from(microblogs);
@@ -27,6 +30,7 @@ export default async function DashboardPage() {
   const [siteCount] = await db.select({ c: count() }).from(sites);
   const [mediaCount] = await db.select({ c: count() }).from(media);
   const [tilCount] = await db.select({ c: count() }).from(tils);
+  const [cvCount] = await db.select({ c: count() }).from(cvs);
 
   const workingOn = await db
     .select()
@@ -44,6 +48,7 @@ export default async function DashboardPage() {
 
   const sections = [
     { label: "Projects", count: projectCount.c, href: "/admin/projects" },
+    { label: "Publications", count: publicationCount.c, href: "/admin/publications" },
     { label: "Life Events", count: lifeCount.c, href: "/admin/life-events" },
     { label: "Books", count: bookCount.c, href: "/admin/books" },
     { label: "Microblogs", count: microblogCount.c, href: "/admin/microblogs" },
@@ -51,6 +56,7 @@ export default async function DashboardPage() {
     { label: "Sites", count: siteCount.c, href: "/admin/sites" },
     { label: "Media", count: mediaCount.c, href: "/admin/media" },
     { label: "TIL", count: tilCount.c, href: "/admin/tils" },
+    { label: "CVs", count: cvCount.c, href: "/admin/cvs" },
   ];
 
   return (

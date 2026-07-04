@@ -141,6 +141,20 @@ export const tils = sqliteTable("tils", {
     .$defaultFn(() => new Date()),
 });
 
+export const cvs = sqliteTable("cvs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  fileUrl: text("file_url").notNull(),
+  showcased: integer("showcased", { mode: "boolean" }).default(false),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export const publications = sqliteTable("publications", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),

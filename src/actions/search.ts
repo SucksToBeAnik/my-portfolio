@@ -103,6 +103,13 @@ const adminPages: SearchIndexItem[] = [
     url: "/admin/publications",
     type: "page",
   },
+  {
+    id: 111,
+    title: "Admin / CVs",
+    subtitle: "Manage CVs and choose the showcased one",
+    url: "/admin/cvs",
+    type: "page",
+  },
 ];
 
 export async function getSearchIndex() {

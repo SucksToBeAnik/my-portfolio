@@ -36,7 +36,11 @@ export function buildSystemPrompt(ctx: SiteContext, isAdmin = false): string {
     ? `\n### Gallery Photos\n${ctx.allGallery.map((g) => `- ${g.title}${g.takenAt ? ` (${new Date(g.takenAt).toISOString().slice(0, 10)})` : ""}`).join("\n")}\n`
     : "";
 
-  const data = `${fmt("Projects", ctx.allProjects)}${fmt("Publications", ctx.allPublications)}${tilSection}${mediaSection}${fmt("Books", ctx.allBooks)}${fmt("Recent Posts", ctx.recentPosts)}${fmt("Life Events", ctx.allLifeEvents)}${fmt("Tools & Stack", ctx.allStacks)}${sitesSection}${gallerySection}`;
+  const cvSection = ctx.showcasedCv
+    ? `\n### CV / Resume\n- "${ctx.showcasedCv.title}": ${ctx.showcasedCv.fileUrl}\n`
+    : "";
+
+  const data = `${fmt("Projects", ctx.allProjects)}${fmt("Publications", ctx.allPublications)}${tilSection}${mediaSection}${fmt("Books", ctx.allBooks)}${fmt("Recent Posts", ctx.recentPosts)}${fmt("Life Events", ctx.allLifeEvents)}${fmt("Tools & Stack", ctx.allStacks)}${sitesSection}${gallerySection}${cvSection}`;
 
   if (isAdmin) {
     return `You are a personal site assistant for Anik (the site owner). The person asking IS Anik — respond as a helpful assistant, not impersonating him.

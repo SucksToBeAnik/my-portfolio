@@ -3,6 +3,7 @@
 import {
   BookOpenText,
   Certificate,
+  FileText,
   FilmStrip,
   FolderOpen,
   Globe,
@@ -28,6 +29,7 @@ const navItems = [
   { href: "/admin/media", label: "Media", icon: FilmStrip },
   { href: "/admin/gallery", label: "Gallery", icon: Image },
   { href: "/admin/tils", label: "TIL", icon: Lightbulb },
+  { href: "/admin/cvs", label: "CVs", icon: FileText },
 ];
 
 export function AdminNav({ variant }: { variant?: "sidebar" | "bottom" }) {

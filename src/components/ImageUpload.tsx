@@ -1,10 +1,11 @@
 "use client";
 
-import { Image as ImageIcon, Trash, Video } from "@phosphor-icons/react";
+import { File as FileIcon, Image as ImageIcon, Trash, Video } from "@phosphor-icons/react";
 import { useCallback, useRef, useState } from "react";
 
 const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"];
 const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/ogg"];
+const ALLOWED_RAW = ["application/pdf"];
 
 interface ImageUploadProps {
   value?: string;
@@ -12,7 +13,7 @@ interface ImageUploadProps {
   onRemove?: () => void;
   onFilePending?: (file: File | null) => void;
   accept?: string;
-  resourceType?: "image" | "video";
+  resourceType?: "image" | "video" | "raw";
 }
 
 type Tab = "upload" | "url";
@@ -35,11 +36,14 @@ export function ImageUpload({
 
   const validate = useCallback(
     (file: File): string | null => {
-      const allowed = resourceType === "video" ? ALLOWED_VIDEO : ALLOWED_IMAGE;
+      const allowed =
+        resourceType === "video" ? ALLOWED_VIDEO : resourceType === "raw" ? ALLOWED_RAW : ALLOWED_IMAGE;
       if (!allowed.includes(file.type)) {
         return resourceType === "video"
           ? "Only MP4, WebM, and OGG videos are allowed."
-          : "Only JPEG, PNG, GIF, WebP, and AVIF images are allowed.";
+          : resourceType === "raw"
+            ? "Only PDF files are allowed."
+            : "Only JPEG, PNG, GIF, WebP, and AVIF images are allowed.";
       }
       return null;
     },
@@ -155,6 +159,11 @@ export function ImageUpload({
             <div className="relative w-full">
               {resourceType === "video" ? (
                 <video src={preview} className="w-full max-h-32 object-contain rounded-lg" />
+              ) : resourceType === "raw" ? (
+                <div className="flex items-center gap-2 p-4">
+                  <FileIcon weight="thin" className="w-6 h-6 text-nav-text shrink-0" />
+                  <span className="text-xs text-fg truncate">{pendingFile?.name}</span>
+                </div>
               ) : (
                 <img src={preview} alt="" className="w-full max-h-32 object-contain rounded-lg" />
               )}
@@ -166,6 +175,11 @@ export function ImageUpload({
             <div className="relative group w-full">
               {resourceType === "video" ? (
                 <video src={value} className="w-full max-h-32 object-contain rounded-lg" />
+              ) : resourceType === "raw" ? (
+                <div className="flex items-center gap-2 p-4">
+                  <FileIcon weight="thin" className="w-6 h-6 text-nav-text shrink-0" />
+                  <span className="text-xs text-fg truncate">{value.split("/").pop()}</span>
+                </div>
               ) : (
                 <img src={value} alt="" className="w-full max-h-32 object-contain rounded-lg" />
               )}
@@ -199,6 +213,8 @@ export function ImageUpload({
             <>
               {resourceType === "video" ? (
                 <Video weight="thin" className="w-6 h-6 text-nav-text" />
+              ) : resourceType === "raw" ? (
+                <FileIcon weight="thin" className="w-6 h-6 text-nav-text" />
               ) : (
                 <ImageIcon weight="thin" className="w-6 h-6 text-nav-text" />
               )}
