@@ -7,7 +7,6 @@ import { getHeartsCounts } from "@/actions/heart-counts";
 import { AskButton } from "@/components/AskButton";
 import { ContentTabs } from "@/components/ContentTabs";
 import { LinkPreview } from "@/components/LinkPreview";
-import { ScrollDown } from "@/components/ScrollDown";
 import { SearchBar } from "@/components/SearchBar";
 import { SeeWorkLink } from "@/components/SeeWorkLink";
 import { ShowcaseScroll } from "@/components/ShowcaseScroll";
@@ -221,7 +220,6 @@ export default async function Home() {
         </div>
 
         <div className="flex-1" />
-        <ScrollDown />
       </div>
 
       {/* Page 2: Projects / Posts — snaps to top of viewport */}

@@ -7,7 +7,7 @@ export function AskButton() {
     <button
       type="button"
       onClick={() => window.dispatchEvent(new CustomEvent("openchat"))}
-      className="group flex items-center px-2 py-1.5 rounded-full border border-hairline text-muted hover:text-fg hover:border-fg/30 transition-colors cursor-pointer overflow-hidden"
+      className="group flex items-center px-2 py-1.5 rounded-full border border-fg/15 text-muted hover:text-fg hover:border-fg/30 transition-colors cursor-pointer overflow-hidden"
       aria-label="Ask me anything"
     >
       <ChatCircleDots weight="thin" className="size-3.5 shrink-0" />
