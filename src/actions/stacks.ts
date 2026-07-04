@@ -9,10 +9,10 @@ import { stacks } from "@/db/schema";
 const stackSchema = z.object({
   name: z.string().min(1),
   url: z.string().min(1),
-  description: z.string().optional(),
-  imageUrl: z.string().optional(),
-  platform: z.string().optional(),
-  category: z.string().optional(),
+  description: z.string().optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
+  platform: z.string().optional().nullable(),
+  category: z.string().optional().nullable(),
 });
 
 export async function getStacks() {

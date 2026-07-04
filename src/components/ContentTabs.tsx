@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getHeartsForEntities } from "@/actions/hearts";
-import { Breadcrumb } from "@/components/Breadcrumb";
 import { ClickableImage } from "@/components/ClickableImage";
 import { HeartButton } from "@/components/HeartButton";
 import { ProjectLink } from "@/components/ProjectLink";
@@ -68,11 +67,7 @@ export function ContentTabs({
 
   return (
     <section id="content">
-      <div className="mb-8 md:mb-16">
-        <Breadcrumb crumbs={[{ label: "Work" }]} />
-      </div>
-
-      <div className="sticky top-0 z-10 bg-bg flex gap-6 pb-2.5 mb-8 border-b border-hairline">
+      <div className="sticky top-0 z-10 bg-bg flex gap-6 pt-6 pb-2.5 mb-8">
         <button
           onClick={() => switchTab("projects")}
           className={`pb-2.5 text-xs font-heading uppercase tracking-wider transition-all cursor-pointer border-b-2 ${

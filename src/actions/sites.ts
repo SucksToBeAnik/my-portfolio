@@ -8,7 +8,7 @@ import { sites } from "@/db/schema";
 
 const siteSchema = z.object({
   url: z.string().url(),
-  tags: z.string().optional(),
+  tags: z.string().optional().nullable(),
 });
 
 export async function getSites() {

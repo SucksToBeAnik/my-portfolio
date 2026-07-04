@@ -1,6 +1,6 @@
 "use server";
 
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
@@ -8,10 +8,10 @@ import { publications } from "@/db/schema";
 
 const schema = z.object({
   title: z.string().min(1),
-  description: z.string().optional(),
-  venue: z.string().optional(),
-  url: z.string().optional(),
-  publishedOn: z.string().optional(),
+  description: z.string().optional().nullable(),
+  venue: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  publishedOn: z.string().optional().nullable(),
 });
 
 export async function getPublications() {
@@ -21,9 +21,8 @@ export async function getPublications() {
 export async function createPublication(data: z.infer<typeof schema>) {
   const parsed = schema.parse(data);
   const maxOrder = await db
-    .select({ max: publications.sortOrder })
+    .select({ max: sql<number>`max(${publications.sortOrder})` })
     .from(publications)
-    .limit(1)
     .then((r) => r[0]?.max ?? -1);
 
   await db.insert(publications).values({ ...parsed, sortOrder: maxOrder + 1 });

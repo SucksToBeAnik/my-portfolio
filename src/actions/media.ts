@@ -8,14 +8,14 @@ import { media } from "@/db/schema";
 import { env } from "@/lib/env";
 
 const mediaSchema = z.object({
-  imdbId: z.string().optional(),
+  imdbId: z.string().optional().nullable(),
   title: z.string().min(1),
-  year: z.string().optional(),
+  year: z.string().optional().nullable(),
   type: z.enum(["movie", "series"]),
-  posterUrl: z.string().optional(),
-  imdbUrl: z.string().optional(),
-  plot: z.string().optional(),
-  review: z.string().max(500).optional(),
+  posterUrl: z.string().optional().nullable(),
+  imdbUrl: z.string().optional().nullable(),
+  plot: z.string().optional().nullable(),
+  review: z.string().max(500).optional().nullable(),
   rating: z.number().int().min(1).max(5).optional().nullable(),
   status: z.enum(["watching", "watched", "planned", "dropped"]),
   seasons: z.number().int().positive().optional().nullable(),

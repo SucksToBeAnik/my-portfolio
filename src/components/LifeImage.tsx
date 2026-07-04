@@ -5,7 +5,7 @@ export function LifeImage({ src, alt }: { src: string; alt: string }) {
     <ClickableImage
       src={src}
       alt={alt}
-      className="w-16 h-16 overflow-hidden shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+      className="w-20 h-20 overflow-hidden shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
     />
   );
 }

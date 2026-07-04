@@ -128,7 +128,7 @@ export function LifeContent({
                     {event.imageUrl ? (
                       <LifeImage src={event.imageUrl} alt={event.title} />
                     ) : (
-                      <div className="w-16 h-16 shrink-0" />
+                      <div className="w-20 h-20 shrink-0" />
                     )}
                     <div>
                       <p className="text-xs text-muted mb-0.5">

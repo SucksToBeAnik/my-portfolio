@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
@@ -9,8 +9,8 @@ import { microblogs } from "@/db/schema";
 const schema = z.object({
   title: z.string().min(1),
   content: z.string().min(1),
-  imageUrl: z.string().optional(),
-  tags: z.string().optional(),
+  imageUrl: z.string().optional().nullable(),
+  tags: z.string().optional().nullable(),
   published: z.boolean().optional(),
   til: z.boolean().optional(),
   publishedAt: z.date().optional().nullable(),
@@ -22,8 +22,14 @@ export async function getMicroblogs() {
 
 export async function createMicroblog(data: z.infer<typeof schema>) {
   const parsed = schema.parse(data);
+  const maxOrder = await db
+    .select({ max: sql<number>`max(${microblogs.sortOrder})` })
+    .from(microblogs)
+    .then((r) => r[0]?.max ?? -1);
+
   await db.insert(microblogs).values({
     ...parsed,
+    sortOrder: maxOrder + 1,
     publishedAt: parsed.published && !parsed.publishedAt ? new Date() : parsed.publishedAt,
   });
   revalidatePath("/admin/microblogs");

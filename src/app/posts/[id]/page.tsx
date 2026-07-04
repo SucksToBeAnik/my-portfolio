@@ -139,17 +139,20 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         <HeartButton entityType="microblog" entityId={post.id} initialCount={heartCount} />
       </article>
 
-      <div className="flex items-center justify-between gap-4 pt-4 border-t border-hairline">
+      <div className="grid grid-cols-2 gap-3">
         {prev ? (
           <Link
             href={`/posts/${prev.id}`}
-            className="flex items-center gap-1.5 text-xs text-muted hover:text-fg transition-colors group"
+            className="group flex flex-col gap-1 rounded-xl bg-hover-bg p-3 hover:bg-fg/10 transition-colors"
           >
-            <ArrowLeft
-              weight="thin"
-              className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform"
-            />
-            <span className="truncate max-w-[200px]">{prev.title}</span>
+            <span className="flex items-center gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
+              <ArrowLeft
+                weight="thin"
+                className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform"
+              />
+              Previous
+            </span>
+            <span className="text-xs text-fg truncate">{prev.title}</span>
           </Link>
         ) : (
           <div />
@@ -157,13 +160,16 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         {next ? (
           <Link
             href={`/posts/${next.id}`}
-            className="flex items-center gap-1.5 text-xs text-muted hover:text-fg transition-colors group text-right"
+            className="group flex flex-col gap-1 rounded-xl bg-hover-bg p-3 text-right hover:bg-fg/10 transition-colors"
           >
-            <span className="truncate max-w-[200px]">{next.title}</span>
-            <ArrowRight
-              weight="thin"
-              className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"
-            />
+            <span className="flex items-center justify-end gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
+              Next
+              <ArrowRight
+                weight="thin"
+                className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"
+              />
+            </span>
+            <span className="text-xs text-fg truncate">{next.title}</span>
           </Link>
         ) : (
           <div />

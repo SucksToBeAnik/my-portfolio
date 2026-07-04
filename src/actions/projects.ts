@@ -9,11 +9,11 @@ import { projects } from "@/db/schema";
 const schema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
-  imageUrl: z.string().optional(),
-  videoUrl: z.string().optional(),
-  url: z.string().optional(),
-  githubUrl: z.string().optional(),
-  workedOn: z.string().optional(),
+  imageUrl: z.string().optional().nullable(),
+  videoUrl: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  githubUrl: z.string().optional().nullable(),
+  workedOn: z.string().optional().nullable(),
   featured: z.boolean().optional(),
   sortOrder: z.number().optional(),
 });

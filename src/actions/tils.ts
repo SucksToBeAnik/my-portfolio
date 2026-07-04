@@ -1,6 +1,6 @@
 "use server";
 
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
@@ -30,9 +30,8 @@ export async function getTilsPublic() {
 export async function createTil(data: z.infer<typeof schema>) {
   const parsed = schema.parse(data);
   const maxOrder = await db
-    .select({ max: tils.sortOrder })
+    .select({ max: sql<number>`max(${tils.sortOrder})` })
     .from(tils)
-    .limit(1)
     .then((r) => r[0]?.max ?? -1);
 
   await db.insert(tils).values({ ...parsed, sortOrder: maxOrder + 1 });

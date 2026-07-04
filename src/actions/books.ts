@@ -9,11 +9,11 @@ import { books } from "@/db/schema";
 const schema = z.object({
   title: z.string().min(1),
   author: z.string().min(1),
-  coverUrl: z.string().optional(),
+  coverUrl: z.string().optional().nullable(),
   rating: z.number().min(1).max(5).optional().nullable(),
-  review: z.string().optional(),
-  quote: z.string().optional(),
-  category: z.string().optional(),
+  review: z.string().optional().nullable(),
+  quote: z.string().optional().nullable(),
+  category: z.string().optional().nullable(),
   status: z.enum(["reading", "read", "want_to_read"]),
   sortOrder: z.number().optional(),
 });
