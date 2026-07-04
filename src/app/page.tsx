@@ -11,7 +11,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { SeeWorkLink } from "@/components/SeeWorkLink";
 import { ShowcaseScroll } from "@/components/ShowcaseScroll";
 import { db } from "@/db";
-import { books, microblogs, projects, siteConfig, tils } from "@/db/schema";
+import { books, projects, siteConfig, tils } from "@/db/schema";
 
 export const revalidate = 3600;
 
@@ -33,39 +33,27 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const [allProjects, allPosts, readingBooks, workingOnRow, workingOnUrlRow, latestTils] =
-    await Promise.all([
-      db.select().from(projects).orderBy(projects.sortOrder),
-      db
-        .select()
-        .from(microblogs)
-        .where(eq(microblogs.published, true))
-        .orderBy(desc(microblogs.publishedAt)),
-      db
-        .select({ id: books.id, title: books.title, author: books.author })
-        .from(books)
-        .where(eq(books.status, "reading"))
-        .limit(1),
-      db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
-      db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
-      db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.createdAt)).limit(1),
-    ]);
+  const [allProjects, readingBooks, workingOnRow, workingOnUrlRow, latestTils] = await Promise.all([
+    db.select().from(projects).orderBy(projects.sortOrder),
+    db
+      .select({ id: books.id, title: books.title, author: books.author })
+      .from(books)
+      .where(eq(books.status, "reading"))
+      .limit(1),
+    db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
+    db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
+    db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.createdAt)).limit(1),
+  ]);
 
   const reading = readingBooks[0] ?? null;
   const workingOn = workingOnRow[0]?.value ?? null;
   const workingOnUrl = workingOnUrlRow[0]?.value || null;
   const latestTil = latestTils[0] ?? null;
 
-  const [projectHearts, postHearts] = await Promise.all([
-    getHeartsCounts(
-      "project",
-      allProjects.map((p) => p.id),
-    ),
-    getHeartsCounts(
-      "microblog",
-      allPosts.map((p) => p.id),
-    ),
-  ]);
+  const projectHearts = await getHeartsCounts(
+    "project",
+    allProjects.map((p) => p.id),
+  );
 
   return (
     <>
@@ -222,15 +210,10 @@ export default async function Home() {
         <div className="flex-1" />
       </div>
 
-      {/* Page 2: Projects / Posts — snaps to top of viewport */}
+      {/* Page 2: Projects — snaps to top of viewport */}
       <div className="min-h-screen snap-start px-6 pb-32">
         <Suspense>
-          <ContentTabs
-            projects={allProjects}
-            posts={allPosts}
-            projectHearts={projectHearts}
-            postHearts={postHearts}
-          />
+          <ContentTabs projects={allProjects} projectHearts={projectHearts} />
         </Suspense>
       </div>
     </div>

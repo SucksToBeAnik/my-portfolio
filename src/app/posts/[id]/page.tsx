@@ -106,7 +106,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       />
       <div className="space-y-6 md:space-y-8">
       <Link
-        href="/?tab=posts"
+        href="/posts"
         className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
       >
         <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
