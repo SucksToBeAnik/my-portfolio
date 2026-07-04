@@ -35,6 +35,13 @@ export default async function DashboardPage() {
     .limit(1)
     .then((r) => r[0]?.value ?? "");
 
+  const workingOnUrl = await db
+    .select()
+    .from(siteConfig)
+    .where(eq(siteConfig.key, "working_on_url"))
+    .limit(1)
+    .then((r) => r[0]?.value ?? "");
+
   const sections = [
     { label: "Projects", count: projectCount.c, href: "/admin/projects" },
     { label: "Life Events", count: lifeCount.c, href: "/admin/life-events" },
@@ -75,6 +82,13 @@ export default async function DashboardPage() {
           name="working_on"
           defaultValue={workingOn}
           placeholder="e.g. Building X with Y..."
+          className="w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors"
+        />
+        <label className="text-xs text-fg/50 block">Link (GitHub, project, etc.)</label>
+        <input
+          name="working_on_url"
+          defaultValue={workingOnUrl}
+          placeholder="https://github.com/..."
           className="w-full px-3 py-1.5 text-xs bg-hover-bg border border-hairline rounded-lg text-fg placeholder-fg/30 focus:outline-none focus:border-fg/30 transition-colors"
         />
         <button

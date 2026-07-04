@@ -1,4 +1,4 @@
-import { GithubLogo, LinkedinLogo, XLogo } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo, LinkedinLogo, LinkSimple, XLogo } from "@phosphor-icons/react/dist/ssr";
 import { desc, eq } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,13 +6,13 @@ import { Suspense } from "react";
 import { getHeartsCounts } from "@/actions/heart-counts";
 import { AskButton } from "@/components/AskButton";
 import { ContentTabs } from "@/components/ContentTabs";
+import { LinkPreview } from "@/components/LinkPreview";
 import { ScrollDown } from "@/components/ScrollDown";
 import { SearchBar } from "@/components/SearchBar";
 import { SeeWorkLink } from "@/components/SeeWorkLink";
 import { ShowcaseScroll } from "@/components/ShowcaseScroll";
-import { LinkPreview } from "@/components/LinkPreview";
 import { db } from "@/db";
-import { books, microblogs, projects, siteConfig } from "@/db/schema";
+import { books, microblogs, projects, siteConfig, tils } from "@/db/schema";
 
 export const revalidate = 3600;
 
@@ -34,23 +34,28 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const [allProjects, allPosts, readingBooks, workingOnRow] = await Promise.all([
-    db.select().from(projects).orderBy(projects.sortOrder),
-    db
-      .select()
-      .from(microblogs)
-      .where(eq(microblogs.published, true))
-      .orderBy(desc(microblogs.publishedAt)),
-    db
-      .select({ title: books.title, author: books.author })
-      .from(books)
-      .where(eq(books.status, "reading"))
-      .limit(1),
-    db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
-  ]);
+  const [allProjects, allPosts, readingBooks, workingOnRow, workingOnUrlRow, latestTils] =
+    await Promise.all([
+      db.select().from(projects).orderBy(projects.sortOrder),
+      db
+        .select()
+        .from(microblogs)
+        .where(eq(microblogs.published, true))
+        .orderBy(desc(microblogs.publishedAt)),
+      db
+        .select({ id: books.id, title: books.title, author: books.author })
+        .from(books)
+        .where(eq(books.status, "reading"))
+        .limit(1),
+      db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
+      db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
+      db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.createdAt)).limit(1),
+    ]);
 
   const reading = readingBooks[0] ?? null;
   const workingOn = workingOnRow[0]?.value ?? null;
+  const workingOnUrl = workingOnUrlRow[0]?.value || null;
+  const latestTil = latestTils[0] ?? null;
 
   const [projectHearts, postHearts] = await Promise.all([
     getHeartsCounts(
@@ -153,19 +158,59 @@ export default async function Home() {
           </section>
 
           {/* Now */}
-          {(workingOn || reading) && (
+          {(workingOn || reading || latestTil) && (
             <section className="space-y-2">
               <p className="text-xs font-heading uppercase tracking-wider text-muted">Now</p>
-              <div className="space-y-1 text-xs">
+              <div className="space-y-1.5 text-xs">
                 {workingOn && (
-                  <p className="text-fg/80">
-                    Working on <span className="font-medium text-fg">{workingOn}</span>
+                  <p className="flex items-start gap-1.5 text-fg/80">
+                    <span className="text-muted/50 shrink-0">◇</span>
+                    <span>
+                      Working on{" "}
+                      {workingOnUrl ? (
+                        <Link
+                          href={workingOnUrl}
+                          target="_blank"
+                          className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
+                        >
+                          {workingOn}
+                          <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-fg">{workingOn}</span>
+                      )}
+                    </span>
                   </p>
                 )}
                 {reading && (
-                  <p className="text-fg/80">
-                    Reading <span className="font-medium text-fg">{reading.title}</span> by{" "}
-                    {reading.author}
+                  <p className="flex items-start gap-1.5 text-fg/80">
+                    <span className="text-muted/50 shrink-0">◇</span>
+                    <span>
+                      Reading{" "}
+                      <Link
+                        href={`/books/${reading.id}`}
+                        className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
+                      >
+                        {reading.title}
+                        <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
+                      </Link>{" "}
+                      by {reading.author}
+                    </span>
+                  </p>
+                )}
+                {latestTil && (
+                  <p className="flex items-start gap-1.5 text-fg/80">
+                    <span className="text-muted/50 shrink-0">◇</span>
+                    <span>
+                      Today I learned{" "}
+                      <Link
+                        href={`/til/${latestTil.id}`}
+                        className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
+                      >
+                        {latestTil.title}
+                        <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
+                      </Link>
+                    </span>
                   </p>
                 )}
               </div>

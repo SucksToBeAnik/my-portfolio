@@ -22,5 +22,7 @@ export async function setConfig(key: string, value: string) {
 
 export async function updateWorkingOn(formData: FormData) {
   const value = formData.get("working_on") as string;
+  const url = formData.get("working_on_url") as string;
   await setConfig("working_on", value);
+  await setConfig("working_on_url", url ?? "");
 }

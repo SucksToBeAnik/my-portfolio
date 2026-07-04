@@ -2,12 +2,11 @@
 
 import {
   BookOpenText,
+  Briefcase,
   ChatCircleDots,
   Heart,
   House,
-  Lightbulb,
   Moon,
-  Briefcase,
   SunDim,
   Television,
   Wrench,
@@ -27,7 +26,6 @@ const navItems = [
   { href: "/", label: "Home", icon: House },
   { href: "/life", label: "Life", icon: Heart },
   { href: "/books", label: "Books", icon: BookOpenText },
-  { href: "/til", label: "TIL", icon: Lightbulb },
   { href: "/media", label: "Watch", icon: Television },
   { href: "/stacks", label: "Stacks", icon: Wrench },
 ];
