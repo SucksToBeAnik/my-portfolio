@@ -2,7 +2,17 @@
 
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { books, gallery, lifeEvents, media, microblogs, projects, stacks, tils } from "@/db/schema";
+import {
+  books,
+  gallery,
+  lifeEvents,
+  media,
+  microblogs,
+  projects,
+  publications,
+  stacks,
+  tils,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 export interface SearchIndexItem {
@@ -10,7 +20,17 @@ export interface SearchIndexItem {
   title: string;
   subtitle: string;
   url: string;
-  type: "project" | "book" | "microblog" | "til" | "lifeEvent" | "stack" | "media" | "gallery" | "page";
+  type:
+    | "project"
+    | "publication"
+    | "book"
+    | "microblog"
+    | "til"
+    | "lifeEvent"
+    | "stack"
+    | "media"
+    | "gallery"
+    | "page";
 }
 
 const staticPages: SearchIndexItem[] = [
@@ -76,11 +96,19 @@ const adminPages: SearchIndexItem[] = [
     url: "/admin/gallery",
     type: "page",
   },
+  {
+    id: 110,
+    title: "Admin / Publications",
+    subtitle: "Manage publications",
+    url: "/admin/publications",
+    type: "page",
+  },
 ];
 
 export async function getSearchIndex() {
   const [
     allProjects,
+    allPublications,
     allBooks,
     allMicroblogs,
     allLifeEvents,
@@ -94,6 +122,10 @@ export async function getSearchIndex() {
       .select({ id: projects.id, title: projects.title, description: projects.description })
       .from(projects)
       .orderBy(desc(projects.sortOrder)),
+    db
+      .select({ id: publications.id, title: publications.title, venue: publications.venue })
+      .from(publications)
+      .orderBy(desc(publications.sortOrder)),
     db
       .select({ id: books.id, title: books.title, author: books.author })
       .from(books)
@@ -132,6 +164,13 @@ export async function getSearchIndex() {
       subtitle: p.description ? p.description.replace(/<[^>]*>/g, "").slice(0, 120) : "",
       url: "/projects",
       type: "project" as const,
+    })),
+    ...allPublications.map((p) => ({
+      id: p.id,
+      title: p.title,
+      subtitle: p.venue ?? "",
+      url: "/?tab=publications",
+      type: "publication" as const,
     })),
     ...allBooks.map((b) => ({
       id: b.id,

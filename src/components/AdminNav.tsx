@@ -2,6 +2,7 @@
 
 import {
   BookOpenText,
+  Certificate,
   FilmStrip,
   FolderOpen,
   Globe,
@@ -18,6 +19,7 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: SquaresFour },
   { href: "/admin/projects", label: "Projects", icon: FolderOpen },
+  { href: "/admin/publications", label: "Publications", icon: Certificate },
   { href: "/admin/life-events", label: "Life Events", icon: Heart },
   { href: "/admin/books", label: "Books", icon: BookOpenText },
   { href: "/admin/microblogs", label: "Microblog", icon: Quotes },

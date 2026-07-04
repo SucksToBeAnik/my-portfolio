@@ -1,10 +1,22 @@
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { books, gallery, lifeEvents, media, microblogs, projects, sites, stacks, tils } from "@/db/schema";
+import {
+  books,
+  gallery,
+  lifeEvents,
+  media,
+  microblogs,
+  projects,
+  publications,
+  sites,
+  stacks,
+  tils,
+} from "@/db/schema";
 
 export async function loadContext() {
   const [
     allProjects,
+    allPublications,
     allBooks,
     recentTils,
     recentMedia,
@@ -15,6 +27,7 @@ export async function loadContext() {
     allGallery,
   ] = await Promise.all([
     db.select({ title: projects.title, description: projects.description, url: projects.url, workedOn: projects.workedOn }).from(projects).orderBy(projects.sortOrder),
+    db.select({ title: publications.title, description: publications.description, venue: publications.venue, url: publications.url, publishedOn: publications.publishedOn }).from(publications).orderBy(publications.sortOrder),
     db.select({ title: books.title, author: books.author, status: books.status, rating: books.rating, category: books.category }).from(books).orderBy(books.sortOrder),
     db.select({ title: tils.title, content: tils.content, createdAt: tils.createdAt }).from(tils).orderBy(desc(tils.createdAt)).limit(15),
     db.select({ title: media.title, type: media.type, year: media.year, status: media.status, rating: media.rating, seasons: media.seasons }).from(media).orderBy(desc(media.updatedAt)).limit(20),
@@ -25,7 +38,18 @@ export async function loadContext() {
     db.select({ title: gallery.title, takenAt: gallery.takenAt }).from(gallery).orderBy(gallery.sortOrder),
   ]);
 
-  return { allProjects, allBooks, recentTils, recentMedia, recentPosts, allLifeEvents, allStacks, allSites, allGallery };
+  return {
+    allProjects,
+    allPublications,
+    allBooks,
+    recentTils,
+    recentMedia,
+    recentPosts,
+    allLifeEvents,
+    allStacks,
+    allSites,
+    allGallery,
+  };
 }
 
 export type SiteContext = Awaited<ReturnType<typeof loadContext>>;

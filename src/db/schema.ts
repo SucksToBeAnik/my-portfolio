@@ -141,6 +141,22 @@ export const tils = sqliteTable("tils", {
     .$defaultFn(() => new Date()),
 });
 
+export const publications = sqliteTable("publications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  description: text("description"),
+  venue: text("venue"),
+  url: text("url"),
+  publishedOn: text("published_on"),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export const gallery = sqliteTable("gallery", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),

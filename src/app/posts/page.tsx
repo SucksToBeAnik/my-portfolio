@@ -46,7 +46,9 @@ export default async function PostsPage() {
 
   return (
     <div className="space-y-8">
-      <Breadcrumb crumbs={[{ label: "Posts" }]} />
+      <div className="mb-8 md:mb-16">
+        <Breadcrumb crumbs={[{ label: "Posts" }]} />
+      </div>
 
       {posts.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
 

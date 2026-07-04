@@ -2,6 +2,7 @@
 
 import {
   BookOpenText,
+  Certificate,
   Compass,
   FolderOpen,
   Heart,
@@ -20,6 +21,7 @@ import { getSearchItems, invalidateSearchCache } from "@/lib/search-index";
 const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
   page: { icon: Compass, label: "Pages" },
   project: { icon: FolderOpen, label: "Projects" },
+  publication: { icon: Certificate, label: "Publications" },
   book: { icon: BookOpenText, label: "Books" },
   microblog: { icon: Quotes, label: "Microblog" },
   til: { icon: Lightbulb, label: "TIL" },
@@ -29,13 +31,26 @@ const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
   gallery: { icon: Image, label: "Gallery" },
 };
 
-const typeOrder = ["page", "project", "book", "microblog", "til", "lifeEvent", "stack", "media", "gallery"];
+const typeOrder = [
+  "page",
+  "project",
+  "publication",
+  "book",
+  "microblog",
+  "til",
+  "lifeEvent",
+  "stack",
+  "media",
+  "gallery",
+];
 
 const TYPE_ALIAS: Record<string, string> = {
   page: "page",
   pages: "page",
   project: "project",
   projects: "project",
+  publication: "publication",
+  publications: "publication",
   book: "book",
   books: "book",
   microblog: "microblog",
@@ -53,6 +68,7 @@ const TYPE_ALIAS: Record<string, string> = {
 const TYPE_SUGGESTIONS = [
   "@pages",
   "@projects",
+  "@publications",
   "@books",
   "@microblog",
   "@til",
