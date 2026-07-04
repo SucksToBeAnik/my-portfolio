@@ -14,6 +14,7 @@ import { SeeWorkLink } from "@/components/SeeWorkLink";
 import { ShowcaseScroll } from "@/components/ShowcaseScroll";
 import { db } from "@/db";
 import { books, projects, publications, siteConfig, tils } from "@/db/schema";
+import { getLatestGithubActivity } from "@/lib/github";
 
 export const revalidate = 3600;
 
@@ -43,6 +44,7 @@ export default async function Home() {
     workingOnUrlRow,
     latestTils,
     showcasedCv,
+    githubActivity,
   ] = await Promise.all([
     db.select().from(projects).orderBy(projects.sortOrder),
     db.select().from(publications).orderBy(publications.sortOrder),
@@ -55,6 +57,7 @@ export default async function Home() {
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
     db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.createdAt)).limit(1),
     getShowcasedCv(),
+    getLatestGithubActivity(),
   ]);
 
   const reading = readingBooks[0] ?? null;
@@ -158,7 +161,7 @@ export default async function Home() {
           </section>
 
           {/* Now */}
-          {(workingOn || reading || latestTil) && (
+          {(workingOn || reading || latestTil || githubActivity) && (
             <section className="space-y-2">
               <p className="text-xs font-heading uppercase tracking-wider text-muted">Now</p>
               <div className="space-y-1.5 text-xs">
@@ -208,6 +211,22 @@ export default async function Home() {
                         className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
                       >
                         {latestTil.title}
+                        <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
+                      </Link>
+                    </span>
+                  </p>
+                )}
+                {githubActivity && (
+                  <p className="flex items-start gap-1.5 text-fg/80">
+                    <span className="text-muted/50 shrink-0">◇</span>
+                    <span>
+                      Recently{" "}
+                      <Link
+                        href={githubActivity.url}
+                        target="_blank"
+                        className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
+                      >
+                        {githubActivity.label}
                         <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
                       </Link>
                     </span>
