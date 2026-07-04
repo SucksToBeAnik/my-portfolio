@@ -1,4 +1,12 @@
-import { GithubLogo, LinkedinLogo, LinkSimple, XLogo } from "@phosphor-icons/react/dist/ssr";
+import {
+  Books,
+  Gear,
+  GithubLogo,
+  Lightbulb,
+  LinkedinLogo,
+  LinkSimple,
+  XLogo,
+} from "@phosphor-icons/react/dist/ssr";
 import { desc, eq } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,13 +16,14 @@ import { getHeartsCounts } from "@/actions/heart-counts";
 import { AskButton } from "@/components/AskButton";
 import { ContentTabs } from "@/components/ContentTabs";
 import { CvLink } from "@/components/CvLink";
+import { GithubActivityLine } from "@/components/GithubActivityLine";
 import { LinkPreview } from "@/components/LinkPreview";
 import { SearchBar } from "@/components/SearchBar";
 import { SeeWorkLink } from "@/components/SeeWorkLink";
 import { ShowcaseScroll } from "@/components/ShowcaseScroll";
 import { db } from "@/db";
 import { books, projects, publications, siteConfig, tils } from "@/db/schema";
-import { getLatestGithubActivity } from "@/lib/github";
+import { getRecentGithubActivity } from "@/lib/github";
 
 export const revalidate = 3600;
 
@@ -44,7 +53,7 @@ export default async function Home() {
     workingOnUrlRow,
     latestTils,
     showcasedCv,
-    githubActivity,
+    githubActivities,
   ] = await Promise.all([
     db.select().from(projects).orderBy(projects.sortOrder),
     db.select().from(publications).orderBy(publications.sortOrder),
@@ -57,7 +66,7 @@ export default async function Home() {
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
     db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.createdAt)).limit(1),
     getShowcasedCv(),
-    getLatestGithubActivity(),
+    getRecentGithubActivity(),
   ]);
 
   const reading = readingBooks[0] ?? null;
@@ -161,13 +170,13 @@ export default async function Home() {
           </section>
 
           {/* Now */}
-          {(workingOn || reading || latestTil || githubActivity) && (
-            <section className="space-y-2">
+          {(workingOn || reading || latestTil || githubActivities.length > 0) && (
+            <section className="space-y-3">
               <p className="text-xs font-heading uppercase tracking-wider text-muted">Now</p>
-              <div className="space-y-1.5 text-xs">
+              <div className="space-y-2 text-xs">
                 {workingOn && (
                   <p className="flex items-start gap-1.5 text-fg/80">
-                    <span className="text-muted/50 shrink-0">◇</span>
+                    <Gear weight="fill" className="w-3 h-3 mt-0.5 text-fg/40 shrink-0" />
                     <span>
                       Working on{" "}
                       {workingOnUrl ? (
@@ -187,7 +196,7 @@ export default async function Home() {
                 )}
                 {reading && (
                   <p className="flex items-start gap-1.5 text-fg/80">
-                    <span className="text-muted/50 shrink-0">◇</span>
+                    <Books weight="fill" className="w-3 h-3 mt-0.5 text-fg/40 shrink-0" />
                     <span>
                       Reading{" "}
                       <Link
@@ -203,7 +212,7 @@ export default async function Home() {
                 )}
                 {latestTil && (
                   <p className="flex items-start gap-1.5 text-fg/80">
-                    <span className="text-muted/50 shrink-0">◇</span>
+                    <Lightbulb weight="fill" className="w-3 h-3 mt-0.5 text-fg/40 shrink-0" />
                     <span>
                       Today I learned{" "}
                       <Link
@@ -216,22 +225,7 @@ export default async function Home() {
                     </span>
                   </p>
                 )}
-                {githubActivity && (
-                  <p className="flex items-start gap-1.5 text-fg/80">
-                    <span className="text-muted/50 shrink-0">◇</span>
-                    <span>
-                      Recently{" "}
-                      <Link
-                        href={githubActivity.url}
-                        target="_blank"
-                        className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
-                      >
-                        {githubActivity.label}
-                        <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
-                      </Link>
-                    </span>
-                  </p>
-                )}
+                {githubActivities.length > 0 && <GithubActivityLine activities={githubActivities} />}
               </div>
             </section>
           )}

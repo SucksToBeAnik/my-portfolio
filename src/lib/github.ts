@@ -50,21 +50,27 @@ function describeEvent(event: GithubEvent): GithubActivity | null {
   }
 }
 
-export async function getLatestGithubActivity(): Promise<GithubActivity | null> {
+export async function getRecentGithubActivity(limit = 5): Promise<GithubActivity[]> {
   try {
     const res = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/events/public`, {
       headers: { Accept: "application/vnd.github+json" },
       next: { revalidate: 3600 },
     });
-    if (!res.ok) return null;
+    if (!res.ok) return [];
 
     const events: GithubEvent[] = await res.json();
+    const activities: GithubActivity[] = [];
+    const seenLabels = new Set<string>();
     for (const event of events) {
       const activity = describeEvent(event);
-      if (activity) return activity;
+      if (activity && !seenLabels.has(activity.label)) {
+        seenLabels.add(activity.label);
+        activities.push(activity);
+      }
+      if (activities.length >= limit) break;
     }
-    return null;
+    return activities;
   } catch {
-    return null;
+    return [];
   }
 }
