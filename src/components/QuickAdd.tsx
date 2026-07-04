@@ -33,31 +33,17 @@ const BOOK_CATEGORIES = [
   "philosophy",
   "poetry",
 ];
-const STACK_PLATFORMS = [
-  "Frontend",
-  "Backend",
+const STACK_CATEGORIES = [
+  "Editor / IDE",
+  "Language / Runtime",
   "Framework",
-  "Design",
-  "DevOps",
   "Database",
-  "AI/ML",
-  "Testing",
-  "Analytics",
-  "Security",
-  "Infrastructure",
+  "Design",
+  "DevOps / Infrastructure",
+  "AI / ML",
+  "Terminal / CLI",
   "Productivity",
-  "Web",
-  "macOS",
-  "iOS",
-  "Android",
-  "Windows",
-  "Linux",
-  "CLI",
-  "API",
-  "Desktop",
-  "Mobile",
-  "Browser",
-  "Cross-platform",
+  "Hardware",
 ];
 import { createGalleryItem } from "@/actions/gallery";
 import { createMedia, lookupIMDb, searchIMDb } from "@/actions/media";
@@ -137,7 +123,7 @@ export function QuickAdd() {
   const [stackUrl, setStackUrl] = useState("");
   const [stackImageUrl, setStackImageUrl] = useState("");
   const [stackDesc, setStackDesc] = useState("");
-  const [stackPlatform, setStackPlatform] = useState("");
+  const [stackCategory, setStackCategory] = useState("");
   const [stackFetching, setStackFetching] = useState(false);
   const stackFetchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -176,7 +162,7 @@ export function QuickAdd() {
     setStackUrl("");
     setStackImageUrl("");
     setStackDesc("");
-    setStackPlatform("");
+    setStackCategory("");
     setStackFetching(false);
     setMediaSearch("");
     setMediaResults([]);
@@ -365,7 +351,7 @@ export function QuickAdd() {
           url: stackUrl,
           imageUrl: stackImageUrl || undefined,
           description: stackDesc.trim() || undefined,
-          platform: stackPlatform || undefined,
+          category: stackCategory || undefined,
         });
       } else if (selectedType === "gallery") {
         if (!galleryFile) {
@@ -728,13 +714,14 @@ export function QuickAdd() {
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className={labelCls}>
-                    Platform <span className="normal-case">(optional)</span>
+                    Category <span className="normal-case">(optional)</span>
                   </label>
                   <TagPicker
                     compact
-                    value={stackPlatform}
-                    onChange={setStackPlatform}
-                    tags={STACK_PLATFORMS}
+                    multiple={false}
+                    value={stackCategory}
+                    onChange={setStackCategory}
+                    tags={STACK_CATEGORIES}
                   />
                 </div>
               </>

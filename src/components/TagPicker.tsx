@@ -5,15 +5,20 @@ interface TagPickerProps {
   onChange: (value: string) => void;
   tags: string[];
   compact?: boolean;
+  multiple?: boolean;
 }
 
-export function TagPicker({ value, onChange, tags, compact = false }: TagPickerProps) {
+export function TagPicker({ value, onChange, tags, compact = false, multiple = true }: TagPickerProps) {
   const selected = value
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean);
 
   function toggle(tag: string) {
+    if (!multiple) {
+      onChange(selected.includes(tag) ? "" : tag);
+      return;
+    }
     const next = selected.includes(tag)
       ? selected.filter((t) => t !== tag)
       : [...selected, tag];
