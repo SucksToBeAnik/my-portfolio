@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { getHeartsCounts } from "@/actions/heart-counts";
-import { AskPrompt } from "@/components/AskPrompt";
+import { AskButton } from "@/components/AskButton";
 import { ContentTabs } from "@/components/ContentTabs";
 import { ScrollDown } from "@/components/ScrollDown";
 import { SearchBar } from "@/components/SearchBar";
@@ -101,7 +101,10 @@ export default async function Home() {
                 height={56}
                 className="rounded-full object-cover w-14 h-14"
               />
-              <SearchBar />
+              <div className="flex items-center gap-2">
+                <AskButton />
+                <SearchBar />
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -110,7 +113,6 @@ export default async function Home() {
                 I&apos;m a software engineer who loves building simple solutions. Here, I share a little
                 bit of everything that interests me.
               </p>
-              <SeeWorkLink />
             </div>
 
             <div className="flex items-center gap-2 text-fg/60">
@@ -170,7 +172,7 @@ export default async function Home() {
             </section>
           )}
 
-          <div className="w-fit"><AskPrompt /></div>
+          <div className="w-fit"><SeeWorkLink /></div>
         </div>
 
         <div className="flex-1" />
