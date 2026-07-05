@@ -33,7 +33,7 @@ export async function createMicroblog(data: z.infer<typeof schema>) {
     publishedAt: parsed.published && !parsed.publishedAt ? new Date() : parsed.publishedAt,
   });
   revalidatePath("/admin/microblogs");
-  revalidatePath("/");
+  revalidatePath("/posts");
 }
 
 export async function updateMicroblog(id: number, data: z.infer<typeof schema>) {
@@ -47,13 +47,15 @@ export async function updateMicroblog(id: number, data: z.infer<typeof schema>) 
     })
     .where(eq(microblogs.id, id));
   revalidatePath("/admin/microblogs");
-  revalidatePath("/");
+  revalidatePath("/posts");
+  revalidatePath(`/posts/${id}`);
 }
 
 export async function deleteMicroblog(id: number) {
   await db.delete(microblogs).where(eq(microblogs.id, id));
   revalidatePath("/admin/microblogs");
-  revalidatePath("/");
+  revalidatePath("/posts");
+  revalidatePath(`/posts/${id}`);
 }
 
 export async function reorderMicroblogs(items: { id: number; sortOrder: number }[]) {
@@ -64,5 +66,5 @@ export async function reorderMicroblogs(items: { id: number; sortOrder: number }
       .where(eq(microblogs.id, item.id));
   }
   revalidatePath("/admin/microblogs");
-  revalidatePath("/");
+  revalidatePath("/posts");
 }
