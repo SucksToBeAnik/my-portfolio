@@ -117,25 +117,49 @@ function NavItem({
   );
 }
 
+// Dock-style magnification: the hovered tile scales up the most, its two
+// neighbours less. Tiles grow by real size so the rest of the column reflows
+// (and stays left-anchored via the container's items-start).
+const RAIL_BASE = 44;
+function railScale(distance: number) {
+  if (distance <= 0) return 1.32;
+  if (distance === 1) return 1.14;
+  return 1;
+}
+
 // Left rail (desktop): an icon tile that reveals its label as a pill on hover.
 function RailItem({
   href,
   onClick,
   label,
   active,
+  scale = 1,
+  onMouseEnter,
   children,
 }: {
   href?: string;
   onClick?: (e: React.MouseEvent) => void;
   label: string;
   active?: boolean;
+  scale?: number;
+  onMouseEnter?: () => void;
   children: React.ReactNode;
 }) {
-  const cls = `group/rail relative flex items-center justify-center w-11 h-11 rounded-2xl backdrop-blur-xl transition-colors ${
+  const cls = `group/rail relative flex items-center justify-center rounded-2xl backdrop-blur-xl transition-all duration-200 ease-out ${
     active
       ? "bg-nav-active-bg text-nav-active-text"
       : "bg-nav-bg text-nav-text hover:bg-hover-bg hover:text-nav-text-hover"
   }`;
+  const px = RAIL_BASE * scale;
+  const style = { width: `${px}px`, height: `${px}px` };
+  const icon = (
+    <span
+      className="flex items-center justify-center transition-transform duration-200 ease-out"
+      style={{ transform: `scale(${scale})` }}
+    >
+      {children}
+    </span>
+  );
   const labelPill = (
     <span className="pointer-events-none absolute left-full ml-3 px-2.5 py-1 rounded-lg text-[11px] font-heading uppercase tracking-wider whitespace-nowrap bg-nav-popup-bg backdrop-blur-xl border border-nav-border text-nav-text-hover shadow-lg opacity-0 -translate-x-1 transition-all duration-150 group-hover/rail:opacity-100 group-hover/rail:translate-x-0">
       {label}
@@ -143,15 +167,29 @@ function RailItem({
   );
   if (href) {
     return (
-      <Link href={href} onClick={onClick} aria-label={label} className={cls}>
-        {children}
+      <Link
+        href={href}
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        aria-label={label}
+        className={cls}
+        style={style}
+      >
+        {icon}
         {labelPill}
       </Link>
     );
   }
   return (
-    <button type="button" onClick={onClick} aria-label={label} className={`${cls} cursor-pointer`}>
-      {children}
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      aria-label={label}
+      className={`${cls} cursor-pointer`}
+      style={style}
+    >
+      {icon}
       {labelPill}
     </button>
   );
@@ -167,6 +205,7 @@ export function BottomNav() {
     chatOpenRef.current = chatOpen;
   }, [chatOpen]);
   const [panelTwo, setPanelTwo] = useState(false);
+  const [hoveredRail, setHoveredRail] = useState<number | null>(null);
 
   useEffect(() => {
     if (pathname !== "/") {
@@ -334,40 +373,102 @@ export function BottomNav() {
         </div>
       </nav>
 
-      {/* Left rail (desktop) — icon tiles, hover reveals the label */}
-      <nav className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-50 flex-col items-start gap-2">
-        <RailItem href="/" label="Home" active={homeIsActive} onClick={handleHomeClick}>
-          <House weight={homeIsActive ? "fill" : "thin"} className="w-5 h-5 shrink-0" />
-        </RailItem>
-        <RailItem label="Work" active={panelTwo} onClick={handleWorkClick}>
-          <Briefcase weight={panelTwo ? "fill" : "thin"} className="w-5 h-5 shrink-0" />
-        </RailItem>
-        {navItems.slice(1).map((item) => {
-          const active = pathname === item.href;
-          const Icon = item.icon;
-          return (
-            <RailItem key={item.href} href={item.href} label={item.label} active={active}>
-              <Icon weight={active ? "fill" : "thin"} className="w-5 h-5 shrink-0" />
+      {/* Left rail (desktop) — icon tiles, hover reveals the label + Dock-style magnify */}
+      {(() => {
+        const sc = (pos: number) =>
+          hoveredRail === null ? 1 : railScale(Math.abs(pos - hoveredRail));
+        // Primary tiles: Home, Work, then the remaining nav items — kept as one
+        // continuous position sequence so the magnification reads spatially.
+        const tiles = [
+          {
+            key: "home",
+            href: "/",
+            label: "Home",
+            active: homeIsActive,
+            onClick: handleHomeClick,
+            icon: House,
+          },
+          {
+            key: "work",
+            label: "Work",
+            active: panelTwo,
+            onClick: handleWorkClick,
+            icon: Briefcase,
+          },
+          ...navItems.slice(1).map((item) => ({
+            key: item.href,
+            href: item.href,
+            label: item.label,
+            active: pathname === item.href,
+            onClick: undefined,
+            icon: item.icon,
+          })),
+        ];
+        const dividerPos = tiles.length;
+        const themePos = dividerPos + 1;
+        const askPos = dividerPos + 2;
+        const authPos = dividerPos + 3;
+        return (
+          <nav
+            className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-50 flex-col items-start gap-2"
+            onMouseLeave={() => setHoveredRail(null)}
+          >
+            {tiles.map((t, i) => {
+              const Icon = t.icon;
+              return (
+                <RailItem
+                  key={t.key}
+                  href={t.href}
+                  label={t.label}
+                  active={t.active}
+                  onClick={t.onClick}
+                  scale={sc(i)}
+                  onMouseEnter={() => setHoveredRail(i)}
+                >
+                  <Icon weight={t.active ? "fill" : "thin"} className="w-5 h-5 shrink-0" />
+                </RailItem>
+              );
+            })}
+
+            <div
+              className="my-1 h-px w-6 self-center bg-nav-border"
+              onMouseEnter={() => setHoveredRail(dividerPos)}
+            />
+
+            <RailItem
+              label={theme === "dark" ? "Light" : "Dark"}
+              onClick={toggleTheme}
+              scale={sc(themePos)}
+              onMouseEnter={() => setHoveredRail(themePos)}
+            >
+              {theme === "dark" ? (
+                <SunDim weight="thin" className="w-5 h-5 shrink-0" />
+              ) : (
+                <Moon weight="thin" className="w-5 h-5 shrink-0" />
+              )}
             </RailItem>
-          );
-        })}
-
-        <div className="my-1 h-px w-6 self-center bg-nav-border" />
-
-        <RailItem label={theme === "dark" ? "Light" : "Dark"} onClick={toggleTheme}>
-          {theme === "dark" ? (
-            <SunDim weight="thin" className="w-5 h-5 shrink-0" />
-          ) : (
-            <Moon weight="thin" className="w-5 h-5 shrink-0" />
-          )}
-        </RailItem>
-        <RailItem label="Ask" active={chatOpen} onClick={() => setChatOpen((p) => !p)}>
-          <ChatCircleDots weight={chatOpen ? "fill" : "thin"} className="w-5 h-5 shrink-0" />
-        </RailItem>
-        <div className="flex w-11 h-11 items-center justify-center rounded-2xl bg-nav-bg backdrop-blur-xl">
-          <AuthMenu placement="right" />
-        </div>
-      </nav>
+            <RailItem
+              label="Ask"
+              active={chatOpen}
+              onClick={() => setChatOpen((p) => !p)}
+              scale={sc(askPos)}
+              onMouseEnter={() => setHoveredRail(askPos)}
+            >
+              <ChatCircleDots weight={chatOpen ? "fill" : "thin"} className="w-5 h-5 shrink-0" />
+            </RailItem>
+            <div
+              className="flex items-center justify-center rounded-2xl bg-nav-bg backdrop-blur-xl transition-all duration-200 ease-out shrink-0"
+              style={{
+                width: `${RAIL_BASE * sc(authPos)}px`,
+                height: `${RAIL_BASE * sc(authPos)}px`,
+              }}
+              onMouseEnter={() => setHoveredRail(authPos)}
+            >
+              <AuthMenu placement="right" />
+            </div>
+          </nav>
+        );
+      })()}
     </>
   );
 }
