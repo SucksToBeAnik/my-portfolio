@@ -261,8 +261,12 @@ body {
 /* Roomy, editorial writing surface */
 .post-editor-content,
 .post-body {
-  font-size: 1.0625rem;
-  line-height: 1.75;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.post-body p {
+  margin: 0.6em 0;
 }
 
 .post-editor-content h1,
@@ -376,13 +380,18 @@ body {
   margin: 1.4em auto;
 }
 
+/* Main post content images get softer, rounder corners. */
+.post-body img {
+  border-radius: 1rem;
+}
+
 /* --- Preview / public: bare <img>, break out at the image --- */
 .post-body img[data-width="wide"] {
   width: min(920px, 94vw);
   max-width: none;
   margin-left: 50%;
   transform: translateX(-50%);
-  border-radius: 0.6rem;
+  border-radius: 1rem;
 }
 
 .post-body img[data-width="full"] {

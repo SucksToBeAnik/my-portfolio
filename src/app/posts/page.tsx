@@ -1,11 +1,9 @@
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
-import { getHeartsCounts } from "@/actions/heart-counts";
 import { Breadcrumb } from "@/components/Breadcrumb";
-import { HeartButton } from "@/components/HeartButton";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
-import { stripMarkdown } from "@/lib/seo";
+import { firstImage } from "@/lib/seo";
 
 export const metadata = {
   title: "Posts",
@@ -23,13 +21,17 @@ export const metadata = {
 
 export const revalidate = 3600;
 
-function fmtDate(date: Date) {
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
-function readTime(content: string) {
-  const words = stripMarkdown(content).split(/\s+/).filter(Boolean).length;
-  return `${Math.max(1, Math.ceil(words / 200))} min read`;
+function relativeDate(date: Date) {
+  const diff = Date.now() - date.getTime();
+  const day = 86_400_000;
+  const days = Math.floor(diff / day);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days} days ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months > 1 ? "s" : ""} ago`;
+  const years = Math.floor(days / 365);
+  return `${years} year${years > 1 ? "s" : ""} ago`;
 }
 
 export default async function PostsPage() {
@@ -39,11 +41,6 @@ export default async function PostsPage() {
     .where(eq(microblogs.published, true))
     .orderBy(desc(microblogs.publishedAt));
 
-  const heartCounts = await getHeartsCounts(
-    "microblog",
-    posts.map((p) => p.id),
-  );
-
   return (
     <div className="space-y-8">
       <div className="mb-8 md:mb-16">
@@ -52,43 +49,38 @@ export default async function PostsPage() {
 
       {posts.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
 
-      <div className="space-y-8">
-        {posts.map((post) => (
-          <article key={post.id}>
-            {post.publishedAt && (
-              <p className="text-xs text-muted mb-1.5">
-                {fmtDate(new Date(post.publishedAt))}
-                <span className="text-fg/20 mx-2">·</span>
-                {readTime(post.content)}
-              </p>
-            )}
-            <Link href={`/posts/${post.id}`} className="block space-y-2 group">
-              <h2 className="text-sm font-heading leading-snug group-hover:text-fg/60 transition-colors">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {posts.map((post) => {
+          const blurb = post.microview?.trim();
+          const image = firstImage(post.content);
+          return (
+            <Link
+              key={post.id}
+              href={`/posts/${post.id}`}
+              className="group flex h-full flex-col gap-3 rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]"
+            >
+              <h2 className="font-heading text-sm uppercase tracking-wide leading-snug">
                 {post.title}
               </h2>
-              <p className="text-xs text-fg/60 leading-relaxed line-clamp-3">
-                {stripMarkdown(post.content)}
-              </p>
-              {post.imageUrl && (
-                <div className="overflow-hidden rounded-lg max-h-48 bg-hover-bg">
+              {blurb && <p className="text-sm text-fg/55 leading-tight line-clamp-4">{blurb}</p>}
+              {image && (
+                <div className="overflow-hidden rounded-xl bg-hover-bg">
                   <img
-                    src={post.imageUrl}
+                    src={image}
                     alt=""
                     loading="lazy"
-                    className="w-full h-full object-contain"
+                    className="aspect-[4/3] w-full object-cover"
                   />
                 </div>
               )}
+              {post.publishedAt && (
+                <p className="mt-auto pt-1 text-[11px] text-muted">
+                  {relativeDate(new Date(post.publishedAt))}
+                </p>
+              )}
             </Link>
-            <div className="mt-2">
-              <HeartButton
-                entityType="microblog"
-                entityId={post.id}
-                initialCount={heartCounts[post.id] ?? 0}
-              />
-            </div>
-          </article>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -76,7 +76,7 @@ export const microblogs = sqliteTable("microblogs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  imageUrl: text("image_url"),
+  microview: text("microview"),
   tags: text("tags"),
   published: integer("published", { mode: "boolean" }).default(false),
   publishedAt: integer("published_at", { mode: "timestamp" }),

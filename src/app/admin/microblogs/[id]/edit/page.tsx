@@ -13,7 +13,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
       initial={{
         title: post.title,
         content: post.content,
-        imageUrl: post.imageUrl ?? "",
+        microview: post.microview ?? "",
         tags: post.tags ?? "",
         published: post.published ?? false,
       }}

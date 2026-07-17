@@ -7,9 +7,7 @@ import {
   CloudArrowUp,
   Code as CodeIcon,
   DownloadSimple,
-  Eye,
   LinkSimple,
-  PencilSimple,
   Rectangle,
   RectangleDashed,
   TextB,
@@ -50,10 +48,12 @@ const microblogTags = [
 export interface PostEditorInitial {
   title: string;
   content: string;
-  imageUrl: string;
+  microview: string;
   tags: string;
   published: boolean;
 }
+
+const MICROVIEW_MAX = 180;
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -73,7 +73,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   const [id, setId] = useState<number | undefined>(postId);
   const [title, setTitle] = useState(initial.title);
   const [content, setContent] = useState(initial.content);
-  const [imageUrl, setImageUrl] = useState(initial.imageUrl);
+  const [microview, setMicroview] = useState(initial.microview);
   const [tags, setTags] = useState(initial.tags);
   const [published, setPublished] = useState(initial.published);
 
@@ -98,8 +98,8 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   }, [preview, title, growTitle]);
 
   // Keep the newest values reachable from debounced callbacks without stale closures.
-  const stateRef = useRef({ id, title, content, imageUrl, tags, published });
-  stateRef.current = { id, title, content, imageUrl, tags, published };
+  const stateRef = useRef({ id, title, content, microview, tags, published });
+  stateRef.current = { id, title, content, microview, tags, published };
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
 
@@ -210,7 +210,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     const data = {
       title: cur.title.trim() || "Untitled",
       content: cur.content.trim() || " ",
-      imageUrl: cur.imageUrl || null,
+      microview: cur.microview.trim() || null,
       tags: cur.tags || null,
       published: publishedNow,
     };
@@ -240,7 +240,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-  }, [title, content, imageUrl, tags, doSave]);
+  }, [title, content, microview, tags, doSave]);
 
   useEffect(() => {
     return () => {
@@ -250,6 +250,12 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
 
   const handlePublish = useCallback(async () => {
     const next = !stateRef.current.published;
+    // Microview is the required hook shown on the posts list — enforce it on publish.
+    if (next && !stateRef.current.microview.trim()) {
+      toast.error("Add a microview before publishing");
+      setMetaOpen(true);
+      return;
+    }
     setPublished(next);
     stateRef.current.published = next;
     await doSave({ publishOverride: next });
@@ -297,6 +303,12 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   const exportPdf = useCallback(() => {
     setExportOpen(false);
     setPreview(true);
+    // Return to the editor once the print dialog closes.
+    const done = () => {
+      setPreview(false);
+      window.removeEventListener("afterprint", done);
+    };
+    window.addEventListener("afterprint", done);
     // Let the preview paint before invoking the print dialog.
     requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
   }, []);
@@ -338,21 +350,6 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
         </div>
 
         <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setPreview((p) => !p)}
-            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-colors ${
-              preview ? "bg-hover-bg text-fg" : "text-fg/60 hover:bg-hover-bg hover:text-fg"
-            }`}
-          >
-            {preview ? (
-              <PencilSimple weight="thin" className="h-4 w-4" />
-            ) : (
-              <Eye weight="thin" className="h-4 w-4" />
-            )}
-            <span className="hidden sm:inline">{preview ? "Edit" : "Preview"}</span>
-          </button>
-
           <div className="relative">
             <button
               type="button"
@@ -419,7 +416,6 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
           {preview ? (
             <article>
               <h1 className="m-0 p-0 font-heading text-3xl leading-tight">{title || "Untitled"}</h1>
-              {imageUrl && <img src={imageUrl} alt="" className="mt-6 w-full rounded-lg" />}
               <PostPreview content={content} className="mt-6 text-fg/80" />
             </article>
           ) : (
@@ -496,26 +492,26 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-fg/50">Tags</label>
-              <TagPicker value={tags ?? ""} onChange={setTags} tags={microblogTags} />
+              <label className="flex items-center gap-1 text-xs text-fg/50">
+                Microview <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                value={microview}
+                onChange={(e) => setMicroview(e.target.value)}
+                rows={3}
+                maxLength={MICROVIEW_MAX}
+                required
+                placeholder="Short hook shown on the posts list — required to publish…"
+                className="block w-full resize-none rounded-lg border border-hairline bg-transparent px-3 py-2 text-xs text-fg placeholder-fg/30 focus:border-fg/30 focus:outline-none"
+              />
+              <p className="text-[10px] text-fg/30">
+                {microview.length}/{MICROVIEW_MAX}
+              </p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-fg/50">Cover image</label>
-              <ImageUpload
-                value={imageUrl}
-                onChange={setImageUrl}
-                onRemove={() => setImageUrl("")}
-                onFilePending={async (file) => {
-                  if (!file) return;
-                  try {
-                    const url = await uploadToCloudinary(file);
-                    setImageUrl(url);
-                  } catch {
-                    toast.error("Upload failed");
-                  }
-                }}
-              />
+              <label className="text-xs text-fg/50">Tags</label>
+              <TagPicker value={tags ?? ""} onChange={setTags} tags={microblogTags} />
             </div>
           </aside>
         </>

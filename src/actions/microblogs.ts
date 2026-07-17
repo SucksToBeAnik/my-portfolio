@@ -9,7 +9,7 @@ import { microblogs } from "@/db/schema";
 const schema = z.object({
   title: z.string().min(1),
   content: z.string().min(1),
-  imageUrl: z.string().optional().nullable(),
+  microview: z.string().max(180).optional().nullable(),
   tags: z.string().optional().nullable(),
   published: z.boolean().optional(),
   til: z.boolean().optional(),

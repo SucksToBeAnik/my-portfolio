@@ -7,7 +7,6 @@ import {
   Globe,
   Image,
   Lightbulb,
-  Quotes,
   Television,
   Wrench,
   X,
@@ -47,12 +46,11 @@ const STACK_CATEGORIES = [
 ];
 import { createGalleryItem } from "@/actions/gallery";
 import { createMedia, lookupIMDb, searchIMDb } from "@/actions/media";
-import { createMicroblog } from "@/actions/microblogs";
 import { createSite } from "@/actions/sites";
 import { createStack } from "@/actions/stacks";
 import { createTil } from "@/actions/tils";
 
-type ContentType = "site" | "book" | "til" | "post" | "media" | "stack" | "gallery";
+type ContentType = "site" | "book" | "til" | "media" | "stack" | "gallery";
 type Step = "type" | "form" | "success";
 type MediaPick = Awaited<ReturnType<typeof lookupIMDb>>;
 type IMDbResult = Awaited<ReturnType<typeof searchIMDb>>[number];
@@ -62,7 +60,6 @@ const TYPES: { id: ContentType; label: string; icon: React.ElementType; desc: st
   { id: "media", label: "Media", icon: Television, desc: "Movie or series" },
   { id: "book", label: "Book", icon: BookOpenText, desc: "Add to reading list" },
   { id: "til", label: "TIL", icon: Lightbulb, desc: "Something you learned" },
-  { id: "post", label: "Post", icon: Quotes, desc: "Short microblog post" },
   { id: "stack", label: "Stack", icon: Wrench, desc: "Tool or service" },
   { id: "gallery", label: "Gallery", icon: Image, desc: "Photo to gallery" },
 ];
@@ -117,7 +114,6 @@ export function QuickAdd() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [published, setPublished] = useState(false);
 
   const [stackName, setStackName] = useState("");
   const [stackUrl, setStackUrl] = useState("");
@@ -152,7 +148,6 @@ export function QuickAdd() {
     setLoading(false);
     setTitle("");
     setContent("");
-    setPublished(false);
     setBookStatus("want_to_read");
     setBookPicked(null);
     setBookRating(null);
@@ -343,8 +338,6 @@ export function QuickAdd() {
         });
       } else if (selectedType === "til") {
         await createTil({ title, content });
-      } else if (selectedType === "post") {
-        await createMicroblog({ title, content, published });
       } else if (selectedType === "stack") {
         await createStack({
           name: stackName,
@@ -435,7 +428,9 @@ export function QuickAdd() {
               {step === "success"
                 ? "Done"
                 : step === "form" && typeInfo
-                  ? selectedType === "gallery" ? "Add to Gallery" : `Add ${typeInfo.label}`
+                  ? selectedType === "gallery"
+                    ? "Add to Gallery"
+                    : `Add ${typeInfo.label}`
                   : "Quick Add"}
             </span>
             {step === "type" && (
@@ -598,8 +593,8 @@ export function QuickAdd() {
               </>
             )}
 
-            {/* TIL / POST */}
-            {(selectedType === "til" || selectedType === "post") && (
+            {/* TIL */}
+            {selectedType === "til" && (
               <>
                 <div className="flex flex-col gap-1">
                   <label className={labelCls}>Title</label>
@@ -623,19 +618,6 @@ export function QuickAdd() {
                     className={`${inputCls} resize-none`}
                   />
                 </div>
-                {selectedType === "post" && (
-                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                    <div
-                      onClick={() => setPublished((p) => !p)}
-                      className={`relative w-8 h-4 rounded-full transition-colors cursor-pointer ${published ? "bg-fg/50" : "bg-hover-bg border border-hairline"}`}
-                    >
-                      <div
-                        className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-fg transition-transform ${published ? "translate-x-4" : ""}`}
-                      />
-                    </div>
-                    <span className="text-xs text-muted">Publish now</span>
-                  </label>
-                )}
               </>
             )}
 
@@ -741,9 +723,7 @@ export function QuickAdd() {
                     }}
                     className="text-xs text-fg file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-hover-bg file:text-fg hover:file:opacity-80"
                   />
-                  {galleryFile && (
-                    <p className="text-[10px] text-muted">{galleryFile.name}</p>
-                  )}
+                  {galleryFile && <p className="text-[10px] text-muted">{galleryFile.name}</p>}
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className={labelCls}>Title</label>
@@ -894,7 +874,11 @@ export function QuickAdd() {
               disabled={loading}
               className="w-full py-2 rounded-lg text-sm bg-fg text-bg hover:opacity-80 transition-opacity disabled:opacity-40 cursor-pointer mt-1"
             >
-              {loading ? "Saving..." : selectedType === "gallery" ? "Add to Gallery" : `Add ${typeInfo?.label}`}
+              {loading
+                ? "Saving..."
+                : selectedType === "gallery"
+                  ? "Add to Gallery"
+                  : `Add ${typeInfo?.label}`}
             </button>
           </form>
         )}

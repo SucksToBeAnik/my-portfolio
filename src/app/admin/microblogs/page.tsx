@@ -15,7 +15,7 @@ interface Item {
   id: number;
   title: string;
   content: string;
-  imageUrl: string | null;
+  microview: string | null;
   tags: string | null;
   published: boolean | null;
   publishedAt: Date | null;
