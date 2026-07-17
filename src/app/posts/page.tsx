@@ -1,6 +1,8 @@
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
+import { getHeartsCounts } from "@/actions/heart-counts";
 import { Breadcrumb } from "@/components/Breadcrumb";
+import { HeartButton } from "@/components/HeartButton";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
 import { firstImage } from "@/lib/seo";
@@ -41,6 +43,11 @@ export default async function PostsPage() {
     .where(eq(microblogs.published, true))
     .orderBy(desc(microblogs.publishedAt));
 
+  const heartCounts = await getHeartsCounts(
+    "microblog",
+    posts.map((p) => p.id),
+  );
+
   return (
     <div className="space-y-8">
       <div className="mb-8 md:mb-16">
@@ -54,31 +61,37 @@ export default async function PostsPage() {
           const blurb = post.microview?.trim();
           const image = firstImage(post.content);
           return (
-            <Link
+            <div
               key={post.id}
-              href={`/posts/${post.id}`}
-              className="group flex h-full flex-col gap-3 rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]"
+              className="group flex h-full flex-col rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]"
             >
-              <h2 className="font-heading text-sm uppercase tracking-wide leading-snug">
-                {post.title}
-              </h2>
-              {blurb && <p className="text-sm text-fg/55 leading-tight line-clamp-4">{blurb}</p>}
-              {image && (
-                <div className="overflow-hidden rounded-xl bg-hover-bg">
-                  <img
-                    src={image}
-                    alt=""
-                    loading="lazy"
-                    className="aspect-[4/3] w-full object-cover"
-                  />
-                </div>
-              )}
-              {post.publishedAt && (
-                <p className="mt-auto pt-1 text-[11px] text-muted">
-                  {relativeDate(new Date(post.publishedAt))}
-                </p>
-              )}
-            </Link>
+              <Link href={`/posts/${post.id}`} className="flex flex-1 flex-col gap-3">
+                <h2 className="font-heading text-sm uppercase tracking-wide leading-snug">
+                  {post.title}
+                </h2>
+                {blurb && <p className="text-sm text-fg/55 leading-tight line-clamp-4">{blurb}</p>}
+                {image && (
+                  <div className="overflow-hidden rounded-xl bg-hover-bg">
+                    <img
+                      src={image}
+                      alt=""
+                      loading="lazy"
+                      className="aspect-[4/3] w-full object-cover"
+                    />
+                  </div>
+                )}
+              </Link>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <span className="text-[11px] text-muted">
+                  {post.publishedAt ? relativeDate(new Date(post.publishedAt)) : ""}
+                </span>
+                <HeartButton
+                  entityType="microblog"
+                  entityId={post.id}
+                  initialCount={heartCounts[post.id] ?? 0}
+                />
+              </div>
+            </div>
           );
         })}
       </div>
