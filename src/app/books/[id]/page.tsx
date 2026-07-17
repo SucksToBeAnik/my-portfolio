@@ -16,19 +16,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .where(eq(books.id, Number(id)))
     .limit(1)
     .then((r) => r[0]);
-  if (!book) return { title: "Books | Suckstobeanik" };
+  if (!book) return { title: "Books" };
   const description = book.review ? stripHtml(book.review) : `By ${book.author}`;
   return {
-    title: `${book.title} | Books | Suckstobeanik`,
+    title: `${book.title} | Books`,
     description: truncate(description),
     openGraph: {
-      title: `${book.title} | Books | Suckstobeanik`,
+      title: `${book.title} | Books`,
       description: truncate(description),
       url: `/books/${id}`,
-      images: book.coverUrl ? [{ url: book.coverUrl, width: 400, height: 600 }] : undefined,
+      images: book.coverUrl ? [{ url: book.coverUrl }] : undefined,
     },
     twitter: {
-      title: `${book.title} | Books | Suckstobeanik`,
+      title: `${book.title} | Books`,
       description: truncate(description),
       images: book.coverUrl ? [book.coverUrl] : undefined,
     },

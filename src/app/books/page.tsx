@@ -5,15 +5,15 @@ import { db } from "@/db";
 import { books } from "@/db/schema";
 
 export const metadata = {
-  title: "Books | Suckstobeanik",
+  title: "Books",
   description: "Book catalog with ratings and reviews.",
   openGraph: {
-    title: "Books | Suckstobeanik",
+    title: "Books",
     description: "Book catalog with ratings and reviews.",
     url: "/books",
   },
   twitter: {
-    title: "Books | Suckstobeanik",
+    title: "Books",
     description: "Book catalog with ratings and reviews.",
   },
 };

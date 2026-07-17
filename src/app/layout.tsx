@@ -20,19 +20,44 @@ const inter = Inter({
   variable: "--font-sans",
 });
 
+const siteUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "Suckstobeanik",
-  description: "Software engineer and builder.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Al Jami Islam Anik — Software Engineer",
+    template: "%s",
+  },
+  description:
+    "Al Jami Islam Anik — software engineer from Dhaka, Bangladesh. Projects, books, writing, and more.",
+  applicationName: "Al Jami Islam Anik",
+  authors: [{ name: "Al Jami Islam Anik", url: siteUrl }],
+  creator: "Al Jami Islam Anik",
+  publisher: "Al Jami Islam Anik",
+  keywords: [
+    "Al Jami Islam Anik",
+    "Al Jami Islam",
+    "Anik",
+    "Suckstobeanik",
+    "software engineer",
+    "frontend engineer",
+    "Dhaka",
+    "Bangladesh",
+    "BRAC University",
+  ],
   openGraph: {
-    title: "Suckstobeanik",
-    description: "Software engineer and builder.",
-    siteName: "Suckstobeanik",
+    title: "Al Jami Islam Anik — Software Engineer",
+    description:
+      "Al Jami Islam Anik — software engineer from Dhaka, Bangladesh. Projects, books, writing, and more.",
+    siteName: "Al Jami Islam Anik",
     images: [{ url: "/profile.jpeg", width: 512, height: 512 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Suckstobeanik",
-    description: "Software engineer and builder.",
+    title: "Al Jami Islam Anik — Software Engineer",
+    description: "Al Jami Islam Anik — software engineer from Dhaka, Bangladesh.",
     images: ["/profile.jpeg"],
   },
 };

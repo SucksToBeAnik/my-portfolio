@@ -8,15 +8,15 @@ import { microblogs } from "@/db/schema";
 import { stripMarkdown } from "@/lib/seo";
 
 export const metadata = {
-  title: "Posts | Suckstobeanik",
+  title: "Posts",
   description: "Short-form posts and microblog entries.",
   openGraph: {
-    title: "Posts | Suckstobeanik",
+    title: "Posts",
     description: "Short-form posts and microblog entries.",
     url: "/posts",
   },
   twitter: {
-    title: "Posts | Suckstobeanik",
+    title: "Posts",
     description: "Short-form posts and microblog entries.",
   },
 };

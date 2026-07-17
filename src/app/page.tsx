@@ -30,17 +30,18 @@ export const revalidate = 3600;
 export const metadata = {
   title: "Suckstobeanik",
   description:
-    "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
+    "Suckstobeanik — a software engineer from Dhaka, Bangladesh who loves building simple solutions. Projects, books, microblog, and more.",
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Suckstobeanik",
     description:
-      "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
+      "Suckstobeanik — a software engineer from Dhaka, Bangladesh who loves building simple solutions. Projects, books, microblog, and more.",
     url: "/",
   },
   twitter: {
     title: "Suckstobeanik",
     description:
-      "Software engineer who loves building simple solutions. Projects, books, microblog, and more.",
+      "Suckstobeanik — a software engineer from Dhaka, Bangladesh who loves building simple solutions.",
   },
 };
 
@@ -87,9 +88,17 @@ export default async function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Person",
-            name: "Suckstobeanik",
+            name: "Al Jami Islam Anik",
+            alternateName: "Suckstobeanik",
             url: "https://suckstobeanik.vercel.app",
-            image: "/profile.jpeg",
+            image: "https://suckstobeanik.vercel.app/profile.jpeg",
+            jobTitle: "Software Engineer",
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: "Dhaka",
+              addressCountry: "Bangladesh",
+            },
+            alumniOf: "BRAC University",
             sameAs: [
               "https://github.com/SucksToBeAnik",
               "https://www.linkedin.com/in/al-jami-islam-anik-485758285",

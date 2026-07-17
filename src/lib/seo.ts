@@ -29,6 +29,16 @@ export function stripMarkdown(md: string): string {
     .trim();
 }
 
+/** Extract the first image URL from markdown (`![alt](url)`) or HTML (`<img src>`) content. */
+export function firstImage(content?: string | null): string | null {
+  if (!content) return null;
+  const md = content.match(/!\[[^\]]*\]\(\s*([^)\s]+)/);
+  if (md?.[1]) return md[1];
+  const html = content.match(/<img[^>]*\ssrc=["']([^"']+)["']/i);
+  if (html?.[1]) return html[1];
+  return null;
+}
+
 export function truncate(str: string, max = 200): string {
   if (str.length <= max) return str;
   return `${str.slice(0, max).replace(/\s+\S*$/, "")}\u2026`;

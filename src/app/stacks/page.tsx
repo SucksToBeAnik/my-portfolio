@@ -7,15 +7,15 @@ import { db } from "@/db";
 import { stacks } from "@/db/schema";
 
 export const metadata: Metadata = {
-  title: "Stacks | Suckstobeanik",
+  title: "Stacks",
   description: "Tools, software, and gear I use.",
   openGraph: {
-    title: "Stacks | Suckstobeanik",
+    title: "Stacks",
     description: "Tools, software, and gear I use.",
     url: "/stacks",
   },
   twitter: {
-    title: "Stacks | Suckstobeanik",
+    title: "Stacks",
     description: "Tools, software, and gear I use.",
   },
 };

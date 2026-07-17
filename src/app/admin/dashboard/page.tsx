@@ -17,7 +17,7 @@ import {
 } from "@/db/schema";
 
 export const metadata = {
-  title: "Dashboard | Admin | Suckstobeanik",
+  title: "Dashboard | Admin",
 };
 
 export default async function DashboardPage() {

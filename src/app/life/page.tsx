@@ -5,15 +5,15 @@ import { db } from "@/db";
 import { gallery, lifeEvents } from "@/db/schema";
 
 export const metadata = {
-  title: "Life | Suckstobeanik",
+  title: "Life",
   description: "Personal milestones, achievements, and travels.",
   openGraph: {
-    title: "Life | Suckstobeanik",
+    title: "Life",
     description: "Personal milestones, achievements, and travels.",
     url: "/life",
   },
   twitter: {
-    title: "Life | Suckstobeanik",
+    title: "Life",
     description: "Personal milestones, achievements, and travels.",
   },
 };

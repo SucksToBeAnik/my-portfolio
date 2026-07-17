@@ -13,16 +13,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!item) return {};
   const description = item.review || item.plot || `${item.title} (${item.year ?? ""})`;
   return {
-    title: `${item.title} | Watch | Suckstobeanik`,
+    title: `${item.title} | Watch`,
     description: truncate(description),
     openGraph: {
-      title: `${item.title} | Watch | Suckstobeanik`,
+      title: `${item.title} | Watch`,
       description: truncate(description),
       url: `/media/${id}`,
       images: item.posterUrl ? [{ url: item.posterUrl }] : undefined,
     },
     twitter: {
-      title: `${item.title} | Watch | Suckstobeanik`,
+      title: `${item.title} | Watch`,
       description: truncate(description),
       images: item.posterUrl ? [item.posterUrl] : undefined,
     },

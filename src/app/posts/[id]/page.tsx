@@ -7,7 +7,7 @@ import { HeartButton } from "@/components/HeartButton";
 import { PostPreview } from "@/components/post-editor/PostPreview";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
-import { stripMarkdown, truncate } from "@/lib/seo";
+import { firstImage, stripMarkdown, truncate } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -24,22 +24,23 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .where(eq(microblogs.id, Number(id)))
     .limit(1)
     .then((r) => r[0]);
-  if (!post) return { title: "Posts | Suckstobeanik" };
+  if (!post) return { title: "Posts" };
+  const ogImage = post.imageUrl || firstImage(post.content);
   return {
-    title: `${post.title} | Posts | Suckstobeanik`,
+    title: `${post.title} | Posts`,
     description: truncate(stripMarkdown(post.content)),
     openGraph: {
-      title: `${post.title} | Posts | Suckstobeanik`,
+      title: `${post.title} | Posts`,
       description: truncate(stripMarkdown(post.content)),
       url: `/posts/${id}`,
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
-      images: post.imageUrl ? [{ url: post.imageUrl }] : undefined,
+      images: ogImage ? [{ url: ogImage }] : undefined,
     },
     twitter: {
-      title: `${post.title} | Posts | Suckstobeanik`,
+      title: `${post.title} | Posts`,
       description: truncate(stripMarkdown(post.content)),
-      images: post.imageUrl ? [post.imageUrl] : undefined,
+      images: ogImage ? [ogImage] : undefined,
     },
   };
 }
@@ -103,7 +104,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             headline: post.title,
             datePublished: post.publishedAt,
             author: { "@type": "Person", name: "Suckstobeanik" },
-            ...(post.imageUrl ? { image: post.imageUrl } : {}),
+            ...((post.imageUrl || firstImage(post.content)) ? { image: post.imageUrl || firstImage(post.content) } : {}),
           }),
         }}
       />

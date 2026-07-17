@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { tils } from "@/db/schema";
-import { stripHtml, truncate } from "@/lib/seo";
+import { firstImage, stripHtml, truncate } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -16,18 +16,21 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .where(eq(tils.id, Number(id)))
     .limit(1)
     .then((r) => r[0]);
-  if (!til) return { title: "TIL | Suckstobeanik" };
+  if (!til) return { title: "TIL" };
+  const ogImage = firstImage(til.content);
   return {
-    title: `${til.title} | TIL | Suckstobeanik`,
+    title: `${til.title} | TIL`,
     description: truncate(stripHtml(til.content)),
     openGraph: {
-      title: `${til.title} | TIL | Suckstobeanik`,
+      title: `${til.title} | TIL`,
       description: truncate(stripHtml(til.content)),
       url: `/til/${id}`,
+      images: ogImage ? [{ url: ogImage }] : undefined,
     },
     twitter: {
-      title: `${til.title} | TIL | Suckstobeanik`,
+      title: `${til.title} | TIL`,
       description: truncate(stripHtml(til.content)),
+      images: ogImage ? [ogImage] : undefined,
     },
   };
 }
@@ -58,6 +61,7 @@ export default async function TilDetailPage({ params }: { params: Promise<{ id: 
             headline: til.title,
             datePublished: til.createdAt,
             author: { "@type": "Person", name: "Suckstobeanik" },
+            ...(firstImage(til.content) ? { image: firstImage(til.content) } : {}),
           }),
         }}
       />

@@ -8,15 +8,15 @@ import { db } from "@/db";
 import { tils } from "@/db/schema";
 
 export const metadata = {
-  title: "TIL | Suckstobeanik",
+  title: "TIL",
   description: "Things I've learned \u2014 short notes and discoveries.",
   openGraph: {
-    title: "TIL | Suckstobeanik",
+    title: "TIL",
     description: "Things I've learned \u2014 short notes and discoveries.",
     url: "/til",
   },
   twitter: {
-    title: "TIL | Suckstobeanik",
+    title: "TIL",
     description: "Things I've learned \u2014 short notes and discoveries.",
   },
 };
