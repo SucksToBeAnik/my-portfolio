@@ -222,6 +222,8 @@ export function BottomNav() {
                 e.preventDefault();
                 setPanelTwo(false);
                 document.getElementById("snap-container")?.scrollTo({ top: 0, behavior: "smooth" });
+                // Drop any lingering ?showcase=1 so revisiting lands at the top.
+                window.history.replaceState(null, "", "/");
               } : undefined}
             />
             <button

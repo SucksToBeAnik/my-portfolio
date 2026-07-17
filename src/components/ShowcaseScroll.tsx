@@ -15,6 +15,8 @@ export function ShowcaseScroll() {
         const container = document.getElementById("snap-container");
         if (!container) return;
         container.scrollTo({ top: container.clientHeight, behavior: "smooth" });
+        // One-shot: strip the param so a later reload doesn't re-scroll to Work.
+        window.history.replaceState(null, "", "/");
       });
     });
   }, [searchParams]);
