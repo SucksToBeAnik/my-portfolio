@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export function AuthMenu() {
+export function AuthMenu({ placement = "up" }: { placement?: "up" | "right" }) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -81,7 +81,13 @@ export function AuthMenu() {
       </button>
 
       {open && (
-        <div className="absolute bottom-full right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 mb-3 w-56 bg-bg/95 backdrop-blur-xl border border-hairline rounded-xl shadow-2xl overflow-hidden z-[100]">
+        <div
+          className={`absolute w-56 bg-bg/95 backdrop-blur-xl border border-hairline rounded-xl shadow-2xl overflow-hidden z-[100] ${
+            placement === "right"
+              ? "left-full bottom-0 ml-3"
+              : "bottom-full right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 mb-3"
+          }`}
+        >
           {isLoggedIn ? (
             <div className="p-2 space-y-0.5">
               <p className="px-3 py-2 text-[11px] text-nav-text">{session?.user?.email}</p>
