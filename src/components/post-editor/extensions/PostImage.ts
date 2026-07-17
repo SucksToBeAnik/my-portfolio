@@ -47,6 +47,10 @@ export const PostImage = ImageExtension.extend({
           const src = String(node.attrs.src || "").replace(/[()]/g, "\\$&");
           const title = buildImageTitle(node.attrs.width, node.attrs.height);
           state.write(`![${alt}](${src}${title ? ` "${title}"` : ""})`);
+          // Image is a block node — close the block so the next block (e.g. a
+          // heading) is separated by a blank line instead of glued onto the same
+          // line, which would make it round-trip as literal "## ...".
+          state.closeBlock(node);
         },
         parse: {
           // handled by markdown-it (title -> width/height via parseHTML above)
