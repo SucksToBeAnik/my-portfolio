@@ -20,6 +20,15 @@ export async function getMicroblogs() {
   return db.select().from(microblogs).orderBy(microblogs.sortOrder);
 }
 
+export async function getMicroblog(id: number) {
+  return db
+    .select()
+    .from(microblogs)
+    .where(eq(microblogs.id, id))
+    .limit(1)
+    .then((r) => r[0] ?? null);
+}
+
 export async function createMicroblog(data: z.infer<typeof schema>) {
   const parsed = schema.parse(data);
   const maxOrder = await db
@@ -27,13 +36,17 @@ export async function createMicroblog(data: z.infer<typeof schema>) {
     .from(microblogs)
     .then((r) => r[0]?.max ?? -1);
 
-  await db.insert(microblogs).values({
-    ...parsed,
-    sortOrder: maxOrder + 1,
-    publishedAt: parsed.published && !parsed.publishedAt ? new Date() : parsed.publishedAt,
-  });
+  const [row] = await db
+    .insert(microblogs)
+    .values({
+      ...parsed,
+      sortOrder: maxOrder + 1,
+      publishedAt: parsed.published && !parsed.publishedAt ? new Date() : parsed.publishedAt,
+    })
+    .returning({ id: microblogs.id });
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
+  return { id: row.id };
 }
 
 export async function updateMicroblog(id: number, data: z.infer<typeof schema>) {

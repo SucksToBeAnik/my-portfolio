@@ -203,7 +203,11 @@ export function BottomNav() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  if (pathname.startsWith("/admin")) {
+  // Detail pages (/posts/[id], /books/[id], /media/[id], /til/[id]) hide the nav
+  // pill so the content has room to breathe; chat stays mounted for the shortcut.
+  const isDetailPage = /^\/(posts|books|media|til)\/[^/]+$/.test(pathname);
+
+  if (pathname.startsWith("/admin") || isDetailPage) {
     return <ChatPopup open={chatOpen} onClose={() => setChatOpen(false)} />;
   }
 

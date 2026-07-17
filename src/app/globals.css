@@ -253,3 +253,293 @@ body {
   max-width: 100%;
   margin: 0.5em 0;
 }
+
+/* ============================================================
+   Full-page post editor + markdown preview
+   ============================================================ */
+
+/* Roomy, editorial writing surface */
+.post-editor-content,
+.post-body {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.post-editor-content h1,
+.post-body h1 {
+  font-family: var(--font-heading), serif;
+  font-size: 1.9rem;
+  font-weight: 600;
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+  line-height: 1.2;
+}
+
+.post-editor-content h2,
+.post-body h2 {
+  font-family: var(--font-heading), serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.4em;
+  margin-bottom: 0.4em;
+  line-height: 1.3;
+}
+
+.post-editor-content h3,
+.post-body h3 {
+  font-family: var(--font-heading), serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 1.2em;
+  margin-bottom: 0.35em;
+}
+
+.post-editor-content p,
+.post-body p {
+  margin: 0.75em 0;
+}
+
+.post-editor-content ul,
+.post-body ul {
+  list-style: disc;
+  padding-left: 1.4em;
+  margin: 0.75em 0;
+}
+
+.post-editor-content ol,
+.post-body ol {
+  list-style: decimal;
+  padding-left: 1.4em;
+  margin: 0.75em 0;
+}
+
+.post-editor-content li,
+.post-body li {
+  margin: 0.25em 0;
+}
+
+.post-editor-content blockquote,
+.post-body blockquote {
+  border-left: 3px solid var(--hairline);
+  padding-left: 1em;
+  margin: 1em 0;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.post-editor-content a,
+.post-body a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.post-editor-content pre,
+.post-body pre {
+  background: var(--hover-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 0.6rem;
+  padding: 0.9em 1em;
+  margin: 1em 0;
+  overflow-x: auto;
+  font-size: 0.9rem;
+}
+
+.post-editor-content code,
+.post-body code {
+  font-size: 0.9em;
+}
+
+.post-editor-content :not(pre) > code,
+.post-body :not(pre) > code {
+  background: var(--hover-bg);
+  border-radius: 0.3rem;
+  padding: 0.1em 0.35em;
+}
+
+.post-editor-content hr,
+.post-body hr {
+  border: none;
+  border-top: 1px solid var(--hairline);
+  margin: 2em 0;
+}
+
+/* Images default to the reading width, but wide / full-bleed images break out
+   of the text column — the modern editorial pattern. Centering works because
+   the 720px column is itself centered in the viewport. */
+.post-editor-content img,
+.post-body img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.6rem;
+  margin: 1.4em auto;
+}
+
+/* --- Preview / public: bare <img>, break out at the image --- */
+.post-body img[data-width="wide"] {
+  width: min(920px, 94vw);
+  max-width: none;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  border-radius: 0.6rem;
+}
+
+.post-body img[data-width="full"] {
+  width: 100vw;
+  max-width: none;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  border-radius: 0;
+}
+
+/* --- Editor: images live in a node-view wrapper. Center via the wrapper and
+   break wide / full images out at the wrapper level so the caption tracks it. --- */
+.post-image-nodeview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.4em 0;
+}
+
+.post-image-frame {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.post-editor-content .post-image-nodeview img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+}
+
+/* Drag handle to crop image height — shown on hover, selection, or while dragging */
+.post-image-resize {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: var(--fg);
+  box-shadow: 0 0 0 2px var(--bg);
+  opacity: 0;
+  pointer-events: none;
+  cursor: ns-resize;
+  transition: opacity 0.15s;
+  touch-action: none;
+}
+
+.post-image-frame:hover .post-image-resize,
+.post-image-resize.is-visible {
+  opacity: 0.5;
+  pointer-events: auto;
+}
+
+.post-image-frame:hover .post-image-resize:hover,
+.post-image-resize.is-visible:hover {
+  opacity: 0.85;
+}
+
+.post-editor-content .post-image-nodeview[data-width="wide"] {
+  width: min(920px, 94vw);
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+.post-editor-content .post-image-nodeview[data-width="full"] {
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+.post-editor-content .post-image-nodeview[data-width="wide"] img {
+  width: 100%;
+}
+
+.post-editor-content .post-image-nodeview[data-width="full"] img {
+  width: 100%;
+  border-radius: 0;
+}
+
+/* Selected image outline in the editor */
+.post-editor-content img.ProseMirror-selectednode {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.post-image-caption {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  margin: 0.6em auto 0;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.post-image-caption::placeholder {
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+/* Rendered caption (preview / public) */
+.post-body .post-caption {
+  display: block;
+  margin: 0.6em auto 1.4em;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* Caption sits directly under its image, so trim the image's bottom margin */
+.post-body img:has(+ .post-caption) {
+  margin-bottom: 0.2em;
+}
+
+/* Keep the title→first-content gap identical between edit and preview */
+.post-editor-content > :first-child,
+.post-body > :first-child {
+  margin-top: 0;
+}
+
+/* ============================================================
+   Print (export as PDF)
+   ============================================================ */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .post-print,
+  .post-print * {
+    visibility: visible;
+  }
+  .post-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 1.5rem;
+  }
+  .post-body img[data-width="wide"],
+  .post-body img[data-width="full"] {
+    width: 100%;
+    margin-left: 0;
+    transform: none;
+  }
+}

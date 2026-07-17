@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/Breadcrumb";
 import { HeartButton } from "@/components/HeartButton";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
-import { stripHtml } from "@/lib/seo";
+import { stripMarkdown } from "@/lib/seo";
 
 export const metadata = {
   title: "Posts | Suckstobeanik",
@@ -27,8 +27,8 @@ function fmtDate(date: Date) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-function readTime(html: string) {
-  const words = stripHtml(html).split(/\s+/).filter(Boolean).length;
+function readTime(content: string) {
+  const words = stripMarkdown(content).split(/\s+/).filter(Boolean).length;
   return `${Math.max(1, Math.ceil(words / 200))} min read`;
 }
 
@@ -67,7 +67,7 @@ export default async function PostsPage() {
                 {post.title}
               </h2>
               <p className="text-xs text-fg/60 leading-relaxed line-clamp-3">
-                {stripHtml(post.content)}
+                {stripMarkdown(post.content)}
               </p>
               {post.imageUrl && (
                 <div className="overflow-hidden rounded-lg max-h-48 bg-hover-bg">
