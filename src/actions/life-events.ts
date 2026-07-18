@@ -31,6 +31,7 @@ export async function createLifeEvent(data: z.infer<typeof schema>) {
   await db.insert(lifeEvents).values(parsed);
   revalidatePath("/admin/life-events");
   revalidatePath("/life");
+  revalidatePath("/");
 }
 
 export async function updateLifeEvent(id: number, data: z.infer<typeof schema>) {
@@ -41,12 +42,14 @@ export async function updateLifeEvent(id: number, data: z.infer<typeof schema>) 
     .where(eq(lifeEvents.id, id));
   revalidatePath("/admin/life-events");
   revalidatePath("/life");
+  revalidatePath("/");
 }
 
 export async function deleteLifeEvent(id: number) {
   await db.delete(lifeEvents).where(eq(lifeEvents.id, id));
   revalidatePath("/admin/life-events");
   revalidatePath("/life");
+  revalidatePath("/");
 }
 
 export async function reorderLifeEvents(items: { id: number; sortOrder: number }[]) {
@@ -58,4 +61,5 @@ export async function reorderLifeEvents(items: { id: number; sortOrder: number }
   }
   revalidatePath("/admin/life-events");
   revalidatePath("/life");
+  revalidatePath("/");
 }

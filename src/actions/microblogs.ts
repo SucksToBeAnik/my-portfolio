@@ -47,6 +47,7 @@ export async function createMicroblog(data: z.infer<typeof schema>) {
     .returning({ id: microblogs.id });
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
+  revalidatePath("/");
   return { id: row.id };
 }
 
@@ -63,6 +64,7 @@ export async function updateMicroblog(id: number, data: z.infer<typeof schema>) 
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
+  revalidatePath("/");
 }
 
 export async function deleteMicroblog(id: number) {
@@ -70,6 +72,7 @@ export async function deleteMicroblog(id: number) {
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
+  revalidatePath("/");
 }
 
 export async function reorderMicroblogs(items: { id: number; sortOrder: number }[]) {
@@ -81,4 +84,5 @@ export async function reorderMicroblogs(items: { id: number; sortOrder: number }
   }
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
+  revalidatePath("/");
 }
