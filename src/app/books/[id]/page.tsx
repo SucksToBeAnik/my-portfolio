@@ -2,16 +2,30 @@ import { ArrowLeft, Star } from "@phosphor-icons/react/dist/ssr";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BookCover3D } from "@/components/BookCover3D";
+import { ShareButton } from "@/components/ShareButton";
 import { db } from "@/db";
 import { books } from "@/db/schema";
 import { stripHtml, truncate } from "@/lib/seo";
+
+const statusLabels: Record<string, string> = {
+  reading: "Currently reading",
+  read: "Read",
+  want_to_read: "Want to read",
+};
 
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const book = await db
-    .select({ title: books.title, author: books.author, review: books.review, coverUrl: books.coverUrl, rating: books.rating })
+    .select({
+      title: books.title,
+      author: books.author,
+      review: books.review,
+      coverUrl: books.coverUrl,
+      rating: books.rating,
+    })
     .from(books)
     .where(eq(books.id, Number(id)))
     .limit(1)
@@ -71,57 +85,98 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
             name: book.title,
             author: book.author,
             ...(book.coverUrl ? { image: book.coverUrl } : {}),
-            ...(book.rating ? { review: { "@type": "Review", reviewRating: { "@type": "Rating", ratingValue: book.rating } } } : {}),
+            ...(book.rating
+              ? {
+                  review: {
+                    "@type": "Review",
+                    reviewRating: { "@type": "Rating", ratingValue: book.rating },
+                  },
+                }
+              : {}),
           }),
         }}
       />
-      <div className="space-y-6 md:space-y-8">
-      <Link
-        href="/books"
-        className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
-      >
-        <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
-        Books
-      </Link>
+      <div className="space-y-6">
+        <Link
+          href="/books"
+          className="inline-flex items-center gap-1 text-xs text-muted transition-colors hover:text-fg"
+        >
+          <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
+          Books
+        </Link>
 
-      <div className="flex flex-col sm:flex-row gap-6">
-        {book.coverUrl ? (
-          <div className="w-28 shrink-0">
-            <img
-              src={book.coverUrl}
-              alt={book.title}
-              loading="lazy"
-              className="w-full rounded-lg"
-            />
-          </div>
-        ) : null}
-        <div className="space-y-2">
-          <h1 className="text-2xl font-heading">{book.title}</h1>
-          <p className="text-sm text-muted">{book.author}</p>
-          {ratingStars(book.rating)}
-          {book.category && (
-            <div className="flex flex-wrap gap-1.5 pt-0.5">
-              {book.category.split(",").map((c) => (
-                <span
-                  key={c.trim()}
-                  className="px-2 py-0.5 rounded text-[10px] uppercase tracking-wider bg-hover-bg text-fg/50"
-                >
-                  {c.trim()}
-                </span>
-              ))}
+        {/* Background panel — the book breaks out above its top edge, and all
+            the content sits on the panel, which runs the full column width. */}
+        <div className="mt-24 rounded-3xl border border-hairline bg-fg/[0.03] p-6 md:mt-28 md:p-10">
+          <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-10">
+            <div className="-mt-28 shrink-0 md:-mt-32">
+              <BookCover3D coverUrl={book.coverUrl} title={book.title} />
             </div>
-          )}
-          {book.quote && <p className="text-sm text-fg/60 italic">&ldquo;{book.quote}&rdquo;</p>}
+            <div className="min-w-0 flex-1 space-y-4 text-center sm:pt-2 sm:text-left">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1 font-heading text-[10px] uppercase tracking-[0.2em] text-muted">
+                <span className="h-1.5 w-1.5 rounded-full bg-fg" />
+                {statusLabels[book.status] ?? book.status}
+              </span>
+              <h1 className="text-3xl font-heading leading-tight md:text-4xl">{book.title}</h1>
+              <p className="font-heading text-sm text-muted">{book.author}</p>
+              {book.quote && (
+                <p className="text-sm italic text-fg/70">&ldquo;{book.quote}&rdquo;</p>
+              )}
+              <div className="flex flex-wrap items-center justify-center gap-4 pt-2 sm:justify-start">
+                <ShareButton title={book.title} />
+              </div>
+            </div>
+          </div>
+
+          {/* Description + Details, on the same panel */}
+          <div className="mt-10 grid gap-8 border-t border-hairline pt-8 sm:grid-cols-[1fr_180px] sm:gap-12">
+            <div>
+              <h2 className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-muted">
+                Description
+              </h2>
+              {book.review ? (
+                <div
+                  className="prose-content space-y-3 text-sm text-fg/80"
+                  dangerouslySetInnerHTML={{ __html: book.review }}
+                />
+              ) : (
+                <p className="text-sm text-muted">No description yet.</p>
+              )}
+            </div>
+
+            {(book.rating || book.category) && (
+              <div>
+                <h2 className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-muted">
+                  Details
+                </h2>
+                <dl className="space-y-4 text-sm">
+                  {book.rating ? (
+                    <div className="space-y-1">
+                      <dt className="text-xs text-muted">Rating</dt>
+                      <dd>{ratingStars(book.rating)}</dd>
+                    </div>
+                  ) : null}
+                  {book.category && (
+                    <div className="space-y-1.5">
+                      <dt className="text-xs text-muted">Category</dt>
+                      <dd className="flex flex-wrap gap-1.5">
+                        {book.category.split(",").map((c) => (
+                          <span
+                            key={c.trim()}
+                            className="rounded bg-hover-bg px-2 py-0.5 text-[10px] uppercase tracking-wider text-fg/50"
+                          >
+                            {c.trim()}
+                          </span>
+                        ))}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-      {book.review && (
-        <div
-          className="prose-content text-sm text-fg/80 space-y-3"
-          dangerouslySetInnerHTML={{ __html: book.review }}
-        />
-      )}
-    </div>
     </>
   );
 }
