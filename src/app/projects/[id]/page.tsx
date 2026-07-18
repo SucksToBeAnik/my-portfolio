@@ -3,6 +3,7 @@ import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getHeartsCounts } from "@/actions/heart-counts";
+import { BackButton } from "@/components/BackButton";
 import { HeartButton } from "@/components/HeartButton";
 import { ProjectLink } from "@/components/ProjectLink";
 import { PostPreview } from "@/components/post-editor/PostPreview";
@@ -114,13 +115,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         }}
       />
       <div className="space-y-6 md:space-y-8">
-        <Link
-          href="/projects"
-          className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
-        >
-          <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
-          Projects
-        </Link>
+        <BackButton label="Projects" fallbackHref="/projects" />
 
         <article className="space-y-6">
           <div className="flex items-start justify-between gap-4">

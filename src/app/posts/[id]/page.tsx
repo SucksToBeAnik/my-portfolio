@@ -3,6 +3,7 @@ import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getHeartsCounts } from "@/actions/heart-counts";
+import { BackButton } from "@/components/BackButton";
 import { HeartButton } from "@/components/HeartButton";
 import { PostPreview } from "@/components/post-editor/PostPreview";
 import { db } from "@/db";
@@ -104,20 +105,14 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             headline: post.title,
             datePublished: post.publishedAt,
             author: { "@type": "Person", name: "Suckstobeanik" },
-            ...(post.imageUrl ?? firstImage(post.content)
+            ...((post.imageUrl ?? firstImage(post.content))
               ? { image: post.imageUrl ?? firstImage(post.content) }
               : {}),
           }),
         }}
       />
       <div className="space-y-6 md:space-y-8">
-        <Link
-          href="/posts"
-          className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
-        >
-          <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
-          Posts
-        </Link>
+        <BackButton label="Posts" fallbackHref="/posts" />
 
         <article className="space-y-6">
           <div className="space-y-2">

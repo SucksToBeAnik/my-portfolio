@@ -149,7 +149,7 @@ export default async function Home() {
             </p>
             {workingOn && (
               <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
-                <span className="text-fg/30">Currently working on {" "}</span>
+                <span className="text-fg/30">Currently working on </span>
                 {workingOnUrl ? (
                   <Link
                     href={workingOnUrl}
@@ -203,8 +203,8 @@ export default async function Home() {
           </div>
         </section>
 
-        <RecentPosts posts={recentPosts} />
         <SelectedProjects projects={featuredProjects} />
+        <RecentPosts posts={recentPosts} />
         <HomePublications publications={allPublications} />
         <CareerTrack items={workEvents} />
       </div>

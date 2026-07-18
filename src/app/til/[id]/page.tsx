@@ -1,7 +1,6 @@
-import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { eq } from "drizzle-orm";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BackButton } from "@/components/BackButton";
 import { db } from "@/db";
 import { tils } from "@/db/schema";
 import { firstImage, stripHtml, truncate } from "@/lib/seo";
@@ -66,29 +65,23 @@ export default async function TilDetailPage({ params }: { params: Promise<{ id: 
         }}
       />
       <div className="space-y-6 md:space-y-8">
-      <Link
-        href="/til"
-        className="inline-flex items-center gap-1 text-xs text-muted hover:text-fg transition-colors"
-      >
-        <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
-        TIL
-      </Link>
+        <BackButton label="TIL" fallbackHref="/til" />
 
-      <article className="space-y-6">
-        <div className="space-y-2">
-          <p className="text-[10px] font-heading uppercase tracking-widest text-fg/30">
-            Today I Learned
-          </p>
-          <h1 className="text-2xl font-heading leading-snug">{til.title}</h1>
-          <p className="text-xs text-muted">{formatDate(new Date(til.createdAt))}</p>
-        </div>
+        <article className="space-y-6">
+          <div className="space-y-2">
+            <p className="text-[10px] font-heading uppercase tracking-widest text-fg/30">
+              Today I Learned
+            </p>
+            <h1 className="text-2xl font-heading leading-snug">{til.title}</h1>
+            <p className="text-xs text-muted">{formatDate(new Date(til.createdAt))}</p>
+          </div>
 
-        <div
-          className="prose-content text-sm text-fg/80 space-y-3"
-          dangerouslySetInnerHTML={{ __html: til.content }}
-        />
-      </article>
-    </div>
+          <div
+            className="prose-content text-sm text-fg/80 space-y-3"
+            dangerouslySetInnerHTML={{ __html: til.content }}
+          />
+        </article>
+      </div>
     </>
   );
 }

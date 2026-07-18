@@ -1,7 +1,7 @@
-import { ArrowLeft, Stack, Star } from "@phosphor-icons/react/dist/ssr";
-import Link from "next/link";
+import { Stack, Star } from "@phosphor-icons/react/dist/ssr";
 import { notFound } from "next/navigation";
 import { getMediaItem } from "@/actions/media";
+import { BackButton } from "@/components/BackButton";
 import { MediaCase3D } from "@/components/MediaCase3D";
 import { truncate } from "@/lib/seo";
 import { SourceLink } from "./SourceLink";
@@ -53,18 +53,14 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
             name: item.title,
             ...(item.year ? { datePublished: item.year } : {}),
             ...(item.posterUrl ? { image: item.posterUrl } : {}),
-            ...(item.rating ? { aggregateRating: { "@type": "AggregateRating", ratingValue: item.rating } } : {}),
+            ...(item.rating
+              ? { aggregateRating: { "@type": "AggregateRating", ratingValue: item.rating } }
+              : {}),
           }),
         }}
       />
       <div className="space-y-6">
-        <Link
-          href="/media"
-          className="inline-flex items-center gap-1 text-xs text-muted transition-colors hover:text-fg"
-        >
-          <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
-          What I Watch
-        </Link>
+        <BackButton label="What I Watch" fallbackHref="/media" />
 
         {/* Background panel — the case breaks out above its top edge, and all
             the content sits on the panel, which runs the full column width. */}

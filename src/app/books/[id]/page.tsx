@@ -1,7 +1,7 @@
-import { ArrowLeft, Star } from "@phosphor-icons/react/dist/ssr";
+import { Star } from "@phosphor-icons/react/dist/ssr";
 import { eq } from "drizzle-orm";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BackButton } from "@/components/BackButton";
 import { BookCover3D } from "@/components/BookCover3D";
 import { ShareButton } from "@/components/ShareButton";
 import { db } from "@/db";
@@ -97,13 +97,7 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
         }}
       />
       <div className="space-y-6">
-        <Link
-          href="/books"
-          className="inline-flex items-center gap-1 text-xs text-muted transition-colors hover:text-fg"
-        >
-          <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
-          Books
-        </Link>
+        <BackButton label="Books" fallbackHref="/books" />
 
         {/* Background panel — the book breaks out above its top edge, and all
             the content sits on the panel, which runs the full column width. */}
