@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export function ImageViewer({
   src,
@@ -38,7 +39,10 @@ export function ImageViewer({
     };
   }, [handleKey]);
 
-  return (
+  // Rendered into document.body so the fixed overlay isn't trapped by a
+  // transformed ancestor (e.g. the timeline's reveal animation), which would
+  // scope the overlay to that ancestor's box and let page content bleed through.
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center cursor-pointer transition-all duration-200"
       style={{
@@ -52,12 +56,9 @@ export function ImageViewer({
         style={{ transform: open ? "scale(1)" : "scale(0.95)", opacity: open ? 1 : 0 }}
         onClick={(e) => e.stopPropagation()}
       >
-        <img
-          src={src}
-          alt={alt}
-          className="max-w-full max-h-[90vh] object-contain shadow-2xl"
-        />
+        <img src={src} alt={alt} className="max-w-full max-h-[90vh] object-contain shadow-2xl" />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

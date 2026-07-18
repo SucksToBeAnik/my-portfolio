@@ -1,11 +1,19 @@
 import { ClickableImage } from "@/components/ClickableImage";
 
-export function LifeImage({ src, alt }: { src: string; alt: string }) {
+export function LifeImage({
+  src,
+  alt,
+  className = "w-28 h-28",
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
   return (
     <ClickableImage
       src={src}
       alt={alt}
-      className="w-20 h-20 overflow-hidden shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+      className={`${className} shrink-0 overflow-hidden cursor-pointer grayscale-[0.15] hover:grayscale-0 hover:opacity-90 transition-all duration-300`}
     />
   );
 }
