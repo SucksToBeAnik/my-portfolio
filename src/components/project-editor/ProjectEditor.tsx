@@ -9,6 +9,7 @@ import {
   Globe,
   RectangleDashed,
 } from "@phosphor-icons/react";
+import { useQueryClient } from "@tanstack/react-query";
 import LinkExtension from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
@@ -75,6 +76,7 @@ export function ProjectEditor({
   initial: ProjectEditorInitial;
 }) {
   const router = useRouter();
+  const qc = useQueryClient();
 
   const [id, setId] = useState<number | undefined>(projectId);
   const [title, setTitle] = useState(initial.title);
@@ -240,44 +242,50 @@ export function ProjectEditor({
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
   }, [editor]);
 
-  const doSave = useCallback(async (opts?: { publishOverride?: boolean; silent?: boolean }) => {
-    const cur = stateRef.current;
-    const publishedNow = opts?.publishOverride ?? cur.published;
-    const isEmpty = !cur.title.trim() && !cur.content.trim();
-    if (isEmpty) return; // don't persist a blank project
-    if (savingRef.current) return;
+  const doSave = useCallback(
+    async (opts?: { publishOverride?: boolean; silent?: boolean }) => {
+      const cur = stateRef.current;
+      const publishedNow = opts?.publishOverride ?? cur.published;
+      const isEmpty = !cur.title.trim() && !cur.content.trim();
+      if (isEmpty) return; // don't persist a blank project
+      if (savingRef.current) return;
 
-    savingRef.current = true;
-    setStatus("saving");
-    const data = {
-      title: cur.title.trim() || "Untitled",
-      content: cur.content.trim() || null,
-      microview: cur.microview.trim() || null,
-      tags: cur.tags || null,
-      published: publishedNow,
-      featured: cur.featured,
-      imageUrl: cur.imageUrl || null,
-      url: cur.url || null,
-      githubUrl: cur.githubUrl || null,
-      workedOn: cur.workedOn || null,
-    };
-    try {
-      if (cur.id) {
-        await updateProject(cur.id, data);
-      } else {
-        const { id: newId } = await createProject(data);
-        setId(newId);
-        window.history.replaceState(null, "", `/admin/projects/${newId}/edit`);
+      savingRef.current = true;
+      setStatus("saving");
+      const data = {
+        title: cur.title.trim() || "Untitled",
+        content: cur.content.trim() || null,
+        microview: cur.microview.trim() || null,
+        tags: cur.tags || null,
+        published: publishedNow,
+        featured: cur.featured,
+        imageUrl: cur.imageUrl || null,
+        url: cur.url || null,
+        githubUrl: cur.githubUrl || null,
+        workedOn: cur.workedOn || null,
+      };
+      try {
+        if (cur.id) {
+          await updateProject(cur.id, data);
+        } else {
+          const { id: newId } = await createProject(data);
+          setId(newId);
+          window.history.replaceState(null, "", `/admin/projects/${newId}/edit`);
+        }
+        // The admin list caches rows in React Query; mark them stale so the list
+        // refetches when the user navigates back to it.
+        qc.invalidateQueries({ queryKey: ["projects"] });
+        setStatus("saved");
+        if (!opts?.silent) toast.success(publishedNow ? "Published" : "Saved");
+      } catch {
+        setStatus("error");
+        if (!opts?.silent) toast.error("Failed to save");
+      } finally {
+        savingRef.current = false;
       }
-      setStatus("saved");
-      if (!opts?.silent) toast.success(publishedNow ? "Published" : "Saved");
-    } catch {
-      setStatus("error");
-      if (!opts?.silent) toast.error("Failed to save");
-    } finally {
-      savingRef.current = false;
-    }
-  }, []);
+    },
+    [qc],
+  );
 
   // Debounced autosave whenever a tracked field changes.
   useEffect(() => {

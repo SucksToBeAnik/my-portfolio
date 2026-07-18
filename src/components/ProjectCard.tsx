@@ -28,20 +28,30 @@ export function ProjectCard({
   const cover = cardCover(project.imageUrl, project.content);
 
   return (
-    <div className="group flex h-full flex-col rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]">
-      <Link href={`/projects/${project.id}`} className="flex flex-1 flex-col gap-3">
-        <h2 className="font-heading text-sm uppercase tracking-wide leading-snug">
-          {project.title}
-        </h2>
-        {blurb && <p className="text-sm text-fg/55 leading-tight line-clamp-4">{blurb}</p>}
-        {cover && (
-          <div className="overflow-hidden rounded-xl bg-hover-bg">
-            {/* Plain <img> so animated GIF covers keep playing. */}
-            <img src={cover} alt="" loading="lazy" className="aspect-[4/3] w-full object-fill" />
-          </div>
-        )}
-      </Link>
-      <div className="mt-3 flex items-center justify-between gap-2">
+    // Shared subgrid row tracks (title / microview / image / footer): cards in the
+    // same grid row size each track to the tallest card in that row, so microviews
+    // — and therefore images — line up per row.
+    <div className="group relative row-span-4 grid grid-rows-subgrid gap-3 rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]">
+      {/* Stretched overlay link: the whole card navigates; the footer sits above
+          it (z-10) so the heart button stays independently clickable. */}
+      <Link
+        href={`/projects/${project.id}`}
+        aria-label={project.title}
+        className="absolute inset-0 z-0 rounded-2xl"
+      />
+      <h2 className="row-start-1 font-heading text-sm uppercase tracking-wide leading-snug">
+        {project.title}
+      </h2>
+      {blurb && (
+        <p className="row-start-2 text-sm text-fg/55 leading-tight line-clamp-4">{blurb}</p>
+      )}
+      {cover && (
+        <div className="row-start-3 overflow-hidden rounded-xl bg-hover-bg">
+          {/* Plain <img> so animated GIF covers keep playing. */}
+          <img src={cover} alt="" loading="lazy" className="aspect-[4/3] w-full object-fill" />
+        </div>
+      )}
+      <div className="row-start-4 relative z-10 flex items-center justify-between gap-2">
         <span className="text-[11px] text-muted">
           {project.workedOn ? fmtDate(project.workedOn) : ""}
         </span>
