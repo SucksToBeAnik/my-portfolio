@@ -36,7 +36,7 @@ function Card({ project }: { project: ProjectItem }) {
             src={project.imageUrl}
             alt={project.title}
             loading="lazy"
-            className="aspect-[4/3] w-full object-cover"
+            className="aspect-[4/3] w-full object-fill"
           />
         ) : (
           <div className="aspect-[4/3] w-full" />

@@ -576,6 +576,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
         <div className="w-80 rounded-xl border border-nav-border bg-bg p-4 shadow-2xl">
           <p className="mb-3 text-xs font-medium text-fg">Insert image</p>
           <ImageUpload
+            key={imageDialog ? "image-open" : "image-closed"}
             onChange={insertImage}
             onFilePending={async (file) => {
               if (!file) return;
@@ -606,6 +607,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
         <div className="w-80 rounded-xl border border-nav-border bg-bg p-4 shadow-2xl">
           <p className="mb-3 text-xs font-medium text-fg">Insert video</p>
           <ImageUpload
+            key={videoDialog ? "video-open" : "video-closed"}
             accept="video/*"
             resourceType="video"
             onChange={insertVideo}

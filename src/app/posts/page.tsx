@@ -83,7 +83,7 @@ export default async function PostsPage() {
                       src={image}
                       alt=""
                       loading="lazy"
-                      className="aspect-[4/3] w-full object-cover"
+                      className="aspect-[4/3] w-full object-fill"
                     />
                   </div>
                 )}

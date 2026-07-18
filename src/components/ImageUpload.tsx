@@ -1,7 +1,7 @@
 "use client";
 
 import { File as FileIcon, Image as ImageIcon, Trash, Video } from "@phosphor-icons/react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const ALLOWED_IMAGE = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"];
 const ALLOWED_VIDEO = ["video/mp4", "video/webm", "video/ogg"];
@@ -34,10 +34,35 @@ export function ImageUpload({
   const [urlInput, setUrlInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Mirror the latest object URL so the unmount cleanup can revoke it without
+  // re-running (and re-registering) every time the preview changes.
+  const previewRef = useRef<string | null>(null);
+  previewRef.current = preview;
+  useEffect(
+    () => () => {
+      if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    },
+    [],
+  );
+
+  // Once the parent commits a URL — an upload resolved into `value`, or a URL
+  // was pasted — drop the local pending preview so the committed media renders
+  // instead of a stuck "pending" overlay.
+  useEffect(() => {
+    if (!value) return;
+    if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    setPreview(null);
+    setPendingFile(null);
+  }, [value]);
+
   const validate = useCallback(
     (file: File): string | null => {
       const allowed =
-        resourceType === "video" ? ALLOWED_VIDEO : resourceType === "raw" ? ALLOWED_RAW : ALLOWED_IMAGE;
+        resourceType === "video"
+          ? ALLOWED_VIDEO
+          : resourceType === "raw"
+            ? ALLOWED_RAW
+            : ALLOWED_IMAGE;
       if (!allowed.includes(file.type)) {
         return resourceType === "video"
           ? "Only MP4, WebM, and OGG videos are allowed."
@@ -128,7 +153,9 @@ export function ImageUpload({
           onClick={() => {
             setTab("url");
             setError(null);
-            setUrlInput(value);
+            // Prefill the committed URL for editing, but keep whatever the user
+            // has already typed when nothing is committed yet.
+            if (value) setUrlInput(value);
           }}
           className={`text-xs transition-colors cursor-pointer pb-0.5 border-b ${
             tab === "url"
@@ -167,8 +194,19 @@ export function ImageUpload({
               ) : (
                 <img src={preview} alt="" className="w-full max-h-32 object-contain rounded-lg" />
               )}
-              <div className="absolute inset-0 bg-bg/60 flex items-center justify-center rounded-lg">
-                <p className="text-xs text-fg">Pending — save to upload</p>
+              <div className="absolute inset-0 bg-bg/60 flex items-center justify-center gap-2 rounded-lg">
+                <span className="text-xs text-fg">Pending — save to upload</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemove();
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-500/80 text-white rounded-lg hover:bg-red-500 transition-all"
+                >
+                  <Trash weight="thin" className="w-3 h-3" />
+                  Remove
+                </button>
               </div>
             </div>
           ) : hasMedia ? (
@@ -246,7 +284,7 @@ export function ImageUpload({
           )}
         </div>
       ) : (
-        <div className="flex">
+        <div className="flex gap-2">
           <input
             type="text"
             placeholder={resourceType === "video" ? "Paste video URL" : "Paste image URL"}
@@ -258,9 +296,16 @@ export function ImageUpload({
                 handleUrlCommit();
               }
             }}
-            onBlur={handleUrlCommit}
             className="flex-1 px-3 py-1.5 text-xs bg-nav-hover-bg border border-nav-border rounded-lg text-fg placeholder-nav-text/50 focus:outline-none focus:border-nav-text transition-colors"
           />
+          <button
+            type="button"
+            onClick={handleUrlCommit}
+            disabled={!urlInput.trim()}
+            className="shrink-0 px-3 py-1.5 text-xs font-medium bg-fg text-bg rounded-lg hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          >
+            Add
+          </button>
         </div>
       )}
 

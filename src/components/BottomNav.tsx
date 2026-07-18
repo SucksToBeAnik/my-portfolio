@@ -145,7 +145,7 @@ function RailItem({
   onMouseEnter?: () => void;
   children: React.ReactNode;
 }) {
-  const cls = `group/rail relative flex items-center justify-center rounded-2xl backdrop-blur-xl transition-all duration-200 ease-out ${
+  const cls = `group/rail relative flex items-center justify-center rounded-2xl transition-all duration-200 ease-out ${
     active
       ? "bg-nav-active-bg text-nav-active-text"
       : "bg-nav-bg text-nav-text hover:bg-hover-bg hover:text-nav-text-hover"
@@ -161,7 +161,7 @@ function RailItem({
     </span>
   );
   const labelPill = (
-    <span className="pointer-events-none absolute left-full ml-3 px-2.5 py-1 rounded-lg text-[11px] font-heading uppercase tracking-wider whitespace-nowrap bg-nav-popup-bg backdrop-blur-xl border border-nav-border text-nav-text-hover shadow-lg opacity-0 -translate-x-1 transition-all duration-150 group-hover/rail:opacity-100 group-hover/rail:translate-x-0">
+    <span className="pointer-events-none absolute left-full ml-3 px-2.5 py-1 rounded-lg text-[11px] font-heading uppercase tracking-wider whitespace-nowrap bg-nav-popup-bg border border-nav-border text-nav-text-hover shadow-lg opacity-0 -translate-x-1 transition-all duration-150 group-hover/rail:opacity-100 group-hover/rail:translate-x-0">
       {label}
     </span>
   );
@@ -339,7 +339,7 @@ export function BottomNav() {
               )}
             </RailItem>
             <div
-              className="flex items-center justify-center rounded-2xl bg-nav-bg backdrop-blur-xl transition-all duration-200 ease-out shrink-0"
+              className="flex items-center justify-center rounded-2xl bg-nav-bg transition-all duration-200 ease-out shrink-0"
               style={{
                 width: `${RAIL_BASE * sc(authPos)}px`,
                 height: `${RAIL_BASE * sc(authPos)}px`,

@@ -37,7 +37,7 @@ export function ProjectCard({
         {cover && (
           <div className="overflow-hidden rounded-xl bg-hover-bg">
             {/* Plain <img> so animated GIF covers keep playing. */}
-            <img src={cover} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
+            <img src={cover} alt="" loading="lazy" className="aspect-[4/3] w-full object-fill" />
           </div>
         )}
       </Link>
