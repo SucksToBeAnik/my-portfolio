@@ -34,7 +34,7 @@ export function CareerTrack({ items }: { items: WorkItem[] }) {
 
   return (
     <section>
-      <SectionHeader label="Work Experience" />
+      <SectionHeader label="Experience" />
       <div className="overflow-hidden rounded-2xl border border-hairline bg-fg/[0.03]">
         {sorted.map((item) => {
           const subtitle = item.description ? stripHtml(item.description) : "";

@@ -3,7 +3,6 @@
 import {
   BookOpenText,
   Briefcase,
-  ChatCircleDots,
   Heart,
   House,
   Moon,
@@ -25,7 +24,7 @@ const ChatPopup = dynamic(() => import("@/components/ChatPopup").then((m) => m.C
 
 const navItems = [
   { href: "/", label: "Home", icon: House },
-  { href: "/projects", label: "Work", icon: Briefcase },
+  { href: "/projects", label: "Projects", icon: Briefcase },
   { href: "/posts", label: "Posts", icon: Quotes },
   { href: "/life", label: "Life", icon: Heart },
   { href: "/books", label: "Books", icon: BookOpenText },
@@ -279,14 +278,6 @@ export function BottomNav() {
                 <Moon weight="thin" className="w-4 h-4 shrink-0" />
               )}
             </button>
-            <button
-              type="button"
-              onClick={() => setChatOpen((p) => !p)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-sm text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 cursor-pointer"
-              aria-label="Ask"
-            >
-              <ChatCircleDots weight={chatOpen ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
-            </button>
           </div>
         </div>
       </nav>
@@ -307,8 +298,7 @@ export function BottomNav() {
         }));
         const dividerPos = tiles.length;
         const themePos = dividerPos + 1;
-        const askPos = dividerPos + 2;
-        const authPos = dividerPos + 3;
+        const authPos = dividerPos + 2;
         return (
           <nav
             className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-50 flex-col items-start gap-2"
@@ -347,15 +337,6 @@ export function BottomNav() {
               ) : (
                 <Moon weight="thin" className="w-5 h-5 shrink-0" />
               )}
-            </RailItem>
-            <RailItem
-              label="Ask"
-              active={chatOpen}
-              onClick={() => setChatOpen((p) => !p)}
-              scale={sc(askPos)}
-              onMouseEnter={() => setHoveredRail(askPos)}
-            >
-              <ChatCircleDots weight={chatOpen ? "fill" : "thin"} className="w-5 h-5 shrink-0" />
             </RailItem>
             <div
               className="flex items-center justify-center rounded-2xl bg-nav-bg backdrop-blur-xl transition-all duration-200 ease-out shrink-0"

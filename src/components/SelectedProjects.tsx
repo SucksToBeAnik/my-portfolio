@@ -47,7 +47,7 @@ function Card({ project }: { project: ProjectItem }) {
   );
 
   const cls =
-    "group flex snap-start shrink-0 basis-[80%] flex-col rounded-2xl border border-hairline bg-fg/[0.03] p-3 transition-colors hover:bg-fg/[0.06] sm:basis-[45%] lg:basis-auto lg:shrink";
+    "group flex snap-start shrink-0 basis-[94%] flex-col rounded-2xl border border-hairline bg-fg/[0.03] p-3 transition-colors hover:bg-fg/[0.06] lg:basis-auto lg:shrink";
 
   // Published projects have a deep-dive page; otherwise fall back to the
   // external site (or the projects index).
@@ -78,9 +78,9 @@ export function SelectedProjects({ projects }: { projects: ProjectItem[] }) {
     // wider max-width than the 680px reading column.
     <section className="relative left-1/2 w-screen -translate-x-1/2 px-6">
       <div className="mx-auto max-w-[940px]">
-        <SectionHeader label="Selected Work" />
+        <SectionHeader label="Selected Projects" />
         {/* Mobile: horizontal swipe carousel. Desktop: 3-up grid. */}
-        <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0">
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-3 lg:overflow-visible lg:touch-auto">
           {projects.map((project) => (
             <Card key={project.id} project={project} />
           ))}

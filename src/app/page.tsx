@@ -56,7 +56,7 @@ export default async function Home() {
       .from(projects)
       .where(eq(projects.featured, true))
       .orderBy(projects.sortOrder)
-      .limit(8),
+      .limit(6),
     db
       .select({
         id: publications.id,
