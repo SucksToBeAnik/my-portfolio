@@ -122,9 +122,9 @@ function Reveal({ children, index }: { children: React.ReactNode; index: number 
 function EventCard({ event, groupYear }: { event: LifeEvent; groupYear: string }) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-hairline bg-fg/[0.02] transition-all duration-300 hover:border-fg/20 hover:bg-fg/[0.04]">
-      <div className="flex items-stretch">
+      <div className="flex flex-col md:flex-row md:items-stretch">
         {event.imageUrl && (
-          <div className="relative w-24 shrink-0 self-stretch md:w-32">
+          <div className="relative h-44 w-full shrink-0 md:h-auto md:w-32 md:self-stretch">
             <LifeImage
               src={event.imageUrl}
               alt={event.title}
@@ -241,7 +241,7 @@ export function Timeline({ items }: { items: LifeEvent[] }) {
               </div>
             </div>
 
-            <div className="space-y-4 md:space-y-5">
+            <div className="min-w-0 space-y-4 md:space-y-5">
               {group.events.map((event, i) => (
                 <Reveal key={event.id} index={i}>
                   <EventCard event={event} groupYear={group.year} />

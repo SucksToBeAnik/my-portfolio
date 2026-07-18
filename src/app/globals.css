@@ -414,20 +414,22 @@ body {
   border-radius: 1rem;
 }
 
-/* --- Preview / public: bare <img>, break out at the image --- */
+/* --- Preview / public: bare <img>, break out at the image ---
+   Breakout uses negative margins (NOT transform: translateX). A transform
+   promotes the image to its own GPU layer, which iOS Safari can fail to
+   repaint on client-side navigation — leaving the image ghosting in the
+   background of the next page until a hard refresh. Margins avoid that layer. */
 .post-body img[data-width="wide"] {
   width: min(920px, 94vw);
   max-width: none;
-  margin-left: 50%;
-  transform: translateX(-50%);
+  margin-left: calc(50% - min(460px, 47vw));
   border-radius: 1rem;
 }
 
 .post-body img[data-width="full"] {
   width: 100vw;
   max-width: none;
-  margin-left: 50%;
-  transform: translateX(-50%);
+  margin-left: calc(50% - 50vw);
   border-radius: 0;
 }
 
@@ -578,6 +580,5 @@ body {
   .post-body img[data-width="full"] {
     width: 100%;
     margin-left: 0;
-    transform: none;
   }
 }
