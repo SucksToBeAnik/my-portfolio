@@ -5,6 +5,21 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* fine matte grain for the bookshelf surfaces — a fractal-noise speckle laid
+   over the flat gradient so the plank reads as a real material, not plastic */
+.shelf-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  opacity: 0.14;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  clip-path: inherit;
+  border-radius: inherit;
+}
+
 @utility animate-fade-up {
   animation: fadeUp 0.2s ease-out backwards;
 }
@@ -27,6 +42,11 @@ html {
   --nav-hover-bg: rgba(255, 255, 255, 0.08);
   --nav-active-bg: rgb(255, 255, 255);
   --nav-active-text: rgb(0, 0, 0);
+  --shelf-top: #5c5c5c;
+  --shelf-top-2: #4a4a4a;
+  --shelf-front-1: #262626;
+  --shelf-front-2: #0d0d0d;
+  --shelf-edge: rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="light"] {
@@ -43,6 +63,11 @@ html {
   --nav-hover-bg: rgba(0, 0, 0, 0.08);
   --nav-active-bg: rgb(0, 0, 0);
   --nav-active-text: rgb(255, 255, 255);
+  --shelf-top: #f2f2f2;
+  --shelf-top-2: #e0e0e0;
+  --shelf-front-1: #c9c9c9;
+  --shelf-front-2: #a6a6a6;
+  --shelf-edge: rgba(255, 255, 255, 0.4);
 }
 
 @theme inline {
