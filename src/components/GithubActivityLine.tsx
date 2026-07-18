@@ -20,20 +20,20 @@ export function GithubActivityLine({ activities }: { activities: GithubActivity[
   if (!activity) return null;
 
   return (
-    <p className="flex items-start gap-1.5 text-fg/80">
-      <GitBranch weight="fill" className="w-3 h-3 mt-0.5 text-fg/40 shrink-0" />
+    <span className="inline-flex items-center gap-1.5">
+      <GitBranch weight="fill" className="w-3 h-3 text-fg/40 shrink-0" />
       <span>
         Recently{" "}
         <Link
           key={index}
           href={activity.url}
           target="_blank"
-          className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105 animate-fade-up"
+          className="inline-flex items-center gap-0.5 font-medium text-fg/80 origin-left transition-transform duration-200 hover:scale-105 hover:text-fg animate-fade-up"
         >
           {activity.label}
           <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
         </Link>
       </span>
-    </p>
+    </span>
   );
 }

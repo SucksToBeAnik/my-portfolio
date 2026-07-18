@@ -1,4 +1,4 @@
-import { Gear, GithubLogo, LinkedinLogo, LinkSimple, XLogo } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo, LinkedinLogo, XLogo } from "@phosphor-icons/react/dist/ssr";
 import { desc, eq } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,7 +6,6 @@ import { getShowcasedCv } from "@/actions/cvs";
 import { AskButton } from "@/components/AskButton";
 import { CareerTrack } from "@/components/CareerTrack";
 import { CvLink } from "@/components/CvLink";
-import { GithubActivityLine } from "@/components/GithubActivityLine";
 import { HomePublications } from "@/components/HomePublications";
 import { LinkPreview } from "@/components/LinkPreview";
 import { RecentPosts } from "@/components/RecentPosts";
@@ -14,7 +13,6 @@ import { SearchBar } from "@/components/SearchBar";
 import { SelectedProjects } from "@/components/SelectedProjects";
 import { db } from "@/db";
 import { lifeEvents, microblogs, projects, publications, siteConfig } from "@/db/schema";
-import { getRecentGithubActivity } from "@/lib/github";
 
 export const revalidate = 3600;
 
@@ -45,7 +43,6 @@ export default async function Home() {
     workingOnRow,
     workingOnUrlRow,
     showcasedCv,
-    githubActivities,
   ] = await Promise.all([
     db
       .select({
@@ -54,10 +51,12 @@ export default async function Home() {
         imageUrl: projects.imageUrl,
         url: projects.url,
         workedOn: projects.workedOn,
+        published: projects.published,
       })
       .from(projects)
       .where(eq(projects.featured, true))
-      .orderBy(projects.sortOrder),
+      .orderBy(projects.sortOrder)
+      .limit(8),
     db
       .select({
         id: publications.id,
@@ -92,7 +91,6 @@ export default async function Home() {
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
     getShowcasedCv(),
-    getRecentGithubActivity(),
   ]);
 
   const workingOn = workingOnRow[0]?.value ?? null;
@@ -143,12 +141,28 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <h1 className="text-4xl font-heading">@suckstobeanik</h1>
             <p className="text-base leading-relaxed text-fg/80 max-w-lg">
               I&apos;m a software engineer who loves building simple solutions. Here, I share a
               little bit of everything that interests me.
             </p>
+            {workingOn && (
+              <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
+                <span className="text-fg/30">Currently working on {" "}</span>
+                {workingOnUrl ? (
+                  <Link
+                    href={workingOnUrl}
+                    target="_blank"
+                    className="font-medium text-fg/80 transition-colors hover:text-fg"
+                  >
+                    {workingOn}
+                  </Link>
+                ) : (
+                  <span className="font-medium text-fg/80">{workingOn}</span>
+                )}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-3 text-fg/60">
@@ -189,40 +203,10 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Now */}
-        {(workingOn || githubActivities.length > 0) && (
-          <section className="space-y-3">
-            <p className="text-xs font-heading uppercase tracking-wider text-muted">Now</p>
-            <div className="space-y-2 text-xs">
-              {workingOn && (
-                <p className="flex items-start gap-1.5 text-fg/80">
-                  <Gear weight="fill" className="w-3 h-3 mt-0.5 text-fg/40 shrink-0" />
-                  <span>
-                    Working on{" "}
-                    {workingOnUrl ? (
-                      <Link
-                        href={workingOnUrl}
-                        target="_blank"
-                        className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
-                      >
-                        {workingOn}
-                        <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
-                      </Link>
-                    ) : (
-                      <span className="font-medium text-fg">{workingOn}</span>
-                    )}
-                  </span>
-                </p>
-              )}
-              {githubActivities.length > 0 && <GithubActivityLine activities={githubActivities} />}
-            </div>
-          </section>
-        )}
-
+        <RecentPosts posts={recentPosts} />
         <SelectedProjects projects={featuredProjects} />
         <HomePublications publications={allPublications} />
         <CareerTrack items={workEvents} />
-        <RecentPosts posts={recentPosts} />
       </div>
     </>
   );

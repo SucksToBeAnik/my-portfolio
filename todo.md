@@ -30,40 +30,40 @@ Hero → Now → **Selected Work** (projects) → **Publications** → **Work** 
 
 ---
 
-## 📋 TODO (next session)
+## ✅ DONE (session 2)
 
-### 1. Featured cap + mobile swipe for Selected Work
-- Home shows ALL featured projects with **no limit** today. Cap to **8** (order by `sortOrder`)
-  in the home query (`src/app/page.tsx`, `featuredProjects`).
-- (Featured toggle already exists in admin — no new button needed.)
-- **Mobile:** revamp `SelectedProjects.tsx` so the projects are a horizontal **swipe carousel**
-  (scroll-snap x: `snap-x snap-mandatory`, `overflow-x-auto`, cards `shrink-0` at ~80% width)
-  instead of a vertical stack. Desktop keeps the 3-up grid (`lg:grid` / `lg:overflow-visible`).
+### 1. Featured cap + mobile swipe for Selected Work — DONE
+- Home `featuredProjects` query capped to **8** (`.limit(8)`, ordered by `sortOrder`).
+- `SelectedProjects.tsx`: mobile horizontal swipe carousel (`snap-x snap-mandatory`,
+  `overflow-x-auto`, cards `basis-[80%] shrink-0`), desktop keeps the 3-up grid (`lg:grid`).
 
-### 2. Deep-dive project page `/projects/[id]` (mirror the post page)
-- **Schema (`projects` table) — add:**
-  - `content text` (nullable) — rich HTML body, edited with `ContentEditor` (same as microblogs);
-    inline images/videos come for free via the post editor.
-  - `published integer boolean default false` — so a project can be featured/listed before its
-    writeup is finished; the `[id]` page 404s (or shows blurb only) until published.
-  - `tags text` (nullable, optional) — for future filtering, like microblogs.
-  - Keep as-is: `description` (short blurb), `imageUrl` (cover/GIF), `videoUrl` (optional hero/demo),
-    `url`, `githubUrl`, `workedOn`. Run `pnpm db:push`.
-- **Admin** — add a `ContentEditor` + Published toggle to the projects form (copy the microblog
-  admin form's editor setup). Wire `content`/`published`/`tags` into `actions/projects.ts` Zod schema.
-- **Route** — create `src/app/projects/[id]/page.tsx` modeled on `src/app/posts/[id]/page.tsx`:
-  reuse `PostPreview` to render `content`, add `generateMetadata`, hearts, prev/next nav, cover.
-  `BottomNav` already hides the pill on `/(posts|books|media|til)/[id]` — add `projects` to that
-  regex so the detail page gets the same full-bleed treatment.
-- **After it's live:** change home `SelectedProjects` cards + `/projects` `ProjectCard` to link to
-  `/projects/${id}` (internal) instead of the external `url`.
+### 2. Deep-dive project page `/projects/[id]` — DONE (full PostEditor path)
+- **Schema:** dropped `description`; added `content`, `microview` (≤180), `tags`, `published`
+  to `projects` (`pnpm db:push` applied).
+- **`microview`** is the card hook + SEO/JSON-LD description — an editable field (required to
+  publish), NOT derived from content.
+- **Editor:** chose the **full PostEditor** experience over the inline drawer. New
+  `ProjectEditor.tsx` (mirrors `PostEditor`) at routes `/admin/projects/new` +
+  `/admin/projects/[id]/edit`; content stored as **markdown**, autosave, publish toggle,
+  details panel. Old inline Drawer removed; list page now links to the editor routes.
+  Shared bubble menu extracted to `post-editor/EditorBubbleMenu.tsx`.
+- **`/projects` is published-only.** `ProjectCard` now follows the post-card pattern:
+  whole card clickable → `/projects/${id}`, shows the `microview` (no derived blurb),
+  cover (imageUrl → firstImage fallback), date + heart footer.
+- **Inline media:** images AND videos upload while writing (slash `/Image` + `/Video`,
+  paste, drag-drop). A video is just an image node whose src is a video URL — see
+  `imageTitle.isVideoSrc`; `ImageNodeView` + `PostPreview` branch to `<video>`. The separate
+  dashboard "Demo video" field was removed (legacy `videoUrl` column kept, no longer edited).
+- **Route:** `src/app/projects/[id]/page.tsx` (reuses `PostPreview`, `generateMetadata`,
+  hearts, prev/next, cover). 404s until `published`. `BottomNav` regex now includes `projects`.
+- **Feature gating:** a project can't be featured unless published (UI disables the toggle +
+  auto-unfeatures on unpublish; `actions/projects.ts` enforces it server-side).
+- **Links:** home `SelectedProjects` + `/projects` `ProjectCard` link to `/projects/${id}`
+  when published, else fall back to external `url`.
 
-### 3. Section order + Now section (my recommendations — confirm before building)
-- **Naming collision:** projects = "Selected Work" and career = "Work". Rename career section
-  label → **"Experience"** (`CareerTrack.tsx` SectionHeader).
-- **Order:** group professional sections → **Selected Work → Experience → Publications → Recent Posts**
-  (move CareerTrack above HomePublications in `page.tsx`).
-- **Now section:** takes prime space under the hero for thin value (only "Working on" + GitHub
-  after reading/TIL were removed). Recommend collapsing into a compact one-line strip directly
-  under the bio (e.g. `Now — working on X · <github activity>`) instead of a standalone section
-  with its own header — or drop it if `working_on` is usually empty.
+### 3. Section order + Now section — DONE
+- Career label → **"Work Experience"**; order is **Recent Posts → Selected Work →
+  Publications → Work Experience**.
+- **Now** collapsed to a compact strip under the bio ("NOW" label on its own line, then
+  `working on X · <github activity>`); standalone Now section removed.
+

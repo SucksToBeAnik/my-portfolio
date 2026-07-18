@@ -7,6 +7,7 @@ interface ProjectItem {
   imageUrl: string | null;
   url: string | null;
   workedOn: string | null;
+  published: boolean | null;
 }
 
 function relativeDate(dateStr: string): string {
@@ -46,7 +47,17 @@ function Card({ project }: { project: ProjectItem }) {
   );
 
   const cls =
-    "group flex flex-col rounded-2xl border border-hairline bg-fg/[0.03] p-3 transition-colors hover:bg-fg/[0.06]";
+    "group flex snap-start shrink-0 basis-[80%] flex-col rounded-2xl border border-hairline bg-fg/[0.03] p-3 transition-colors hover:bg-fg/[0.06] sm:basis-[45%] lg:basis-auto lg:shrink";
+
+  // Published projects have a deep-dive page; otherwise fall back to the
+  // external site (or the projects index).
+  if (project.published) {
+    return (
+      <Link href={`/projects/${project.id}`} className={cls}>
+        {inner}
+      </Link>
+    );
+  }
 
   return project.url ? (
     <a href={project.url} target="_blank" rel="noopener noreferrer" className={cls}>
@@ -68,7 +79,8 @@ export function SelectedProjects({ projects }: { projects: ProjectItem[] }) {
     <section className="relative left-1/2 w-screen -translate-x-1/2 px-6">
       <div className="mx-auto max-w-[940px]">
         <SectionHeader label="Selected Work" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Mobile: horizontal swipe carousel. Desktop: 3-up grid. */}
+        <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0">
           {projects.map((project) => (
             <Card key={project.id} project={project} />
           ))}

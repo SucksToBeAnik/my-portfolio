@@ -39,7 +39,13 @@ const staticPages: SearchIndexItem[] = [
   { id: 2, title: "Life", subtitle: "Personal timeline", url: "/life", type: "page" },
   { id: 3, title: "Books", subtitle: "Book catalog & reviews", url: "/books", type: "page" },
   { id: 4, title: "Writings", subtitle: "Microblog posts & TIL", url: "/writings", type: "page" },
-  { id: 5, title: "Stacks", subtitle: "Tools, software, and gear I use", url: "/stacks", type: "page" },
+  {
+    id: 5,
+    title: "Stacks",
+    subtitle: "Tools, software, and gear I use",
+    url: "/stacks",
+    type: "page",
+  },
   { id: 22, title: "Sites", subtitle: "Websites I find useful", url: "/sites", type: "page" },
 ];
 
@@ -126,7 +132,7 @@ export async function getSearchIndex() {
     session,
   ] = await Promise.all([
     db
-      .select({ id: projects.id, title: projects.title, description: projects.description })
+      .select({ id: projects.id, title: projects.title, description: projects.microview })
       .from(projects)
       .orderBy(desc(projects.sortOrder)),
     db

@@ -10,6 +10,7 @@ import {
   TextHOne,
   TextHTwo,
   TextT,
+  VideoCamera,
 } from "@phosphor-icons/react";
 import { type Editor, Extension, type Range, ReactRenderer } from "@tiptap/react";
 import Suggestion, { type SuggestionOptions, type SuggestionProps } from "@tiptap/suggestion";
@@ -19,6 +20,7 @@ export interface SlashActionCtx {
   editor: Editor;
   range: Range;
   onImage: () => void;
+  onVideo: () => void;
 }
 
 interface SlashItem {
@@ -104,6 +106,18 @@ const ITEMS: SlashItem[] = [
     },
   },
 ];
+
+// Included only when the editor wires `onVideo` (see SlashCommand options).
+const VIDEO_ITEM: SlashItem = {
+  title: "Video",
+  subtitle: "Upload or embed",
+  icon: VideoCamera,
+  aliases: ["vid", "movie", "clip", "mp4"],
+  action: ({ editor, range, onVideo }) => {
+    editor.chain().focus().deleteRange(range).run();
+    onVideo();
+  },
+};
 
 interface ListProps {
   items: SlashItem[];
@@ -286,11 +300,14 @@ interface SlashStorage {
   keydown: ((e: KeyboardEvent) => void) | null;
 }
 
-export const SlashCommand = Extension.create<{ onImage: () => void }, SlashStorage>({
+export const SlashCommand = Extension.create<
+  { onImage: () => void; onVideo?: () => void },
+  SlashStorage
+>({
   name: "slashCommand",
 
   addOptions() {
-    return { onImage: () => {} };
+    return { onImage: () => {}, onVideo: undefined };
   },
 
   addStorage() {
@@ -317,16 +334,19 @@ export const SlashCommand = Extension.create<{ onImage: () => void }, SlashStora
 
   addProseMirrorPlugins() {
     const onImage = () => this.options.onImage();
+    const onVideoOpt = this.options.onVideo;
+    const onVideo = () => onVideoOpt?.();
+    const availableItems = onVideoOpt ? [...ITEMS, VIDEO_ITEM] : ITEMS;
     return [
       Suggestion<SlashItem>({
         editor: this.editor,
         char: "/",
         allowSpaces: false,
         startOfLine: false,
-        command: ({ editor, range, props }) => props.action({ editor, range, onImage }),
+        command: ({ editor, range, props }) => props.action({ editor, range, onImage, onVideo }),
         items: ({ query }) => {
           const q = query.toLowerCase();
-          return ITEMS.filter(
+          return availableItems.filter(
             (item) =>
               item.title.toLowerCase().includes(q) || item.aliases?.some((a) => a.includes(q)),
           );

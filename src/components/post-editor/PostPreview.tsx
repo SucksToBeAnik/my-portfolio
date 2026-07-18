@@ -1,12 +1,13 @@
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
-import { parseImageTitle } from "@/components/post-editor/imageTitle";
+import { isVideoSrc, parseImageTitle } from "@/components/post-editor/imageTitle";
 
 const components: Components = {
   img: ({ src, alt, title }) => {
     const { width, height } = parseImageTitle(title);
     const caption = alt?.trim();
+    const source = typeof src === "string" ? src : undefined;
     // For a cropped height, set object-fit but DON'T pin width inline for
     // wide/full — that would override the breakout width from the data-width
     // CSS (and mismatch the editor). Only normal images fill their column.
@@ -17,15 +18,26 @@ const components: Components = {
           ...(width === "normal" ? { width: "100%" } : {}),
         }
       : undefined;
+    // Videos ride the same markdown-image pipeline (see imageTitle.isVideoSrc).
     return (
       <>
-        <img
-          src={typeof src === "string" ? src : undefined}
-          alt={alt ?? ""}
-          data-width={width !== "normal" ? width : undefined}
-          style={style}
-          loading="lazy"
-        />
+        {isVideoSrc(source) ? (
+          <video
+            src={source}
+            controls
+            playsInline
+            data-width={width !== "normal" ? width : undefined}
+            style={style}
+          />
+        ) : (
+          <img
+            src={source}
+            alt={alt ?? ""}
+            data-width={width !== "normal" ? width : undefined}
+            style={style}
+            loading="lazy"
+          />
+        )}
         {caption ? <span className="post-caption">{caption}</span> : null}
       </>
     );

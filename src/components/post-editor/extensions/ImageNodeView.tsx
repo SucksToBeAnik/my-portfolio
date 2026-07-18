@@ -2,6 +2,7 @@
 
 import { NodeViewWrapper, type ReactNodeViewProps } from "@tiptap/react";
 import { useRef, useState } from "react";
+import { isVideoSrc } from "@/components/post-editor/imageTitle";
 
 const MIN_HEIGHT = 80;
 const MAX_HEIGHT = 1400;
@@ -19,10 +20,11 @@ export function ImageNodeView({ node, updateAttributes, selected }: ReactNodeVie
   const height: number | null = node.attrs.height ?? null;
   const dataWidth = width !== "normal" ? width : undefined;
 
+  const isVideo = isVideoSrc(src);
   const [focused, setFocused] = useState(false);
   const [liveHeight, setLiveHeight] = useState<number | null>(null);
 
-  const imgRef = useRef<HTMLImageElement>(null);
+  const mediaRef = useRef<HTMLImageElement | HTMLVideoElement | null>(null);
   const dragStart = useRef<{ y: number; h: number } | null>(null);
 
   const effectiveHeight = liveHeight ?? height;
@@ -36,7 +38,7 @@ export function ImageNodeView({ node, updateAttributes, selected }: ReactNodeVie
   const onPointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const startH = height ?? imgRef.current?.clientHeight ?? 240;
+    const startH = height ?? mediaRef.current?.clientHeight ?? 240;
     dragStart.current = { y: e.clientY, h: startH };
     setLiveHeight(startH);
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -63,14 +65,30 @@ export function ImageNodeView({ node, updateAttributes, selected }: ReactNodeVie
   return (
     <NodeViewWrapper className="post-image-nodeview" data-width={dataWidth}>
       <div className="post-image-frame">
-        <img
-          ref={imgRef}
-          src={src}
-          alt={alt}
-          data-height={effectiveHeight ? String(Math.round(effectiveHeight)) : undefined}
-          style={imgStyle}
-          className={selected ? "ProseMirror-selectednode" : ""}
-        />
+        {isVideo ? (
+          <video
+            ref={(el) => {
+              mediaRef.current = el;
+            }}
+            src={src}
+            controls
+            playsInline
+            data-height={effectiveHeight ? String(Math.round(effectiveHeight)) : undefined}
+            style={imgStyle}
+            className={selected ? "ProseMirror-selectednode" : ""}
+          />
+        ) : (
+          <img
+            ref={(el) => {
+              mediaRef.current = el;
+            }}
+            src={src}
+            alt={alt}
+            data-height={effectiveHeight ? String(Math.round(effectiveHeight)) : undefined}
+            style={imgStyle}
+            className={selected ? "ProseMirror-selectednode" : ""}
+          />
+        )}
         <button
           type="button"
           contentEditable={false}

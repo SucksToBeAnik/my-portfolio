@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Markdown } from "tiptap-markdown";
-import { createMicroblog, updateMicroblog } from "@/actions/microblogs";
+import { createProject, updateProject } from "@/actions/projects";
 import { ImageUpload } from "@/components/ImageUpload";
 import { EditorBubbleMenu } from "@/components/post-editor/EditorBubbleMenu";
 import { type ImageWidth, PostImage } from "@/components/post-editor/extensions/PostImage";
@@ -25,25 +25,30 @@ import { PostPreview } from "@/components/post-editor/PostPreview";
 import { TagPicker } from "@/components/TagPicker";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
-const microblogTags = [
-  "tech",
-  "life",
-  "thoughts",
-  "coding",
+const projectTags = [
+  "web",
+  "mobile",
+  "ai",
+  "tool",
+  "open-source",
+  "backend",
+  "frontend",
   "design",
-  "career",
-  "learning",
-  "tools",
-  "opinion",
-  "tip",
+  "experiment",
 ];
 
-export interface PostEditorInitial {
+export interface ProjectEditorInitial {
   title: string;
   content: string;
   microview: string;
   tags: string;
   published: boolean;
+  featured: boolean;
+  imageUrl: string;
+  videoUrl: string;
+  url: string;
+  githubUrl: string;
+  workedOn: string;
 }
 
 const MICROVIEW_MAX = 180;
@@ -56,27 +61,43 @@ function slugify(s: string) {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
-      .slice(0, 60) || "post"
+      .slice(0, 60) || "project"
   );
 }
 
-export function PostEditor({ postId, initial }: { postId?: number; initial: PostEditorInitial }) {
+export function ProjectEditor({
+  projectId,
+  initial,
+}: {
+  projectId?: number;
+  initial: ProjectEditorInitial;
+}) {
   const router = useRouter();
 
-  const [id, setId] = useState<number | undefined>(postId);
+  const [id, setId] = useState<number | undefined>(projectId);
   const [title, setTitle] = useState(initial.title);
   const [content, setContent] = useState(initial.content);
   const [microview, setMicroview] = useState(initial.microview);
   const [tags, setTags] = useState(initial.tags);
   const [published, setPublished] = useState(initial.published);
+  const [featured, setFeatured] = useState(initial.featured);
+  const [imageUrl, setImageUrl] = useState(initial.imageUrl);
+  // Legacy hero video — preserved across saves but no longer edited here (videos
+  // now live inline in the writeup).
+  const [videoUrl] = useState(initial.videoUrl);
+  const [url, setUrl] = useState(initial.url);
+  const [githubUrl, setGithubUrl] = useState(initial.githubUrl);
+  const [workedOn, setWorkedOn] = useState(initial.workedOn);
 
   const [preview, setPreview] = useState(false);
   const [metaOpen, setMetaOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [imageDialog, setImageDialog] = useState(false);
+  const [videoDialog, setVideoDialog] = useState(false);
   const [status, setStatus] = useState<SaveStatus>("idle");
 
   const imageDialogRef = useRef<HTMLDialogElement>(null);
+  const videoDialogRef = useRef<HTMLDialogElement>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-grow the title box so it matches the preview <h1> (no layout shift).
@@ -91,18 +112,47 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   }, [preview, title, growTitle]);
 
   // Keep the newest values reachable from debounced callbacks without stale closures.
-  const stateRef = useRef({ id, title, content, microview, tags, published });
-  stateRef.current = { id, title, content, microview, tags, published };
+  const stateRef = useRef({
+    id,
+    title,
+    content,
+    microview,
+    tags,
+    published,
+    featured,
+    imageUrl,
+    videoUrl,
+    url,
+    githubUrl,
+    workedOn,
+  });
+  stateRef.current = {
+    id,
+    title,
+    content,
+    microview,
+    tags,
+    published,
+    featured,
+    imageUrl,
+    videoUrl,
+    url,
+    githubUrl,
+    workedOn,
+  };
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
 
+  // Images and videos ride the same node/markdown pipeline — a video is just an
+  // image node whose src points at a video file (see imageTitle.isVideoSrc).
   const uploadAndInsert = useCallback(async (editor: Editor | null, file: File) => {
     if (!editor) return;
-    const toastId = toast.loading("Uploading image…");
+    const isVideo = file.type.startsWith("video/");
+    const toastId = toast.loading(isVideo ? "Uploading video…" : "Uploading image…");
     try {
-      const url = await uploadToCloudinary(file);
+      const url = await uploadToCloudinary(file, isVideo ? "video" : "image");
       editor.chain().focus().setImage({ src: url }).run();
-      toast.success("Image added", { id: toastId });
+      toast.success(isVideo ? "Video added" : "Image added", { id: toastId });
     } catch {
       toast.error("Upload failed", { id: toastId });
     }
@@ -118,23 +168,26 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
       LinkExtension.configure({ openOnClick: false }),
       PostImage,
       Placeholder.configure({
-        placeholder: "Write, or press '/' for blocks…",
+        placeholder: "Write the deep-dive, or press '/' for blocks…",
       }),
       Markdown.configure({
         html: true,
         transformPastedText: true,
         breaks: false,
       }),
-      SlashCommand.configure({ onImage: () => setImageDialog(true) }),
+      SlashCommand.configure({
+        onImage: () => setImageDialog(true),
+        onVideo: () => setVideoDialog(true),
+      }),
     ],
     content: initial.content,
     editorProps: {
       attributes: {
         class: "post-editor-content focus:outline-none min-h-[60vh]",
       },
-      handlePaste: (view, event) => {
-        const file = Array.from(event.clipboardData?.files ?? []).find((f) =>
-          f.type.startsWith("image/"),
+      handlePaste: (_view, event) => {
+        const file = Array.from(event.clipboardData?.files ?? []).find(
+          (f) => f.type.startsWith("image/") || f.type.startsWith("video/"),
         );
         if (file) {
           event.preventDefault();
@@ -143,9 +196,11 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
         }
         return false;
       },
-      handleDrop: (view, event) => {
+      handleDrop: (_view, event) => {
         const dt = (event as DragEvent).dataTransfer;
-        const file = Array.from(dt?.files ?? []).find((f) => f.type.startsWith("image/"));
+        const file = Array.from(dt?.files ?? []).find(
+          (f) => f.type.startsWith("image/") || f.type.startsWith("video/"),
+        );
         if (file) {
           event.preventDefault();
           uploadAndInsert(editor, file);
@@ -155,9 +210,6 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
       },
     },
     onCreate: ({ editor }) => {
-      // ProseMirror's default selection lands on the first node; when that node
-      // is an image it shows up pre-selected for editing. Collapse to a caret so
-      // nothing is selected on load.
       editor.commands.setTextSelection(0);
     },
     onUpdate: ({ editor }) => {
@@ -168,15 +220,15 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     },
   });
 
-  // Open the image dialog when triggered by the slash command.
+  // Open the media dialogs when triggered by the slash command.
   useEffect(() => {
     if (imageDialog) imageDialogRef.current?.showModal();
   }, [imageDialog]);
+  useEffect(() => {
+    if (videoDialog) videoDialogRef.current?.showModal();
+  }, [videoDialog]);
 
-  // A node-selected image keeps its selection (and outline) after the editor
-  // blurs, so clicking away wouldn't clear it. Collapse the node selection on
-  // any outside click — but not on the image's own bubble menu, whose width
-  // buttons need the selection to stay put.
+  // Collapse a lingering node selection on any outside click (see PostEditor).
   useEffect(() => {
     if (!editor) return;
     const onPointerDown = (e: PointerEvent) => {
@@ -195,25 +247,31 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     const cur = stateRef.current;
     const publishedNow = opts?.publishOverride ?? cur.published;
     const isEmpty = !cur.title.trim() && !cur.content.trim();
-    if (isEmpty) return; // don't persist a blank post
+    if (isEmpty) return; // don't persist a blank project
     if (savingRef.current) return;
 
     savingRef.current = true;
     setStatus("saving");
     const data = {
       title: cur.title.trim() || "Untitled",
-      content: cur.content.trim() || " ",
+      content: cur.content.trim() || null,
       microview: cur.microview.trim() || null,
       tags: cur.tags || null,
       published: publishedNow,
+      featured: cur.featured,
+      imageUrl: cur.imageUrl || null,
+      videoUrl: cur.videoUrl || null,
+      url: cur.url || null,
+      githubUrl: cur.githubUrl || null,
+      workedOn: cur.workedOn || null,
     };
     try {
       if (cur.id) {
-        await updateMicroblog(cur.id, data);
+        await updateProject(cur.id, data);
       } else {
-        const { id: newId } = await createMicroblog(data);
+        const { id: newId } = await createProject(data);
         setId(newId);
-        window.history.replaceState(null, "", `/admin/microblogs/${newId}/edit`);
+        window.history.replaceState(null, "", `/admin/projects/${newId}/edit`);
       }
       setStatus("saved");
       if (!opts?.silent) toast.success(publishedNow ? "Published" : "Saved");
@@ -225,15 +283,14 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     }
   }, []);
 
-  // Debounced autosave whenever a tracked field changes. doSave reads the
-  // latest values from stateRef and is stable, so it isn't a dependency.
+  // Debounced autosave whenever a tracked field changes.
   useEffect(() => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => doSave({ silent: true }), 1300);
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-  }, [title, content, microview, tags, doSave]);
+  }, [title, content, microview, tags, featured, imageUrl, url, githubUrl, workedOn, doSave]);
 
   useEffect(() => {
     return () => {
@@ -243,7 +300,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
 
   const handlePublish = useCallback(async () => {
     const next = !stateRef.current.published;
-    // Microview is the required hook shown on the posts list — enforce it on publish.
+    // Microview is the hook shown on the /projects card + metadata — required.
     if (next && !stateRef.current.microview.trim()) {
       toast.error("Add a microview before publishing");
       setMetaOpen(true);
@@ -263,6 +320,15 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     [editor],
   );
 
+  const insertVideo = useCallback(
+    (url: string) => {
+      editor?.chain().focus().setImage({ src: url }).run();
+      videoDialogRef.current?.close();
+      setVideoDialog(false);
+    },
+    [editor],
+  );
+
   const setImageWidth = useCallback(
     (width: ImageWidth) => {
       editor?.chain().focus().updateAttributes("image", { width }).run();
@@ -273,14 +339,25 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   const addLink = useCallback(() => {
     if (!editor) return;
     const prev = editor.getAttributes("link").href;
-    const url = window.prompt("URL", prev || "https://");
-    if (url === null) return;
-    if (url === "") {
+    const linkUrl = window.prompt("URL", prev || "https://");
+    if (linkUrl === null) return;
+    if (linkUrl === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
       return;
     }
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    editor.chain().focus().extendMarkRange("link").setLink({ href: linkUrl }).run();
   }, [editor]);
+
+  const uploadCover = useCallback(async (file: File | null) => {
+    if (!file) return;
+    const toastId = toast.loading("Uploading…");
+    try {
+      setImageUrl(await uploadToCloudinary(file, "image"));
+      toast.success("Uploaded", { id: toastId });
+    } catch {
+      toast.error("Upload failed", { id: toastId });
+    }
+  }, []);
 
   const exportMarkdown = useCallback(() => {
     const md = `# ${stateRef.current.title || "Untitled"}\n\n${stateRef.current.content}`;
@@ -296,13 +373,11 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   const exportPdf = useCallback(() => {
     setExportOpen(false);
     setPreview(true);
-    // Return to the editor once the print dialog closes.
     const done = () => {
       setPreview(false);
       window.removeEventListener("afterprint", done);
     };
     window.addEventListener("afterprint", done);
-    // Let the preview paint before invoking the print dialog.
     requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
   }, []);
 
@@ -317,6 +392,9 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             ? "Saved"
             : "Draft";
 
+  const inputCls =
+    "block w-full rounded-lg border border-hairline bg-transparent px-3 py-2 text-xs text-fg placeholder-fg/30 focus:border-fg/30 focus:outline-none";
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-bg text-fg">
       {/* Top bar */}
@@ -324,11 +402,11 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
-            onClick={() => router.push("/admin/microblogs")}
+            onClick={() => router.push("/admin/projects")}
             className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs text-fg/60 hover:bg-hover-bg hover:text-fg transition-colors"
           >
             <ArrowLeft weight="thin" className="h-4 w-4" />
-            <span className="hidden sm:inline">Posts</span>
+            <span className="hidden sm:inline">Projects</span>
           </button>
           <span className="flex items-center gap-1.5 text-[11px] text-fg/40">
             {status === "saving" ? (
@@ -461,7 +539,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
           />
           <aside className="no-print fixed right-0 top-0 z-50 flex h-full w-full max-w-sm flex-col gap-6 overflow-y-auto border-l border-hairline bg-bg p-5 shadow-2xl">
             <div className="flex items-center justify-between">
-              <h2 className="font-heading text-sm">Post details</h2>
+              <h2 className="font-heading text-sm">Project details</h2>
               <button
                 type="button"
                 onClick={() => setMetaOpen(false)}
@@ -472,16 +550,42 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-fg/50">Status</label>
-              <button
-                type="button"
-                onClick={() => setPublished((p) => !p)}
-                className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
-                  published ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"
-                }`}
-              >
-                {published ? "● Published" : "○ Draft"}
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="space-y-2">
+                  <label className="text-xs text-fg/50">Status</label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPublished((p) => {
+                        // A project can only be featured while published.
+                        if (p) setFeatured(false);
+                        return !p;
+                      })
+                    }
+                    className={`block px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                      published ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"
+                    }`}
+                  >
+                    {published ? "● Published" : "○ Draft"}
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-fg/50">Featured</label>
+                  <button
+                    type="button"
+                    disabled={!published}
+                    onClick={() => setFeatured((p) => !p)}
+                    className={`block px-3 py-1.5 text-xs rounded-lg font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+                      featured ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"
+                    }`}
+                  >
+                    {featured ? "★ Featured" : "☆ Feature"}
+                  </button>
+                </div>
+              </div>
+              {!published && (
+                <p className="text-[10px] text-fg/30">Publish the project to feature it.</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -494,7 +598,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
                 rows={3}
                 maxLength={MICROVIEW_MAX}
                 required
-                placeholder="Short hook shown on the posts list — required to publish…"
+                placeholder="Short hook shown on the /projects card — required to publish…"
                 className="block w-full resize-none rounded-lg border border-hairline bg-transparent px-3 py-2 text-xs text-fg placeholder-fg/30 focus:border-fg/30 focus:outline-none"
               />
               <p className="text-[10px] text-fg/30">
@@ -503,8 +607,48 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             </div>
 
             <div className="space-y-2">
+              <label className="text-xs text-fg/50">Cover image / GIF</label>
+              <ImageUpload
+                value={imageUrl}
+                onChange={setImageUrl}
+                onRemove={() => setImageUrl("")}
+                onFilePending={uploadCover}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs text-fg/50">Worked on</label>
+              <input
+                type="date"
+                value={workedOn}
+                onChange={(e) => setWorkedOn(e.target.value)}
+                className={`${inputCls} dark:[color-scheme:dark]`}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs text-fg/50">Project URL</label>
+              <input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://…"
+                className={inputCls}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs text-fg/50">GitHub URL</label>
+              <input
+                value={githubUrl}
+                onChange={(e) => setGithubUrl(e.target.value)}
+                placeholder="https://github.com/…"
+                className={inputCls}
+              />
+            </div>
+
+            <div className="space-y-2">
               <label className="text-xs text-fg/50">Tags</label>
-              <TagPicker value={tags ?? ""} onChange={setTags} tags={microblogTags} />
+              <TagPicker value={tags ?? ""} onChange={setTags} tags={projectTags} />
             </div>
           </aside>
         </>
@@ -532,6 +676,38 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             onClick={() => {
               imageDialogRef.current?.close();
               setImageDialog(false);
+            }}
+            className="mt-3 text-xs text-fg/60 hover:text-fg transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </dialog>
+
+      {/* Video insert dialog */}
+      <dialog
+        ref={videoDialogRef}
+        onClose={() => setVideoDialog(false)}
+        className="bg-transparent backdrop:bg-black/50"
+      >
+        <div className="w-80 rounded-xl border border-nav-border bg-bg p-4 shadow-2xl">
+          <p className="mb-3 text-xs font-medium text-fg">Insert video</p>
+          <ImageUpload
+            accept="video/*"
+            resourceType="video"
+            onChange={insertVideo}
+            onFilePending={async (file) => {
+              if (!file) return;
+              await uploadAndInsert(editor, file);
+              videoDialogRef.current?.close();
+              setVideoDialog(false);
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              videoDialogRef.current?.close();
+              setVideoDialog(false);
             }}
             className="mt-3 text-xs text-fg/60 hover:text-fg transition-colors"
           >

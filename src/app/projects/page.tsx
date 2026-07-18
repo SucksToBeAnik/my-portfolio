@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { getHeartsCounts } from "@/actions/heart-counts";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { ProjectCard } from "@/components/ProjectCard";
@@ -21,7 +22,11 @@ export const metadata = {
 export const revalidate = 3600;
 
 export default async function ProjectsPage() {
-  const allProjects = await db.select().from(projects).orderBy(projects.sortOrder);
+  const allProjects = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.published, true))
+    .orderBy(projects.sortOrder);
   const heartCounts = await getHeartsCounts(
     "project",
     allProjects.map((p) => p.id),

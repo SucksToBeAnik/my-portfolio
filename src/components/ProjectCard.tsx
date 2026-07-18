@@ -1,15 +1,13 @@
-import { ClickableImage } from "@/components/ClickableImage";
+import Link from "next/link";
 import { HeartButton } from "@/components/HeartButton";
-import { ProjectLink } from "@/components/ProjectLink";
-import { stripHtml } from "@/lib/seo";
+import { firstImage } from "@/lib/seo";
 
 export interface ProjectCardItem {
   id: number;
   title: string;
-  description: string | null;
+  microview: string | null;
+  content: string | null;
   imageUrl: string | null;
-  url: string | null;
-  githubUrl: string | null;
   workedOn: string | null;
 }
 
@@ -26,37 +24,29 @@ export function ProjectCard({
   project: ProjectCardItem;
   heartCount?: number;
 }) {
+  const blurb = project.microview?.trim();
+  const cover = project.imageUrl ?? firstImage(project.content);
+
   return (
-    <article className="flex flex-col rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]">
-      {project.imageUrl ? (
-        <ClickableImage
-          src={project.imageUrl}
-          alt={project.title}
-          className="w-full aspect-video overflow-hidden rounded-xl bg-hover-bg cursor-pointer hover:opacity-80 transition-opacity"
-        />
-      ) : (
-        <div className="w-full aspect-video rounded-xl bg-hover-bg" />
-      )}
-
-      <div className="pt-4 space-y-2 flex-1 flex flex-col">
-        <h2 className="text-base font-heading leading-snug">{project.title}</h2>
-        {project.description && (
-          <p className="text-xs text-fg/70 leading-relaxed line-clamp-4 flex-1">
-            {stripHtml(project.description)}
-          </p>
+    <div className="group flex h-full flex-col rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]">
+      <Link href={`/projects/${project.id}`} className="flex flex-1 flex-col gap-3">
+        <h2 className="font-heading text-sm uppercase tracking-wide leading-snug">
+          {project.title}
+        </h2>
+        {blurb && <p className="text-sm text-fg/55 leading-tight line-clamp-4">{blurb}</p>}
+        {cover && (
+          <div className="overflow-hidden rounded-xl bg-hover-bg">
+            {/* Plain <img> so animated GIF covers keep playing. */}
+            <img src={cover} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
+          </div>
         )}
-
-        <div className="flex items-center justify-between flex-wrap gap-2 pt-2 text-xs text-muted">
-          <div className="flex items-center gap-3">
-            {project.workedOn && <span>{fmtDate(project.workedOn)}</span>}
-            <HeartButton entityType="project" entityId={project.id} initialCount={heartCount} />
-          </div>
-          <div className="flex items-center gap-2">
-            {project.url && <ProjectLink url={project.url} label="Website" />}
-            {project.githubUrl && <ProjectLink url={project.githubUrl} label="GitHub" />}
-          </div>
-        </div>
+      </Link>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <span className="text-[11px] text-muted">
+          {project.workedOn ? fmtDate(project.workedOn) : ""}
+        </span>
+        <HeartButton entityType="project" entityId={project.id} initialCount={heartCount} />
       </div>
-    </article>
+    </div>
   );
 }
