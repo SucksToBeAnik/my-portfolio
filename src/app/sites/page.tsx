@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { ArrowLeft } from "@phosphor-icons/react";
+import { ArrowRight } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { Wrench } from "@phosphor-icons/react";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -40,16 +40,17 @@ function getDomain(url: string): string {
 interface SiteMeta {
   title: string | null;
   logo: string | null;
+  description: string | null;
 }
 
-function SiteItem({ url, tags, createdAt, savedDescription }: { url: string; tags: string | null; createdAt: Date; savedDescription?: string | null }) {
+function SiteItem({ url, savedDescription }: { url: string; savedDescription?: string | null }) {
   const domain = getDomain(url);
   const [meta, setMeta] = useState<SiteMeta | null>(null);
 
   useEffect(() => {
     fetchMicrolink(url).then((data) => {
       if (data) {
-        setMeta({ title: data.title, logo: data.logo });
+        setMeta({ title: data.title, logo: data.logo, description: data.description });
         if (data.description && !savedDescription) {
           saveSiteDescription(url, data.description).catch(() => {});
         }
@@ -66,31 +67,24 @@ function SiteItem({ url, tags, createdAt, savedDescription }: { url: string; tag
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-3 px-4 py-3 w-full border border-hairline rounded-xl hover:bg-hover-bg transition-colors group cursor-pointer"
+        className="group flex items-center gap-2.5 w-full py-2.5 border-b border-hairline/50 cursor-pointer"
       >
-        <img
-          src={displayFavicon}
-          alt=""
-          className="w-5 h-5 rounded shrink-0"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
+        <span className="w-5 h-5 shrink-0 flex items-center justify-center">
+          <img
+            src={displayFavicon}
+            alt=""
+            className="w-full h-full object-contain rounded"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        </span>
+        <h3 className="text-sm font-heading truncate">{meta?.title || domain}</h3>
+
+        <ArrowRight
+          weight="thin"
+          className="ml-auto w-3.5 h-3.5 text-muted shrink-0 transition -translate-x-1 group-hover:translate-x-0 group-hover:text-fg"
         />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm truncate">{meta?.title || domain}</p>
-          {tags && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {tags.split(",").map((tag) => (
-                <span
-                  key={tag.trim()}
-                  className="px-1.5 py-0.5 text-[10px] bg-hover-bg rounded text-fg/50"
-                >
-                  {tag.trim()}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
       </a>
     </LinkPreview>
   );
@@ -138,20 +132,18 @@ export default function SitesPage() {
 
       {sites.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {grouped.map((group) => (
-          <div key={group.label} className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-heading uppercase tracking-widest text-fg/30 shrink-0">
-                {group.label}
-              </span>
-            </div>
-            <div className="space-y-1">
+          <section key={group.label} className="space-y-1">
+            <h2 className="text-[11px] font-heading text-muted uppercase tracking-wider mb-2">
+              {group.label}
+            </h2>
+            <div>
               {group.items.map((site) => (
-                <SiteItem key={site.id} url={site.url} tags={site.tags} createdAt={site.createdAt} savedDescription={site.description} />
+                <SiteItem key={site.id} url={site.url} savedDescription={site.description} />
               ))}
             </div>
-          </div>
+          </section>
         ))}
       </div>
     </div>
