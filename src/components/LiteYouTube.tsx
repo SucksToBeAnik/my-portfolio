@@ -16,7 +16,7 @@ export function LiteYouTube({
   return (
     <div
       data-width={dataWidth}
-      className="relative aspect-video overflow-hidden rounded-xl bg-black cursor-pointer group max-h-[400px]"
+      className="relative aspect-video w-full overflow-hidden rounded-xl bg-black cursor-pointer group"
       onClick={(e) => {
         const target = e.currentTarget;
         const iframe = document.createElement("iframe");

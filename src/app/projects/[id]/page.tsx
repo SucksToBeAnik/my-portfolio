@@ -117,7 +117,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       <div className="space-y-6 md:space-y-8">
         <BackButton label="Projects" fallbackHref="/projects" />
 
-        <article className="space-y-6">
+        <article>
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
               <h1 className="text-2xl font-heading">{project.title}</h1>
@@ -137,9 +137,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             )}
           </div>
 
-          {project.content && <PostPreview content={project.content} className="text-fg/80" />}
+          {project.content && (
+            <PostPreview content={project.content} className="mt-12 text-fg/80" />
+          )}
 
-          <HeartButton entityType="project" entityId={project.id} initialCount={heartCount} />
+          <div className="mt-10">
+            <HeartButton entityType="project" entityId={project.id} initialCount={heartCount} />
+          </div>
         </article>
 
         <div className="grid grid-cols-2 gap-3">

@@ -5,6 +5,8 @@ import {
   Check,
   CloudArrowUp,
   DownloadSimple,
+  EyeSlash,
+  Globe,
   RectangleDashed,
 } from "@phosphor-icons/react";
 import LinkExtension from "@tiptap/extension-link";
@@ -17,6 +19,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Markdown } from "tiptap-markdown";
 import { createProject, updateProject } from "@/actions/projects";
+import { EditPreviewToggle } from "@/components/EditPreviewToggle";
 import { ImageUpload } from "@/components/ImageUpload";
 import { EditorBubbleMenu } from "@/components/post-editor/EditorBubbleMenu";
 import { type ImageWidth, PostImage } from "@/components/post-editor/extensions/PostImage";
@@ -391,8 +394,8 @@ export function ProjectEditor({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-bg text-fg">
       {/* Top bar */}
-      <header className="no-print flex h-14 shrink-0 items-center justify-between gap-3 border-b border-hairline px-3 md:px-4">
-        <div className="flex min-w-0 items-center gap-3">
+      <header className="no-print grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-1 border-b border-hairline px-2 md:px-4">
+        <div className="flex min-w-0 items-center gap-1.5">
           <button
             type="button"
             onClick={() => router.push("/admin/projects")}
@@ -413,7 +416,9 @@ export function ProjectEditor({
           </span>
         </div>
 
-        <div className="flex items-center gap-1">
+        <EditPreviewToggle preview={preview} onChange={setPreview} />
+
+        <div className="flex min-w-0 items-center justify-end gap-1">
           <div className="relative">
             <button
               type="button"
@@ -465,11 +470,17 @@ export function ProjectEditor({
           <button
             type="button"
             onClick={handlePublish}
-            className={`ml-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+            aria-label={published ? "Unpublish" : "Publish"}
+            className={`ml-0.5 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-all sm:px-3 ${
               published ? "bg-hover-bg text-fg/70 hover:text-fg" : "bg-fg text-bg hover:opacity-90"
             }`}
           >
-            {published ? "Unpublish" : "Publish"}
+            {published ? (
+              <EyeSlash weight="thin" className="h-4 w-4 sm:hidden" />
+            ) : (
+              <Globe weight="thin" className="h-4 w-4 sm:hidden" />
+            )}
+            <span className="hidden sm:inline">{published ? "Unpublish" : "Publish"}</span>
           </button>
         </div>
       </header>
@@ -480,7 +491,7 @@ export function ProjectEditor({
           {preview ? (
             <article>
               <h1 className="m-0 p-0 font-heading text-3xl leading-tight">{title || "Untitled"}</h1>
-              <PostPreview content={content} className="mt-6 text-fg/80" />
+              <PostPreview content={content} className="mt-6 text-fg/80" interactive={false} />
             </article>
           ) : (
             <>

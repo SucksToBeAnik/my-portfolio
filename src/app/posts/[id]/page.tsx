@@ -114,7 +114,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       <div className="space-y-6 md:space-y-8">
         <BackButton label="Posts" fallbackHref="/posts" />
 
-        <article className="space-y-6">
+        <article>
           <div className="space-y-2">
             <h1 className="text-2xl font-heading">{post.title}</h1>
             {post.publishedAt && (
@@ -126,9 +126,11 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             )}
           </div>
 
-          <PostPreview content={post.content} className="text-fg/80" />
+          <PostPreview content={post.content} className="mt-12 text-fg/80" />
 
-          <HeartButton entityType="microblog" entityId={post.id} initialCount={heartCount} />
+          <div className="mt-10">
+            <HeartButton entityType="microblog" entityId={post.id} initialCount={heartCount} />
+          </div>
         </article>
 
         <div className="grid grid-cols-2 gap-3">

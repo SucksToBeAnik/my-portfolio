@@ -212,8 +212,18 @@ function positionPopup(popup: HTMLElement, rect: DOMRect | null) {
     menu.style.overscrollBehavior = "contain";
   }
 
-  const height = Math.min(menu?.offsetHeight || 340, avail);
-  popup.style.top = flipUp ? `${rect.top - margin - height}px` : `${rect.bottom + margin}px`;
+  // Anchor vertically so the menu always grows into the free space. When
+  // flipping up, pin the popup's BOTTOM just above the caret and let it expand
+  // upward — this avoids relying on the menu's rendered height, which reads as 0
+  // on the first paint and otherwise leaves the menu anchored at the caret and
+  // running off the bottom of the screen.
+  if (flipUp) {
+    popup.style.top = "auto";
+    popup.style.bottom = `${vh - rect.top + margin}px`;
+  } else {
+    popup.style.bottom = "auto";
+    popup.style.top = `${rect.bottom + margin}px`;
+  }
 
   let left = rect.left;
   if (left + POPUP_WIDTH > vw - margin) left = vw - POPUP_WIDTH - margin;

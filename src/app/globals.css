@@ -290,12 +290,29 @@ body {
 /* Roomy, editorial writing surface */
 .post-editor-content,
 .post-body {
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  /* Kerning + ligatures + legibility for long-form reading. */
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  hanging-punctuation: first last;
 }
 
 .post-body p {
-  margin: 0.6em 0;
+  margin: 1em 0;
+  /* Avoid orphans / ragged last lines. */
+  text-wrap: pretty;
+}
+
+/* Headings balance their line breaks and tighten slightly (mono runs wide). */
+.post-body h1,
+.post-body h2,
+.post-body h3 {
+  text-wrap: balance;
+  letter-spacing: -0.01em;
 }
 
 .post-editor-content h1,
@@ -376,6 +393,69 @@ body {
   margin: 1em 0;
   overflow-x: auto;
   font-size: 0.9rem;
+}
+
+/* Code block card: header bar (filename/language + copy) over the code. The
+   wrapper owns the frame so the bar and the <pre> read as one unit. */
+.post-body .post-code {
+  margin: 1.4em 0;
+  border: 1px solid var(--hairline);
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: var(--hover-bg);
+}
+
+.post-body .post-code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0.5em 0.9em;
+  border-bottom: 1px solid var(--hairline);
+  font-family: var(--font-heading), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+.post-body .post-code-name {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-body .post-code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  flex-shrink: 0;
+  padding: 0.25em 0.5em;
+  border-radius: 0.4rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.post-body .post-code-copy:hover {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.post-body .post-code-copy svg {
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.post-body .post-code pre {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
 }
 
 .post-editor-content code,
@@ -579,6 +659,349 @@ body {
 }
 
 /* ============================================================
+   Drop cap — the rendered post's opening letter, set large in the
+   heading mono. Only when the post opens on a paragraph (never on a
+   heading/image), and only in the reader/preview — not the live
+   editor, where it would fight the cursor.
+   ============================================================ */
+.post-body > p:first-child::first-letter {
+  float: left;
+  font-family: var(--font-heading), serif;
+  font-size: 3.2em;
+  line-height: 0.78;
+  font-weight: 600;
+  padding: 0.02em 0.1em 0 0;
+  text-transform: uppercase;
+}
+
+@media (max-width: 480px) {
+  .post-body > p:first-child::first-letter {
+    font-size: 2.7em;
+  }
+}
+
+/* ============================================================
+   Pull quotes — the rendered post elevates every blockquote into
+   an editorial pull quote: centred, large, set in the heading mono
+   under a big quote glyph. The live editor's quote block (styled
+   above under .post-editor-content) stays modest.
+   ============================================================ */
+.post-body blockquote {
+  border-left: none;
+  padding: 0;
+  margin: 2.2em auto;
+  max-width: 34rem;
+  text-align: center;
+  font-family: var(--font-heading), serif;
+  font-style: normal;
+  font-size: 1.45rem;
+  line-height: 1.4;
+  color: var(--fg);
+}
+
+.post-body blockquote::before {
+  content: "\275D";
+  display: block;
+  font-family: var(--font-heading), serif;
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--fg);
+  opacity: 0.28;
+  margin-bottom: 0.15em;
+}
+
+.post-body blockquote p {
+  margin: 0.3em 0;
+}
+
+@media (max-width: 480px) {
+  .post-body blockquote {
+    font-size: 1.2rem;
+  }
+}
+
+/* ============================================================
+   Callouts — a blockquote opening with [!NOTE] / [!TIP] /
+   [!IMPORTANT] / [!WARNING] / [!CAUTION] is rewritten (see
+   postMarkdownPlugins) into a bordered box with a mono label.
+   ============================================================ */
+.post-body .post-callout {
+  position: relative;
+  margin: 2em 0;
+  padding: 1.2em 1.2em 1em;
+  border: 1px solid var(--hairline);
+  border-radius: 0.7rem;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* The label is notched into the top border: pulled up onto the border line
+   with a background matching the page so the border "breaks" around it. */
+.post-body .post-callout-label {
+  position: absolute;
+  top: 0;
+  left: 1.1em;
+  transform: translateY(-50%);
+  margin: 0;
+  padding: 0 0.55em;
+  background: var(--bg);
+  font-family: var(--font-heading), monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.post-body .post-callout > p {
+  margin: 0.6em 0;
+}
+
+/* First child is the (out-of-flow) label; clear the top margin of the content
+   that follows it and the bottom margin of the last block. */
+.post-body .post-callout-label + * {
+  margin-top: 0;
+}
+
+.post-body .post-callout > :last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   Side-notes — footnotes ([^1]) lifted inline. On narrow screens
+   they sit as an indented block right after the reference; on wide
+   screens they float out into the right margin (Tufte-style).
+   ============================================================ */
+/* The reference number is a button styled as a superscript marker. */
+.post-body .post-sidenote-ref {
+  appearance: none;
+  border: none;
+  background: none;
+  font-family: var(--font-heading), monospace;
+  font-size: 0.7em;
+  font-weight: inherit;
+  vertical-align: super;
+  line-height: 0;
+  padding: 0 0.15em;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+/* Mobile / narrow: note is hidden until the number is tapped, then it pops up
+   as a fixed tooltip card positioned by SidenoteTooltips (centred over the
+   number, above it, clamped to the viewport). */
+.post-body .post-sidenote {
+  display: none;
+  position: fixed;
+  z-index: 60;
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 24px));
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--hairline);
+  border-radius: 0.6rem;
+  background: var(--nav-popup-bg);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.3);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--fg);
+  text-align: left;
+  overflow-wrap: break-word;
+}
+
+.post-body .post-sidenote.is-open {
+  display: block;
+}
+
+.post-body .post-sidenote-num {
+  font-family: var(--font-heading), monospace;
+  color: var(--fg);
+  margin-right: 0.4em;
+}
+
+/* Wide screens: no tooltip — the note is always shown, floated into the right
+   margin outside the reading column (Tufte-style). */
+@media (min-width: 1240px) {
+  .post-body .post-sidenote,
+  .post-body .post-sidenote.is-open {
+    display: block;
+    position: static;
+    float: right;
+    clear: right;
+    width: 12rem;
+    max-width: none;
+    margin: 0.1rem -13.5rem 0.7rem 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--muted);
+    text-align: left;
+  }
+
+  .post-body .post-sidenote-ref {
+    cursor: text;
+  }
+}
+
+/* ============================================================
+   Post media — gallery-print figures (public reader + preview)
+   Each image/video/YouTube embed is wrapped in a `.post-figure`:
+   a hairline mat frames it, captions become auto-numbered plate
+   labels, and images fade up from grayscale to full colour the
+   first time they enter view. The editor node-view keeps its own
+   styling (above); this only governs the rendered post body.
+   ============================================================ */
+.post-body {
+  counter-reset: post-figure;
+}
+
+.post-body .post-figure {
+  display: block;
+  margin: 1.8em auto;
+}
+
+/* react-markdown wraps a lone image in a <p>; drop that paragraph's spacing
+   so the figure owns its own rhythm. */
+.post-body p:has(> .post-figure) {
+  margin: 0;
+}
+
+.post-body .post-figure[data-width="wide"] {
+  width: min(920px, 94vw);
+  max-width: none;
+  margin-left: calc(50% - min(460px, 47vw));
+}
+
+.post-body .post-figure[data-width="full"] {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+}
+
+/* The mat: a hairline frame with a breath of padding, like a passe-partout.
+   Full-bleed images shed the frame entirely. */
+.post-body .post-figure-media {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--hairline);
+  /* Concentric with the image: outer radius = inner radius + padding. */
+  border-radius: calc(0.75rem + 6px);
+  background: var(--hover-bg);
+  overflow: hidden;
+  cursor: zoom-in;
+  /* reset <button> chrome (interactive variant) */
+  appearance: none;
+  -webkit-appearance: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+}
+
+.post-body .post-figure[data-static] .post-figure-media,
+.post-body .post-figure-video .post-figure-media {
+  cursor: default;
+}
+
+.post-body .post-figure[data-width="full"] .post-figure-media {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.post-body .post-figure-media > img,
+.post-body .post-figure-media > video {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border-radius: 0.75rem;
+}
+
+/* Embeds (YouTube) render without a mat — they own their chrome. The figure
+   just provides the breakout width; the player fills it. */
+.post-body .post-figure-embed > :first-child {
+  margin: 0;
+}
+
+/* The facade thumbnail and the swapped-in iframe must fill the 16:9 box. The
+   generic `.post-body img` rules (height:auto, margin, radius) outrank the
+   utility classes on the thumbnail, so pin the sizing here explicitly. */
+.post-body .post-figure-embed img,
+.post-body .post-figure-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+.post-body .post-figure[data-width="full"] .post-figure-media > img,
+.post-body .post-figure[data-width="full"] .post-figure-media > video {
+  border-radius: 0;
+}
+
+/* Caption → numbered plate label (Fig. 01, Fig. 02 …) in the heading mono. */
+.post-body .post-figure .post-caption {
+  counter-increment: post-figure;
+  display: block;
+  margin: 0.7em auto 0;
+  max-width: 640px;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.post-body .post-figure .post-caption::before {
+  content: "Fig. " counter(post-figure, decimal-leading-zero) "  ·  ";
+  font-family: var(--font-heading), monospace;
+  letter-spacing: 0.02em;
+  opacity: 0.65;
+}
+
+/* Grayscale → colour reveal + fade-up. Motion-only; reduced-motion users get
+   the image in full colour immediately (the default, unstyled state). */
+@media (prefers-reduced-motion: no-preference) {
+  .post-body .post-figure-media > img,
+  .post-body .post-figure-media > video {
+    opacity: 0;
+    filter: grayscale(1);
+    transform: translateY(12px) scale(1.012);
+    transition:
+      opacity 0.8s ease,
+      filter 1.1s ease,
+      transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .post-body .post-figure[data-show] .post-figure-media > img,
+  .post-body .post-figure[data-show] .post-figure-media > video {
+    opacity: 1;
+    filter: grayscale(0);
+    transform: none;
+  }
+
+  /* Hover: no movement — just a subtle sharpening of the mat's edge to signal
+     the lightbox (the zoom-in cursor does the rest). */
+  .post-body .post-figure[data-show]:not([data-static]) .post-figure-media {
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  .post-body .post-figure[data-show]:not([data-static]) .post-figure-media:hover {
+    border-color: color-mix(in srgb, var(--fg) 24%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent);
+  }
+}
+
+/* ============================================================
    Print (export as PDF)
    ============================================================ */
 @media print {
@@ -600,9 +1023,16 @@ body {
     max-width: 100%;
     padding: 0 1.5rem;
   }
-  .post-body img[data-width="wide"],
-  .post-body img[data-width="full"] {
+  .post-body .post-figure[data-width="wide"],
+  .post-body .post-figure[data-width="full"] {
     width: 100%;
     margin-left: 0;
+  }
+  /* Never hold a print behind a scroll-reveal that never fired. */
+  .post-body .post-figure-media > img,
+  .post-body .post-figure-media > video {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
   }
 }
