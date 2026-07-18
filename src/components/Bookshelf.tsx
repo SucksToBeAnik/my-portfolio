@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type ShelfBook = {
   id: number;
@@ -50,6 +53,39 @@ function ShelfBook({ book }: { book: ShelfBook }) {
 }
 
 export function Bookshelf({ label, books }: { label: string; books: ShelfBook[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ start: false, end: false });
+
+  const updateEdges = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const start = el.scrollLeft > 1;
+    const end = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+    setEdges((prev) => (prev.start === start && prev.end === end ? prev : { start, end }));
+  }, []);
+
+  useEffect(() => {
+    updateEdges();
+    const el = scrollRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(updateEdges);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [updateEdges]);
+
+  // Fade the row's edges to TRUE transparency (a mask), not a painted color —
+  // so the real page background shows through and there's no gray fringe in
+  // light mode. Each side only fades when there's more to scroll that way.
+  const F = "2.75rem";
+  const mask =
+    edges.start && edges.end
+      ? `linear-gradient(to right, transparent, #000 ${F}, #000 calc(100% - ${F}), transparent)`
+      : edges.end
+        ? `linear-gradient(to right, #000 calc(100% - ${F}), transparent)`
+        : edges.start
+          ? `linear-gradient(to right, transparent, #000 ${F})`
+          : undefined;
+
   return (
     <section className="space-y-4">
       <h2 className="flex items-baseline gap-2 font-heading text-xs uppercase tracking-[0.2em]">
@@ -108,7 +144,15 @@ export function Bookshelf({ label, books }: { label: string; books: ShelfBook[] 
         {/* THE BOOKS — pb pushes their bases down onto the top surface, so a
             sliver of the lit shelf shows in front of them and their contact
             shadows fall on a lit plane. */}
-        <div className="no-scrollbar relative flex items-end gap-5 overflow-x-auto px-6 pb-[22px] pt-10">
+        {/* A book row that overflows the column fades out at its edges instead
+            of hard-cutting, hinting there are more books to scroll. The mask
+            fades to true transparency so the page background shows through. */}
+        <div
+          ref={scrollRef}
+          onScroll={updateEdges}
+          className="no-scrollbar relative flex items-end gap-5 overflow-x-auto px-6 pb-[22px] pt-10"
+          style={{ maskImage: mask, WebkitMaskImage: mask }}
+        >
           {books.map((book) => (
             <ShelfBook key={book.id} book={book} />
           ))}
