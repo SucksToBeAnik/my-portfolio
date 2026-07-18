@@ -47,6 +47,8 @@ html {
   --shelf-front-1: #262626;
   --shelf-front-2: #0d0d0d;
   --shelf-edge: rgba(255, 255, 255, 0.06);
+  --shelf-seam: rgba(0, 0, 0, 0.35);
+  --shelf-seam-lip: rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="light"] {
@@ -68,6 +70,8 @@ html {
   --shelf-front-1: #c9c9c9;
   --shelf-front-2: #a6a6a6;
   --shelf-edge: rgba(255, 255, 255, 0.4);
+  --shelf-seam: rgba(0, 0, 0, 0.13);
+  --shelf-seam-lip: rgba(255, 255, 255, 0.5);
 }
 
 @theme inline {

@@ -79,14 +79,30 @@ export function Bookshelf({ label, books }: { label: string; books: ShelfBook[] 
               clipPath: "polygon(18px 0, calc(100% - 18px) 0, 100% 100%, 0 100%)",
             }}
           />
-          {/* front face */}
+          {/* front face — a dark bottom inset gives the plank visible thickness
+              and depth under the edge rather than reading as a flat strip. */}
           <div
             className="shelf-grain relative h-[13px] rounded-b-[9px]"
             style={{
               background: "linear-gradient(180deg, var(--shelf-front-1), var(--shelf-front-2))",
-              boxShadow: "inset 0 1px 0 var(--shelf-edge)",
+              boxShadow:
+                "inset 0 1px 0 var(--shelf-edge), inset 0 -2px 3px -1px rgba(0,0,0,0.55)",
             }}
           />
+          {/* vertical dividers across the top surface — hairline grooves (dark
+              cut + light lip) so the shelf reads as boards butted together. */}
+          {["33.33%", "66.66%"].map((left) => (
+            <span
+              key={left}
+              aria-hidden
+              className="absolute top-0 h-[18px] w-px"
+              style={{
+                left,
+                background: "var(--shelf-seam)",
+                boxShadow: "1px 0 0 var(--shelf-seam-lip)",
+              }}
+            />
+          ))}
         </div>
 
         {/* THE BOOKS — pb pushes their bases down onto the top surface, so a
