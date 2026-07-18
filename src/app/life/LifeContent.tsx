@@ -51,7 +51,7 @@ export function LifeContent({
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between mb-8 md:mb-16">
+      <div className="flex items-center justify-between mb-8 md:mb-12">
         <Breadcrumb crumbs={[{ label: "My Life" }]} />
         <div className="flex gap-3 shrink-0">
           <button

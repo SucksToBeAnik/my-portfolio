@@ -88,7 +88,7 @@ export function Bookshelf({ label, books }: { label: string; books: ShelfBook[] 
 
   return (
     <section className="space-y-4">
-      <h2 className="flex items-baseline gap-2 font-heading text-xs uppercase tracking-[0.2em]">
+      <h2 className="flex items-baseline gap-2 font-heading text-[11px] uppercase tracking-wider text-muted">
         {label}
         <span className="font-sans text-[10px] tracking-normal text-fg/30">{books.length}</span>
       </h2>

@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!session) redirect("/");
 
   return (
-    <div className="-mx-6 -mt-16 -mb-32 h-screen flex flex-col pt-16 pb-32">
+    <div className="-mx-6 -mt-12 -mb-32 h-screen flex flex-col pt-12 pb-32">
       <div className="flex flex-1 min-h-0 bg-bg text-fg">
         <aside className="hidden md:flex flex-col w-56 border-r border-hairline bg-bg/50 shrink-0 p-4">
           <AdminBreadcrumb />

@@ -49,7 +49,7 @@ export function BooksDisplay({ books, header }: { books: Book[]; header?: ReactN
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between mb-8 md:mb-16">
+      <div className="flex items-center justify-between mb-8 md:mb-12">
         {header}
         <FilterPopover
           tags={allCategories}

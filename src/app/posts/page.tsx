@@ -1,3 +1,4 @@
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { getHeartsCounts } from "@/actions/heart-counts";
@@ -50,8 +51,14 @@ export default async function PostsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="mb-8 md:mb-16">
+      <div className="flex items-center justify-between mb-8 md:mb-12">
         <Breadcrumb crumbs={[{ label: "Posts" }]} />
+        <Link
+          href="/til"
+          className="text-xs text-muted hover:text-fg transition-colors inline-flex items-center gap-1 shrink-0"
+        >
+          Today I learned <ArrowRight weight="thin" className="w-3 h-3" />
+        </Link>
       </div>
 
       {posts.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}

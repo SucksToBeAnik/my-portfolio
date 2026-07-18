@@ -107,15 +107,15 @@ export default async function Home() {
           }),
         }}
       />
-      {/* Negative margins cancel <main>'s pt-16 px-6 pb-32 so this div starts at the */}
+      {/* Negative margins cancel <main>'s pt-12 px-6 pb-32 so this div starts at the */}
       {/* true viewport top. h-screen + overflow-y-scroll makes it the scroll container. */}
       {/* snap-y mandatory gives true PDF-page behavior: each panel locks to the viewport. */}
-      <div id="snap-container" className="-mx-6 -mt-16 -mb-32 h-screen overflow-y-scroll snap-y snap-mandatory overscroll-none no-scrollbar">
+      <div id="snap-container" className="-mx-6 -mt-12 -mb-32 h-screen overflow-y-scroll snap-y snap-mandatory overscroll-none no-scrollbar">
       <Suspense><ShowcaseScroll /></Suspense>
 
       {/* Page 1: Hero — exactly one viewport tall */}
       <div className="h-screen snap-start flex flex-col px-6 pt-16 pb-24">
-        <div className="flex flex-col gap-16">
+        <div className="flex flex-col gap-16 md:gap-24">
           {/* Hero */}
           <section className="space-y-5">
             <div className="flex items-start justify-between">

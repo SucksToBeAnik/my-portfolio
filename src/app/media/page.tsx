@@ -40,7 +40,7 @@ export default async function WatchPage() {
 
   return (
     <div className="space-y-8">
-      <div className="mb-8 md:mb-16">
+      <div className="mb-8 md:mb-12">
         <Breadcrumb crumbs={[{ label: "What I Watch" }]} />
       </div>
 
