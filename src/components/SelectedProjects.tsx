@@ -80,7 +80,7 @@ export function SelectedProjects({ projects }: { projects: ProjectItem[] }) {
       <div className="mx-auto max-w-[940px]">
         <SectionHeader label="Selected Projects" />
         {/* Mobile: horizontal swipe carousel. Desktop: 3-up grid. */}
-        <div className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x lg:grid lg:grid-cols-3 lg:overflow-visible lg:touch-auto">
+        <div className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain touch-auto lg:grid lg:grid-cols-3 lg:overflow-visible">
           {projects.map((project) => (
             <Card key={project.id} project={project} />
           ))}
