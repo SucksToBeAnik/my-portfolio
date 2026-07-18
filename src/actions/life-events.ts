@@ -13,6 +13,7 @@ const schema = z.object({
   description: z.string().min(1),
   imageUrl: z.string().optional().nullable(),
   url: z.string().optional().nullable(),
+  role: z.string().optional().nullable(),
   type: z.string().min(1),
   current: z.boolean().optional(),
   location: z.string().optional().nullable(),

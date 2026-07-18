@@ -368,7 +368,7 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs text-fg/50">Screenshot</label>
+                <label className="text-xs text-fg/50">Cover image / GIF</label>
                 <ImageUpload
                   key={drawerOpen ? (editId ?? "new") : "closed"}
                   value={f("imageUrl")}
@@ -378,7 +378,7 @@ export default function ProjectsPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs text-fg/50">Demo Video</label>
+                <label className="text-xs text-fg/50">Demo Video (deep-dive only)</label>
                 <ImageUpload
                   key={drawerOpen ? (editId ?? "new") : "closed"}
                   value={f("videoUrl")}

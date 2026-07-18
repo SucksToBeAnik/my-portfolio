@@ -25,6 +25,7 @@ const ChatPopup = dynamic(() => import("@/components/ChatPopup").then((m) => m.C
 
 const navItems = [
   { href: "/", label: "Home", icon: House },
+  { href: "/projects", label: "Work", icon: Briefcase },
   { href: "/posts", label: "Posts", icon: Quotes },
   { href: "/life", label: "Life", icon: Heart },
   { href: "/books", label: "Books", icon: BookOpenText },
@@ -197,60 +198,13 @@ function RailItem({
 
 export function BottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const [chatOpen, setChatOpen] = useState(false);
   const chatOpenRef = useRef(false);
   useEffect(() => {
     chatOpenRef.current = chatOpen;
   }, [chatOpen]);
-  const [panelTwo, setPanelTwo] = useState(false);
   const [hoveredRail, setHoveredRail] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (pathname !== "/") {
-      setPanelTwo(false);
-      return;
-    }
-
-    let removeScroll: (() => void) | null = null;
-
-    function attach(container: HTMLElement) {
-      if (removeScroll) return; // already attached
-      let timer: ReturnType<typeof setTimeout>;
-      function onScroll() {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          setPanelTwo(container.scrollTop > container.clientHeight / 2);
-        }, 50);
-      }
-      container.addEventListener("scroll", onScroll, { passive: true });
-      removeScroll = () => {
-        clearTimeout(timer);
-        container.removeEventListener("scroll", onScroll);
-      };
-    }
-
-    const existing = document.getElementById("snap-container");
-    if (existing) {
-      attach(existing as HTMLElement);
-      return () => removeScroll?.();
-    }
-
-    // Container not in DOM yet (page still loading) — watch for it
-    const observer = new MutationObserver(() => {
-      const el = document.getElementById("snap-container");
-      if (!el) return;
-      observer.disconnect();
-      attach(el as HTMLElement);
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => {
-      observer.disconnect();
-      removeScroll?.();
-    };
-  }, [pathname]);
 
   useEffect(() => {
     const handler = () => {
@@ -292,50 +246,13 @@ export function BottomNav() {
     return <ChatPopup open={chatOpen} onClose={() => setChatOpen(false)} />;
   }
 
-  const homeIsActive = pathname === "/" && !panelTwo;
-  const handleHomeClick =
-    pathname === "/"
-      ? (e: React.MouseEvent) => {
-          e.preventDefault();
-          setPanelTwo(false);
-          document.getElementById("snap-container")?.scrollTo({ top: 0, behavior: "smooth" });
-          // Drop any lingering ?showcase=1 so revisiting lands at the top.
-          window.history.replaceState(null, "", "/");
-        }
-      : undefined;
-  const handleWorkClick = () => {
-    if (pathname === "/") {
-      setPanelTwo(true);
-      const container = document.getElementById("snap-container");
-      container?.scrollTo({ top: container.clientHeight, behavior: "smooth" });
-    } else {
-      setPanelTwo(true);
-      router.push("/?showcase=1");
-    }
-  };
-
   return (
     <>
       <ChatPopup open={chatOpen} onClose={() => setChatOpen(false)} />
       <nav className="fixed bottom-0 left-0 right-0 flex justify-center pb-4 pointer-events-none z-50 lg:hidden">
         <div className="flex items-center justify-center w-full max-w-[700px] mx-4 px-1.5 py-1.5 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
           <div className="flex items-center gap-0 sm:gap-0.5">
-            <NavItem
-              href={navItems[0].href}
-              label={navItems[0].label}
-              icon={navItems[0].icon}
-              isActive={homeIsActive}
-              onClick={handleHomeClick}
-            />
-            <button
-              type="button"
-              onClick={handleWorkClick}
-              className="relative flex items-center gap-1.5 px-1.5 sm:px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 cursor-pointer shrink-0"
-            >
-              <Briefcase weight={panelTwo ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline">Work</span>
-            </button>
-            {navItems.slice(1).map((item) => (
+            {navItems.map((item) => (
               <NavItem
                 key={item.href}
                 href={item.href}
@@ -377,33 +294,16 @@ export function BottomNav() {
       {(() => {
         const sc = (pos: number) =>
           hoveredRail === null ? 1 : railScale(Math.abs(pos - hoveredRail));
-        // Primary tiles: Home, Work, then the remaining nav items — kept as one
-        // continuous position sequence so the magnification reads spatially.
-        const tiles = [
-          {
-            key: "home",
-            href: "/",
-            label: "Home",
-            active: homeIsActive,
-            onClick: handleHomeClick,
-            icon: House,
-          },
-          {
-            key: "work",
-            label: "Work",
-            active: panelTwo,
-            onClick: handleWorkClick,
-            icon: Briefcase,
-          },
-          ...navItems.slice(1).map((item) => ({
-            key: item.href,
-            href: item.href,
-            label: item.label,
-            active: pathname === item.href,
-            onClick: undefined,
-            icon: item.icon,
-          })),
-        ];
+        // Nav tiles kept as one continuous position sequence so the
+        // magnification reads spatially.
+        const tiles = navItems.map((item) => ({
+          key: item.href,
+          href: item.href,
+          label: item.label,
+          active: pathname === item.href,
+          onClick: undefined,
+          icon: item.icon,
+        }));
         const dividerPos = tiles.length;
         const themePos = dividerPos + 1;
         const askPos = dividerPos + 2;

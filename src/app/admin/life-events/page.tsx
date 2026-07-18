@@ -40,6 +40,7 @@ interface Item {
   description: string;
   imageUrl: string | null;
   url: string | null;
+  role: string | null;
   type: string;
   current: boolean | null;
   location: string | null;
@@ -56,6 +57,7 @@ const empty = {
   description: "",
   imageUrl: "",
   url: "",
+  role: "",
   type: "education",
   current: false,
   location: "",
@@ -491,6 +493,18 @@ export default function LifeEventsPage() {
                 className={inputCls}
               />
             </div>
+
+            {form.type === "work" && (
+              <div className="space-y-1.5">
+                <label className="text-xs text-fg/50">Role</label>
+                <input
+                  value={f("role")}
+                  onChange={(e) => s("role", e.target.value)}
+                  placeholder="e.g. Founder, Co-Founder/CEO"
+                  className={inputCls}
+                />
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Location</label>

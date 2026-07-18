@@ -1,28 +1,19 @@
-import {
-  Books,
-  Gear,
-  GithubLogo,
-  Lightbulb,
-  LinkedinLogo,
-  LinkSimple,
-  XLogo,
-} from "@phosphor-icons/react/dist/ssr";
+import { Gear, GithubLogo, LinkedinLogo, LinkSimple, XLogo } from "@phosphor-icons/react/dist/ssr";
 import { desc, eq } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
 import { getShowcasedCv } from "@/actions/cvs";
-import { getHeartsCounts } from "@/actions/heart-counts";
 import { AskButton } from "@/components/AskButton";
-import { ContentTabs } from "@/components/ContentTabs";
+import { CareerTrack } from "@/components/CareerTrack";
 import { CvLink } from "@/components/CvLink";
 import { GithubActivityLine } from "@/components/GithubActivityLine";
+import { HomePublications } from "@/components/HomePublications";
 import { LinkPreview } from "@/components/LinkPreview";
+import { RecentPosts } from "@/components/RecentPosts";
 import { SearchBar } from "@/components/SearchBar";
-import { SeeWorkLink } from "@/components/SeeWorkLink";
-import { ShowcaseScroll } from "@/components/ShowcaseScroll";
+import { SelectedProjects } from "@/components/SelectedProjects";
 import { db } from "@/db";
-import { books, projects, publications, siteConfig, tils } from "@/db/schema";
+import { lifeEvents, microblogs, projects, publications, siteConfig } from "@/db/schema";
 import { getRecentGithubActivity } from "@/lib/github";
 
 export const revalidate = 3600;
@@ -47,38 +38,65 @@ export const metadata = {
 
 export default async function Home() {
   const [
-    allProjects,
+    featuredProjects,
     allPublications,
-    readingBooks,
+    workEvents,
+    recentPosts,
     workingOnRow,
     workingOnUrlRow,
-    latestTils,
     showcasedCv,
     githubActivities,
   ] = await Promise.all([
-    db.select().from(projects).orderBy(projects.sortOrder),
-    db.select().from(publications).orderBy(publications.sortOrder),
     db
-      .select({ id: books.id, title: books.title, author: books.author })
-      .from(books)
-      .where(eq(books.status, "reading"))
-      .limit(1),
+      .select({
+        id: projects.id,
+        title: projects.title,
+        imageUrl: projects.imageUrl,
+        url: projects.url,
+        workedOn: projects.workedOn,
+      })
+      .from(projects)
+      .where(eq(projects.featured, true))
+      .orderBy(projects.sortOrder),
+    db
+      .select({
+        id: publications.id,
+        title: publications.title,
+        url: publications.url,
+        publishedOn: publications.publishedOn,
+      })
+      .from(publications)
+      .orderBy(publications.sortOrder),
+    db
+      .select({
+        id: lifeEvents.id,
+        title: lifeEvents.title,
+        description: lifeEvents.description,
+        role: lifeEvents.role,
+        startDate: lifeEvents.startDate,
+        endDate: lifeEvents.endDate,
+        current: lifeEvents.current,
+      })
+      .from(lifeEvents)
+      .where(eq(lifeEvents.type, "work")),
+    db
+      .select({
+        id: microblogs.id,
+        title: microblogs.title,
+        publishedAt: microblogs.publishedAt,
+      })
+      .from(microblogs)
+      .where(eq(microblogs.published, true))
+      .orderBy(desc(microblogs.publishedAt))
+      .limit(4),
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
-    db.select({ id: tils.id, title: tils.title }).from(tils).orderBy(desc(tils.createdAt)).limit(1),
     getShowcasedCv(),
     getRecentGithubActivity(),
   ]);
 
-  const reading = readingBooks[0] ?? null;
   const workingOn = workingOnRow[0]?.value ?? null;
   const workingOnUrl = workingOnUrlRow[0]?.value || null;
-  const latestTil = latestTils[0] ?? null;
-
-  const projectHearts = await getHeartsCounts(
-    "project",
-    allProjects.map((p) => p.id),
-  );
 
   return (
     <>
@@ -107,155 +125,105 @@ export default async function Home() {
           }),
         }}
       />
-      {/* Negative margins cancel <main>'s pt-12 px-6 pb-32 so this div starts at the */}
-      {/* true viewport top. h-screen + overflow-y-scroll makes it the scroll container. */}
-      {/* snap-y mandatory gives true PDF-page behavior: each panel locks to the viewport. */}
-      <div id="snap-container" className="-mx-6 -mt-12 -mb-32 h-screen overflow-y-scroll snap-y snap-mandatory overscroll-none no-scrollbar">
-      <Suspense><ShowcaseScroll /></Suspense>
 
-      {/* Page 1: Hero — exactly one viewport tall */}
-      <div className="h-screen snap-start flex flex-col px-6 pt-16 pb-24">
-        <div className="flex flex-col gap-16 md:gap-24">
-          {/* Hero */}
-          <section className="space-y-5">
-            <div className="flex items-start justify-between">
-              <Image
-                src="/profile.jpeg"
-                alt="Suckstobeanik"
-                width={56}
-                height={56}
-                className="rounded-full object-cover w-14 h-14"
-              />
-              <div className="flex items-center gap-2">
-                <AskButton />
-                <SearchBar />
-              </div>
+      <div className="flex flex-col gap-16 md:gap-20">
+        {/* Hero */}
+        <section className="space-y-5">
+          <div className="flex items-start justify-between">
+            <Image
+              src="/profile.jpeg"
+              alt="Suckstobeanik"
+              width={56}
+              height={56}
+              className="rounded-full object-cover w-14 h-14"
+            />
+            <div className="flex items-center gap-2">
+              <AskButton />
+              <SearchBar />
             </div>
+          </div>
 
-            <div className="space-y-3">
-              <h1 className="text-4xl font-heading">@suckstobeanik</h1>
-              <p className="text-base leading-relaxed text-fg/80 max-w-lg">
-                I&apos;m a software engineer who loves building simple solutions. Here, I share a little
-                bit of everything that interests me.
-              </p>
-            </div>
+          <div className="space-y-3">
+            <h1 className="text-4xl font-heading">@suckstobeanik</h1>
+            <p className="text-base leading-relaxed text-fg/80 max-w-lg">
+              I&apos;m a software engineer who loves building simple solutions. Here, I share a
+              little bit of everything that interests me.
+            </p>
+          </div>
 
-            <div className="flex items-center gap-3 text-fg/60">
-              <LinkPreview url="https://github.com/SucksToBeAnik" position="bottom">
-                <Link
-                  href="https://github.com/SucksToBeAnik"
-                  target="_blank"
-                  className="flex items-center gap-1.5 hover:text-fg transition-colors"
-                  aria-label="GitHub"
-                >
-                  <GithubLogo weight="thin" className="w-5 h-5" />
-                </Link>
-              </LinkPreview>
-              <LinkPreview
-                url="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
-                position="bottom"
+          <div className="flex items-center gap-3 text-fg/60">
+            <LinkPreview url="https://github.com/SucksToBeAnik" position="bottom">
+              <Link
+                href="https://github.com/SucksToBeAnik"
+                target="_blank"
+                className="flex items-center gap-1.5 hover:text-fg transition-colors"
+                aria-label="GitHub"
               >
-                <Link
-                  href="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
-                  target="_blank"
-                  className="flex items-center gap-1.5 hover:text-fg transition-colors"
-                  aria-label="LinkedIn"
-                >
-                  <LinkedinLogo weight="thin" className="w-5 h-5" />
-                </Link>
-              </LinkPreview>
-              <LinkPreview url="https://x.com/suckstobeanik" position="bottom">
-                <Link
-                  href="https://x.com/suckstobeanik"
-                  target="_blank"
-                  className="flex items-center gap-1.5 hover:text-fg transition-colors"
-                  aria-label="X / Twitter"
-                >
-                  <XLogo weight="thin" className="w-5 h-5" />
-                </Link>
-              </LinkPreview>
-              {showcasedCv && <CvLink url={showcasedCv.fileUrl} />}
-            </div>
-          </section>
+                <GithubLogo weight="thin" className="w-5 h-5" />
+              </Link>
+            </LinkPreview>
+            <LinkPreview
+              url="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
+              position="bottom"
+            >
+              <Link
+                href="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
+                target="_blank"
+                className="flex items-center gap-1.5 hover:text-fg transition-colors"
+                aria-label="LinkedIn"
+              >
+                <LinkedinLogo weight="thin" className="w-5 h-5" />
+              </Link>
+            </LinkPreview>
+            <LinkPreview url="https://x.com/suckstobeanik" position="bottom">
+              <Link
+                href="https://x.com/suckstobeanik"
+                target="_blank"
+                className="flex items-center gap-1.5 hover:text-fg transition-colors"
+                aria-label="X / Twitter"
+              >
+                <XLogo weight="thin" className="w-5 h-5" />
+              </Link>
+            </LinkPreview>
+            {showcasedCv && <CvLink url={showcasedCv.fileUrl} />}
+          </div>
+        </section>
 
-          {/* Now */}
-          {(workingOn || reading || latestTil || githubActivities.length > 0) && (
-            <section className="space-y-3">
-              <p className="text-xs font-heading uppercase tracking-wider text-muted">Now</p>
-              <div className="space-y-2 text-xs">
-                {workingOn && (
-                  <p className="flex items-start gap-1.5 text-fg/80">
-                    <Gear weight="fill" className="w-3 h-3 mt-0.5 text-fg/40 shrink-0" />
-                    <span>
-                      Working on{" "}
-                      {workingOnUrl ? (
-                        <Link
-                          href={workingOnUrl}
-                          target="_blank"
-                          className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
-                        >
-                          {workingOn}
-                          <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
-                        </Link>
-                      ) : (
-                        <span className="font-medium text-fg">{workingOn}</span>
-                      )}
-                    </span>
-                  </p>
-                )}
-                {reading && (
-                  <p className="flex items-start gap-1.5 text-fg/80">
-                    <Books weight="fill" className="w-3 h-3 mt-0.5 text-fg/40 shrink-0" />
-                    <span>
-                      Reading{" "}
+        {/* Now */}
+        {(workingOn || githubActivities.length > 0) && (
+          <section className="space-y-3">
+            <p className="text-xs font-heading uppercase tracking-wider text-muted">Now</p>
+            <div className="space-y-2 text-xs">
+              {workingOn && (
+                <p className="flex items-start gap-1.5 text-fg/80">
+                  <Gear weight="fill" className="w-3 h-3 mt-0.5 text-fg/40 shrink-0" />
+                  <span>
+                    Working on{" "}
+                    {workingOnUrl ? (
                       <Link
-                        href={`/books/${reading.id}`}
+                        href={workingOnUrl}
+                        target="_blank"
                         className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
                       >
-                        {reading.title}
-                        <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
-                      </Link>{" "}
-                      by {reading.author}
-                    </span>
-                  </p>
-                )}
-                {latestTil && (
-                  <p className="flex items-start gap-1.5 text-fg/80">
-                    <Lightbulb weight="fill" className="w-3 h-3 mt-0.5 text-fg/40 shrink-0" />
-                    <span>
-                      Today I learned{" "}
-                      <Link
-                        href={`/til/${latestTil.id}`}
-                        className="inline-flex items-center gap-0.5 font-medium text-fg origin-left transition-transform duration-200 hover:scale-105"
-                      >
-                        {latestTil.title}
+                        {workingOn}
                         <LinkSimple weight="bold" className="w-3 h-3 text-muted/60" />
                       </Link>
-                    </span>
-                  </p>
-                )}
-                {githubActivities.length > 0 && <GithubActivityLine activities={githubActivities} />}
-              </div>
-            </section>
-          )}
+                    ) : (
+                      <span className="font-medium text-fg">{workingOn}</span>
+                    )}
+                  </span>
+                </p>
+              )}
+              {githubActivities.length > 0 && <GithubActivityLine activities={githubActivities} />}
+            </div>
+          </section>
+        )}
 
-          <div className="w-fit"><SeeWorkLink /></div>
-        </div>
-
-        <div className="flex-1" />
+        <SelectedProjects projects={featuredProjects} />
+        <HomePublications publications={allPublications} />
+        <CareerTrack items={workEvents} />
+        <RecentPosts posts={recentPosts} />
       </div>
-
-      {/* Page 2: Projects — snaps to top of viewport */}
-      <div className="min-h-screen snap-start px-6 pb-32">
-        <Suspense>
-          <ContentTabs
-            projects={allProjects}
-            publications={allPublications}
-            projectHearts={projectHearts}
-          />
-        </Suspense>
-      </div>
-    </div>
     </>
   );
 }

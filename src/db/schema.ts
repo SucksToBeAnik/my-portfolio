@@ -37,6 +37,7 @@ export const lifeEvents = sqliteTable("life_events", {
   description: text("description").notNull(),
   imageUrl: text("image_url"),
   url: text("url"),
+  role: text("role"),
   type: text("type").notNull(),
   current: integer("current", { mode: "boolean" }).default(false),
   location: text("location"),
