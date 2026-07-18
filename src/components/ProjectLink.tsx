@@ -19,7 +19,7 @@ export function ProjectLink({ url, label }: { url: string; label: string }) {
         className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-hover-bg text-fg/70 hover:text-fg hover:bg-fg/10 transition-colors"
       >
         {Icon && <Icon weight="thin" className="w-3.5 h-3.5" />}
-        {label}
+        <span className="hidden sm:inline">{label}</span>
       </a>
     </LinkPreview>
   );
