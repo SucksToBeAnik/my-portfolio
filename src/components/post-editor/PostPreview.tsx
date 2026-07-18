@@ -39,7 +39,7 @@ const components: Components = {
  */
 export function PostPreview({ content, className }: { content: string; className?: string }) {
   return (
-    <div className={`post-body ${className ?? ""}`}>
+    <div className={`post-body text-fg/55 ${className ?? ""}`}>
       <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} components={components}>
         {content}
       </ReactMarkdown>
