@@ -1,4 +1,4 @@
-import { Star, Stack, PlayCircle } from "@phosphor-icons/react/dist/ssr";
+import { Star, PlayCircle } from "@phosphor-icons/react/dist/ssr";
 import { asc } from "drizzle-orm";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -51,60 +51,46 @@ export default async function WatchPage() {
           <p className="text-[11px] font-heading mb-3 uppercase tracking-wider text-muted">
             {group.label}
           </p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
             {group.items.map((item) => (
               <Link
                 key={item.id}
                 href={`/media/${item.id}`}
-                className="group flex h-full flex-col rounded-xl border border-hairline bg-fg/[0.03] p-2.5 transition-colors hover:bg-fg/[0.06]"
+                className="group relative block overflow-hidden rounded-lg bg-hover-bg ring-1 ring-transparent transition duration-200 hover:-translate-y-1 hover:ring-fg/20"
               >
-                <div className="flex flex-1 flex-col gap-2">
-                  <div className="space-y-1">
-                    <h2 className="font-heading text-xs uppercase tracking-wide leading-snug line-clamp-2">
-                      {item.title}
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-1 text-[10px]">
-                      <span className="px-1 py-px rounded font-heading uppercase tracking-wider bg-fg/10 text-fg/60">
-                        {item.type === "series" ? "Series" : "Movie"}
-                      </span>
-                      {item.type === "series" && item.seasons && (
-                        <span className="inline-flex items-center gap-0.5 px-1 py-px rounded bg-fg/5 text-fg/50">
-                          <Stack weight="regular" className="w-2.5 h-2.5" />
-                          {item.seasons}
-                        </span>
-                      )}
-                      {item.year && <span className="text-fg/40">{item.year}</span>}
-                    </div>
-                    {item.rating ? (
-                      <span className="inline-flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <Star
-                            key={n}
-                            weight="fill"
-                            className={`w-2.5 h-2.5 ${(item.rating ?? 0) >= n ? "text-fg" : "text-fg/30"}`}
-                          />
-                        ))}
-                      </span>
-                    ) : null}
+                {item.posterUrl ? (
+                  <img
+                    src={item.posterUrl}
+                    alt={item.title}
+                    loading="lazy"
+                    className="aspect-[2/3] w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex aspect-[2/3] w-full items-center justify-center">
+                    <PlayCircle weight="thin" className="w-8 h-8 text-fg/20" />
                   </div>
-                  {item.review && (
-                    <p className="text-[11px] text-fg/55 italic leading-tight line-clamp-3">
-                      &ldquo;{item.review}&rdquo;
-                    </p>
-                  )}
-                  <div className="mt-auto overflow-hidden rounded-lg bg-hover-bg">
-                    {item.posterUrl ? (
-                      <img
-                        src={item.posterUrl}
-                        alt={item.title}
-                        loading="lazy"
-                        className="aspect-[2/3] w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex aspect-[2/3] w-full items-center justify-center">
-                        <PlayCircle weight="thin" className="w-7 h-7 text-fg/20" />
-                      </div>
-                    )}
+                )}
+
+                {item.rating ? (
+                  <span className="absolute right-1.5 top-1.5 inline-flex items-center gap-0.5 rounded bg-black/60 px-1 py-0.5 text-[10px] font-heading text-white backdrop-blur-sm">
+                    <Star weight="fill" className="w-2.5 h-2.5" />
+                    {item.rating}
+                  </span>
+                ) : null}
+
+                <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-gradient-to-t from-black/90 via-black/45 to-transparent p-2 pt-6 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <h2 className="font-heading text-[11px] uppercase leading-snug tracking-wide text-white line-clamp-2">
+                    {item.title}
+                  </h2>
+                  <div className="flex items-center gap-1 text-[10px] text-white/70">
+                    <span>
+                      {item.type === "series"
+                        ? item.seasons
+                          ? `Series · S${item.seasons}`
+                          : "Series"
+                        : "Movie"}
+                    </span>
+                    {item.year && <span>· {item.year}</span>}
                   </div>
                 </div>
               </Link>
