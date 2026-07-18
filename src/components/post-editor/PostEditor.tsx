@@ -23,6 +23,8 @@ import { createMicroblog, updateMicroblog } from "@/actions/microblogs";
 import { EditPreviewToggle } from "@/components/EditPreviewToggle";
 import { ImageUpload } from "@/components/ImageUpload";
 import { EditorBubbleMenu } from "@/components/post-editor/EditorBubbleMenu";
+import { CodeBlockTab } from "@/components/post-editor/extensions/codeBlockTab";
+import { PostCodeBlock } from "@/components/post-editor/extensions/PostCodeBlock";
 import { type ImageWidth, PostImage } from "@/components/post-editor/extensions/PostImage";
 import { SlashCommand } from "@/components/post-editor/extensions/slashCommand";
 import { PostPreview } from "@/components/post-editor/PostPreview";
@@ -126,8 +128,10 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
         link: false,
+        codeBlock: false, // replaced by PostCodeBlock (adds a language picker)
       }),
       LinkExtension.configure({ openOnClick: false }),
+      PostCodeBlock,
       PostImage,
       Placeholder.configure({
         placeholder: "Write, or press '/' for blocks…",
@@ -141,6 +145,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
         onImage: () => setImageDialog(true),
         onVideo: () => setVideoDialog(true),
       }),
+      CodeBlockTab,
     ],
     content: initial.content,
     editorProps: {

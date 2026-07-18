@@ -23,6 +23,7 @@ import { createProject, updateProject } from "@/actions/projects";
 import { EditPreviewToggle } from "@/components/EditPreviewToggle";
 import { ImageUpload } from "@/components/ImageUpload";
 import { EditorBubbleMenu } from "@/components/post-editor/EditorBubbleMenu";
+import { CodeBlockTab } from "@/components/post-editor/extensions/codeBlockTab";
 import { type ImageWidth, PostImage } from "@/components/post-editor/extensions/PostImage";
 import { SlashCommand } from "@/components/post-editor/extensions/slashCommand";
 import { PostPreview } from "@/components/post-editor/PostPreview";
@@ -178,6 +179,7 @@ export function ProjectEditor({
         onImage: () => setImageDialog(true),
         onVideo: () => setVideoDialog(true),
       }),
+      CodeBlockTab,
     ],
     content: initial.content,
     editorProps: {

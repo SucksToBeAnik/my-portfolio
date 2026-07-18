@@ -24,10 +24,19 @@ export function PostFigure({
   interactive?: boolean;
 }) {
   const figureRef = useRef<HTMLElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const [revealed, setRevealed] = useState(!interactive);
   const [loaded, setLoaded] = useState(false);
   const [open, setOpen] = useState(false);
   const show = revealed && loaded;
+
+  // A cached image can finish loading before React hydrates and attaches
+  // `onLoad`, so the event never fires and the figure stays hidden (this is why
+  // images vanished on a normal refresh but returned on a hard refresh). Catch
+  // the already-complete case on mount.
+  useEffect(() => {
+    if (imgRef.current?.complete) setLoaded(true);
+  }, []);
 
   useEffect(() => {
     if (!interactive) return;
@@ -56,6 +65,7 @@ export function PostFigure({
 
   const img = (
     <img
+      ref={imgRef}
       src={src}
       alt={caption ?? ""}
       style={imgStyle}

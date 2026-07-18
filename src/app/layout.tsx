@@ -8,6 +8,7 @@ import { PageShell } from "@/components/PageShell";
 import { QuickAdd } from "@/components/QuickAdd";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { QueryProvider } from "@/lib/QueryProvider";
+import { siteUrl } from "@/lib/seo";
 import { ThemeProvider } from "@/lib/ThemeProvider";
 
 const spaceMono = Space_Mono({
@@ -21,12 +22,8 @@ const inter = Inter({
   variable: "--font-sans",
 });
 
-const siteUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(siteUrl()),
   title: {
     default: "Al Jami Islam Anik — Software Engineer",
     template: "%s",
@@ -34,9 +31,14 @@ export const metadata: Metadata = {
   description:
     "Al Jami Islam Anik — software engineer from Dhaka, Bangladesh. Projects, books, writing, and more.",
   applicationName: "Al Jami Islam Anik",
-  authors: [{ name: "Al Jami Islam Anik", url: siteUrl }],
+  authors: [{ name: "Al Jami Islam Anik", url: siteUrl() }],
   creator: "Al Jami Islam Anik",
   publisher: "Al Jami Islam Anik",
+  alternates: {
+    types: {
+      "application/rss+xml": [{ url: "/rss.xml", title: "Al Jami Islam Anik — Writing" }],
+    },
+  },
   keywords: [
     "Al Jami Islam Anik",
     "Al Jami Islam",

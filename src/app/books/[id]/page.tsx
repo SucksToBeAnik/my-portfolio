@@ -8,6 +8,11 @@ import { db } from "@/db";
 import { books } from "@/db/schema";
 import { stripHtml, truncate } from "@/lib/seo";
 
+export async function generateStaticParams() {
+  const rows = await db.select({ id: books.id }).from(books);
+  return rows.map((r) => ({ id: String(r.id) }));
+}
+
 const statusLabels: Record<string, string> = {
   reading: "Currently reading",
   read: "Read",

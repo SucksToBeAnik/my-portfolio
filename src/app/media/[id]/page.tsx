@@ -1,12 +1,17 @@
 import { Stack, Star } from "@phosphor-icons/react/dist/ssr";
 import { notFound } from "next/navigation";
-import { getMediaItem } from "@/actions/media";
+import { getMediaItem, getMediaPublic } from "@/actions/media";
 import { BackButton } from "@/components/BackButton";
 import { MediaCase3D } from "@/components/MediaCase3D";
 import { truncate } from "@/lib/seo";
 import { SourceLink } from "./SourceLink";
 
 export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const rows = await getMediaPublic();
+  return rows.map((r) => ({ id: String(r.id) }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

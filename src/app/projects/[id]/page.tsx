@@ -13,6 +13,14 @@ import { firstImage, stripMarkdown, truncate } from "@/lib/seo";
 
 export const revalidate = 3600;
 
+export async function generateStaticParams() {
+  const rows = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .where(eq(projects.published, true));
+  return rows.map((r) => ({ id: String(r.id) }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const project = await db

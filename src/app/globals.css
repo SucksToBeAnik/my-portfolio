@@ -395,6 +395,57 @@ body {
   font-size: 0.9rem;
 }
 
+/* Editor code block: the <pre> plus a language picker floated in its corner.
+   The picker sits over the padding so it never overlaps the code. */
+.post-cb-editor {
+  position: relative;
+}
+
+.post-cb-editor pre {
+  margin: 1em 0;
+}
+
+.post-cb-lang {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  padding: 0.1em 0.15em 0.1em 0.5em;
+  border: 1px solid var(--hairline);
+  border-radius: 0.4rem;
+  background: var(--bg);
+  font-family: var(--font-heading), monospace;
+  font-size: 0.68rem;
+  color: var(--fg);
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.post-cb-editor:hover .post-cb-lang,
+.post-cb-lang:focus-within {
+  opacity: 1;
+}
+
+.post-cb-lang select {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+  padding-right: 0.1em;
+}
+
+.post-cb-lang svg {
+  width: 0.7em;
+  height: 0.7em;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
 /* Code block card: header bar (filename/language + copy) over the code. The
    wrapper owns the frame so the bar and the <pre> read as one unit. */
 .post-body .post-code {
@@ -408,13 +459,36 @@ body {
 .post-body .post-code-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1em;
-  padding: 0.5em 0.9em;
+  gap: 0.7em;
+  padding: 0.55em 0.85em;
   border-bottom: 1px solid var(--hairline);
   font-family: var(--font-heading), monospace;
   font-size: 0.72rem;
   letter-spacing: 0.02em;
+}
+
+/* macOS window traffic-light dots. */
+.post-body .post-code-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  flex-shrink: 0;
+}
+
+.post-body .post-code-dots > span {
+  width: 0.72em;
+  height: 0.72em;
+  border-radius: 9999px;
+}
+
+.post-body .post-code-dots > span:nth-child(1) {
+  background: #ff5f57;
+}
+.post-body .post-code-dots > span:nth-child(2) {
+  background: #febc2e;
+}
+.post-body .post-code-dots > span:nth-child(3) {
+  background: #28c840;
 }
 
 .post-body .post-code-name {
@@ -422,6 +496,22 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Language name + copy, pinned to the right. */
+.post-body .post-code-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.post-body .post-code-lang {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.66rem;
 }
 
 .post-body .post-code-copy {
@@ -451,11 +541,24 @@ body {
   height: 0.9em;
 }
 
-.post-body .post-code pre {
+/* The mounted editor renders inside a shadow root and owns its own theme +
+   layout; the host just sets the code font-size (inherited through the shadow
+   boundary). */
+.post-body .post-code-editor {
+  display: block;
+  font-size: 0.85rem;
+}
+
+/* Shown before the editor mounts and for no-JS/crawlers. Once the editor
+   attaches its shadow root, this light-DOM content stops rendering. */
+.post-body .post-code-fallback {
   margin: 0;
   border: none;
   border-radius: 0;
   background: transparent;
+  padding: 0.9em 1em;
+  overflow-x: auto;
+  font-size: 0.85rem;
 }
 
 .post-editor-content code,

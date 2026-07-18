@@ -25,4 +25,8 @@ export const env = cleanEnv(process.env, {
     desc: "OMDb API key for IMDb metadata lookup",
     default: "",
   }),
+  BUTTONDOWN_API_KEY: str({
+    desc: "Buttondown API key for email subscribers + new-post broadcasts",
+    default: "",
+  }),
 });

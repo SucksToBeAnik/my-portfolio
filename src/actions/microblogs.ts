@@ -5,6 +5,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
+import { auth } from "@/lib/auth";
+import { buttondownConfigured, sendBroadcast } from "@/lib/buttondown";
+import { siteUrl, stripMarkdown, truncate } from "@/lib/seo";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -73,6 +76,30 @@ export async function deleteMicroblog(id: number) {
   revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
   revalidatePath("/");
+}
+
+/**
+ * Send a Buttondown broadcast announcing a published post. Admin-only and
+ * deliberately manual (not fired on publish) since emailing subscribers is an
+ * irreversible, outward-facing action. Returns a status the UI can surface.
+ */
+export async function notifySubscribers(id: number): Promise<{
+  ok: boolean;
+  reason?: "unauthorized" | "not-published" | "not-configured" | "failed";
+}> {
+  const session = await auth();
+  if (!session?.user) return { ok: false, reason: "unauthorized" };
+  if (!buttondownConfigured()) return { ok: false, reason: "not-configured" };
+
+  const post = await getMicroblog(id);
+  if (!post?.published) return { ok: false, reason: "not-published" };
+
+  const url = siteUrl(`/posts/${id}`);
+  const teaser = post.microview?.trim() || truncate(stripMarkdown(post.content), 280);
+  const body = `${teaser}\n\n[Read the full post →](${url})`;
+
+  const sent = await sendBroadcast(post.title, body);
+  return sent ? { ok: true } : { ok: false, reason: "failed" };
 }
 
 export async function reorderMicroblogs(items: { id: number; sortOrder: number }[]) {

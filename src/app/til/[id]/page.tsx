@@ -7,6 +7,11 @@ import { firstImage, stripHtml, truncate } from "@/lib/seo";
 
 export const revalidate = 3600;
 
+export async function generateStaticParams() {
+  const rows = await db.select({ id: tils.id }).from(tils);
+  return rows.map((r) => ({ id: String(r.id) }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const til = await db

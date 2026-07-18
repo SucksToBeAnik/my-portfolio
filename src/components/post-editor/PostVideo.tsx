@@ -42,6 +42,19 @@ export function PostVideo({
     [interactive],
   );
 
+  // Metadata for a cached video can arrive before hydration attaches
+  // `onLoadedMetadata`, leaving the figure hidden on a normal refresh. Catch
+  // the already-loaded case on mount (mirrors onMeta).
+  useEffect(() => {
+    const v = videoRef.current;
+    if (v && v.readyState >= 1) {
+      if (interactive && Number.isFinite(v.duration) && v.duration <= AMBIENT_MAX_SECONDS) {
+        setAmbient(true);
+      }
+      setLoaded(true);
+    }
+  }, [interactive]);
+
   useEffect(() => {
     if (!interactive) return;
     const el = figureRef.current;

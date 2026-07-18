@@ -1,13 +1,18 @@
 "use client";
 
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { DotsSixVertical, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
+import { DotsSixVertical, EnvelopeSimple, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { deleteMicroblog, getMicroblogs, reorderMicroblogs } from "@/actions/microblogs";
+import {
+  deleteMicroblog,
+  getMicroblogs,
+  notifySubscribers,
+  reorderMicroblogs,
+} from "@/actions/microblogs";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { Spinner } from "@/components/Spinner";
 
@@ -26,6 +31,21 @@ export default function MicroblogsPage() {
   const qc = useQueryClient();
   const router = useRouter();
   const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [notifyId, setNotifyId] = useState<number | null>(null);
+
+  const notifyMut = useMutation({
+    mutationFn: (id: number) => notifySubscribers(id),
+    onSuccess: (res) => {
+      if (res.ok) {
+        toast.success("Email sent to subscribers");
+      } else if (res.reason === "not-configured") {
+        toast.error("Buttondown API key not set");
+      } else {
+        toast.error("Failed to send email");
+      }
+    },
+    onError: () => toast.error("Failed to send email"),
+  });
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["microblogs"],
@@ -113,6 +133,15 @@ export default function MicroblogsPage() {
                         )}
                       </button>
                       <div className="flex gap-1.5 shrink-0 ml-3">
+                        {item.published && (
+                          <button
+                            onClick={() => setNotifyId(item.id)}
+                            title="Email subscribers about this post"
+                            className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"
+                          >
+                            <EnvelopeSimple weight="thin" className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => router.push(`/admin/microblogs/${item.id}/edit`)}
                           className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"
@@ -148,6 +177,18 @@ export default function MicroblogsPage() {
           setConfirmId(null);
         }}
         onCancel={() => setConfirmId(null)}
+      />
+
+      <ConfirmModal
+        open={notifyId !== null}
+        title="Email subscribers"
+        message="Send this post to all your Buttondown subscribers now? This can't be undone."
+        confirmLabel="Send email"
+        onConfirm={() => {
+          if (notifyId !== null) notifyMut.mutate(notifyId);
+          setNotifyId(null);
+        }}
+        onCancel={() => setNotifyId(null)}
       />
     </div>
   );

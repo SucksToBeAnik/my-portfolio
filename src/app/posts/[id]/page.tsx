@@ -6,11 +6,20 @@ import { getHeartsCounts } from "@/actions/heart-counts";
 import { BackButton } from "@/components/BackButton";
 import { HeartButton } from "@/components/HeartButton";
 import { PostPreview } from "@/components/post-editor/PostPreview";
+import { SubscribeForm } from "@/components/SubscribeForm";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
 import { firstImage, stripMarkdown, truncate } from "@/lib/seo";
 
 export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const rows = await db
+    .select({ id: microblogs.id })
+    .from(microblogs)
+    .where(eq(microblogs.published, true));
+  return rows.map((r) => ({ id: String(r.id) }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -132,6 +141,8 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             <HeartButton entityType="microblog" entityId={post.id} initialCount={heartCount} />
           </div>
         </article>
+
+        <SubscribeForm />
 
         <div className="grid grid-cols-2 gap-3">
           {prev ? (
