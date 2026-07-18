@@ -2,6 +2,7 @@ import { ArrowLeft, Stack, Star } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMediaItem } from "@/actions/media";
+import { MediaCase3D } from "@/components/MediaCase3D";
 import { truncate } from "@/lib/seo";
 import { SourceLink } from "./SourceLink";
 
@@ -56,79 +57,82 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
           }),
         }}
       />
-      <div className="space-y-6 md:space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="space-y-6">
         <Link
           href="/media"
-          className="flex items-center gap-1.5 text-xs font-heading text-muted hover:text-fg transition-colors"
+          className="inline-flex items-center gap-1 text-xs text-muted transition-colors hover:text-fg"
         >
           <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
           What I Watch
         </Link>
-        {item.imdbUrl && <SourceLink url={item.imdbUrl} />}
-      </div>
 
-      <div className="flex gap-6">
-        {item.posterUrl ? (
-          <img
-            src={item.posterUrl}
-            alt={item.title}
-            className="w-28 sm:w-36 shrink-0 rounded-xl object-cover self-start"
-          />
-        ) : (
-          <div className="w-28 sm:w-36 shrink-0 aspect-[2/3] rounded-xl bg-hover-bg" />
-        )}
-
-        <div className="min-w-0 flex-1 space-y-3 pt-1">
-          <div className="space-y-1">
-            <h1 className="text-xl font-heading leading-tight">{item.title}</h1>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-fg/50">
-              {item.year && <span>{item.year}</span>}
-              <span className="px-1.5 py-0.5 rounded bg-fg/10 text-fg/60 text-[10px] font-heading uppercase tracking-wider">
-                {item.type === "series" ? "Series" : "Movie"}
+        {/* Background panel — the case breaks out above its top edge, and all
+            the content sits on the panel, which runs the full column width. */}
+        <div className="mt-24 rounded-3xl border border-hairline bg-fg/[0.03] p-6 md:mt-28 md:p-10">
+          <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-10">
+            <div className="-mt-28 shrink-0 md:-mt-32">
+              <MediaCase3D posterUrl={item.posterUrl} title={item.title} />
+            </div>
+            <div className="min-w-0 flex-1 space-y-4 text-center sm:pt-2 sm:text-left">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1 font-heading text-[10px] uppercase tracking-[0.2em] text-muted">
+                <span className="h-1.5 w-1.5 rounded-full bg-fg" />
+                {statusLabels[item.status] ?? item.status}
               </span>
-              {item.type === "series" && item.seasons && (
-                <span className="inline-flex items-center gap-1 text-fg/40 text-[10px]">
-                  <Stack weight="regular" className="w-3 h-3" />
-                  {item.seasons} season{item.seasons > 1 ? "s" : ""}
+              <h1 className="text-3xl font-heading leading-tight md:text-4xl">{item.title}</h1>
+              <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-fg/50 sm:justify-start">
+                {item.year && <span>{item.year}</span>}
+                <span className="rounded bg-fg/10 px-1.5 py-0.5 font-heading text-[10px] uppercase tracking-wider text-fg/60">
+                  {item.type === "series" ? "Series" : "Movie"}
+                </span>
+                {item.type === "series" && item.seasons && (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-fg/40">
+                    <Stack weight="regular" className="w-3 h-3" />
+                    {item.seasons} season{item.seasons > 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+              {item.rating && (
+                <span className="inline-flex gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star
+                      key={n}
+                      weight="fill"
+                      className={`w-4 h-4 ${(item.rating ?? 0) >= n ? "text-fg" : "text-fg/30"}`}
+                    />
+                  ))}
                 </span>
               )}
-              <span className="px-1.5 py-0.5 rounded bg-fg/5 text-fg/40 text-[10px]">
-                {statusLabels[item.status]}
-              </span>
+              {item.imdbUrl && (
+                <div className="flex items-center justify-center pt-2 sm:justify-start">
+                  <SourceLink url={item.imdbUrl} />
+                </div>
+              )}
             </div>
           </div>
 
-          {item.rating && (
-            <span className="inline-flex gap-1">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <Star
-                  key={n}
-                  weight="fill"
-                  className={`w-3.5 h-3.5 ${(item.rating ?? 0) >= n ? "text-fg" : "text-fg/20"}`}
-                />
-              ))}
-            </span>
+          {/* My Take is the primary block — it's the value I add. Plot is a
+              small, de-emphasized footnote for context. */}
+          {item.review && (
+            <div className="mt-10 border-t border-hairline pt-8">
+              <h2 className="mb-3 font-heading text-[10px] uppercase tracking-[0.2em] text-muted">
+                My Take
+              </h2>
+              <blockquote className="border-l-2 border-fg/30 pl-5 text-base italic leading-relaxed text-fg/90">
+                {item.review}
+              </blockquote>
+            </div>
+          )}
+
+          {item.plot && (
+            <div className={item.review ? "mt-8" : "mt-10 border-t border-hairline pt-8"}>
+              <h2 className="mb-2 font-heading text-[10px] uppercase tracking-[0.2em] text-muted">
+                Plot
+              </h2>
+              <p className="text-xs leading-relaxed text-fg/45">{item.plot}</p>
+            </div>
           )}
         </div>
       </div>
-
-      {item.review && (
-        <div className="space-y-2">
-          <p className="text-[11px] font-heading text-fg/30 uppercase tracking-wider">My Take</p>
-          <blockquote className="border-l-2 border-hairline pl-4 text-sm text-fg/70 italic leading-relaxed">
-            {item.review}
-          </blockquote>
-        </div>
-      )}
-
-      {item.plot && (
-        <div className="space-y-2">
-          <p className="text-[11px] font-heading text-fg/30 uppercase tracking-wider">Plot</p>
-          <p className="text-sm text-fg/60 leading-relaxed">{item.plot}</p>
-        </div>
-      )}
-    </div>
     </>
   );
 }
