@@ -11,7 +11,6 @@ export default function NewProjectPage() {
         published: false,
         featured: false,
         imageUrl: "",
-        videoUrl: "",
         url: "",
         githubUrl: "",
         workedOn: "",

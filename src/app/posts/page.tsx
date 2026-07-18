@@ -6,7 +6,7 @@ import { Breadcrumb } from "@/components/Breadcrumb";
 import { HeartButton } from "@/components/HeartButton";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
-import { firstImage } from "@/lib/seo";
+import { cardCover } from "@/lib/seo";
 
 export const metadata = {
   title: "Posts",
@@ -66,7 +66,7 @@ export default async function PostsPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {posts.map((post) => {
           const blurb = post.microview?.trim();
-          const image = firstImage(post.content);
+          const image = cardCover(post.imageUrl, post.content);
           return (
             <div
               key={post.id}

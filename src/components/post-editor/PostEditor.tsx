@@ -43,6 +43,7 @@ export interface PostEditorInitial {
   content: string;
   microview: string;
   tags: string;
+  imageUrl: string;
   published: boolean;
 }
 
@@ -68,15 +69,18 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   const [content, setContent] = useState(initial.content);
   const [microview, setMicroview] = useState(initial.microview);
   const [tags, setTags] = useState(initial.tags);
+  const [imageUrl, setImageUrl] = useState(initial.imageUrl);
   const [published, setPublished] = useState(initial.published);
 
   const [preview, setPreview] = useState(false);
   const [metaOpen, setMetaOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [imageDialog, setImageDialog] = useState(false);
+  const [videoDialog, setVideoDialog] = useState(false);
   const [status, setStatus] = useState<SaveStatus>("idle");
 
   const imageDialogRef = useRef<HTMLDialogElement>(null);
+  const videoDialogRef = useRef<HTMLDialogElement>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-grow the title box so it matches the preview <h1> (no layout shift).
@@ -91,18 +95,21 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   }, [preview, title, growTitle]);
 
   // Keep the newest values reachable from debounced callbacks without stale closures.
-  const stateRef = useRef({ id, title, content, microview, tags, published });
-  stateRef.current = { id, title, content, microview, tags, published };
+  const stateRef = useRef({ id, title, content, microview, tags, imageUrl, published });
+  stateRef.current = { id, title, content, microview, tags, imageUrl, published };
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
 
+  // Images and videos ride the same node/markdown pipeline — a video is just an
+  // image node whose src points at a video file (see imageTitle.isVideoSrc).
   const uploadAndInsert = useCallback(async (editor: Editor | null, file: File) => {
     if (!editor) return;
-    const toastId = toast.loading("Uploading image…");
+    const isVideo = file.type.startsWith("video/");
+    const toastId = toast.loading(isVideo ? "Uploading video…" : "Uploading image…");
     try {
-      const url = await uploadToCloudinary(file);
+      const url = await uploadToCloudinary(file, isVideo ? "video" : "image");
       editor.chain().focus().setImage({ src: url }).run();
-      toast.success("Image added", { id: toastId });
+      toast.success(isVideo ? "Video added" : "Image added", { id: toastId });
     } catch {
       toast.error("Upload failed", { id: toastId });
     }
@@ -125,16 +132,19 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
         transformPastedText: true,
         breaks: false,
       }),
-      SlashCommand.configure({ onImage: () => setImageDialog(true) }),
+      SlashCommand.configure({
+        onImage: () => setImageDialog(true),
+        onVideo: () => setVideoDialog(true),
+      }),
     ],
     content: initial.content,
     editorProps: {
       attributes: {
         class: "post-editor-content focus:outline-none min-h-[60vh]",
       },
-      handlePaste: (view, event) => {
-        const file = Array.from(event.clipboardData?.files ?? []).find((f) =>
-          f.type.startsWith("image/"),
+      handlePaste: (_view, event) => {
+        const file = Array.from(event.clipboardData?.files ?? []).find(
+          (f) => f.type.startsWith("image/") || f.type.startsWith("video/"),
         );
         if (file) {
           event.preventDefault();
@@ -143,9 +153,11 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
         }
         return false;
       },
-      handleDrop: (view, event) => {
+      handleDrop: (_view, event) => {
         const dt = (event as DragEvent).dataTransfer;
-        const file = Array.from(dt?.files ?? []).find((f) => f.type.startsWith("image/"));
+        const file = Array.from(dt?.files ?? []).find(
+          (f) => f.type.startsWith("image/") || f.type.startsWith("video/"),
+        );
         if (file) {
           event.preventDefault();
           uploadAndInsert(editor, file);
@@ -168,10 +180,13 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     },
   });
 
-  // Open the image dialog when triggered by the slash command.
+  // Open the media dialogs when triggered by the slash command.
   useEffect(() => {
     if (imageDialog) imageDialogRef.current?.showModal();
   }, [imageDialog]);
+  useEffect(() => {
+    if (videoDialog) videoDialogRef.current?.showModal();
+  }, [videoDialog]);
 
   // A node-selected image keeps its selection (and outline) after the editor
   // blurs, so clicking away wouldn't clear it. Collapse the node selection on
@@ -205,6 +220,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
       content: cur.content.trim() || " ",
       microview: cur.microview.trim() || null,
       tags: cur.tags || null,
+      imageUrl: cur.imageUrl || null,
       published: publishedNow,
     };
     try {
@@ -233,7 +249,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-  }, [title, content, microview, tags, doSave]);
+  }, [title, content, microview, tags, imageUrl, doSave]);
 
   useEffect(() => {
     return () => {
@@ -262,6 +278,26 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     },
     [editor],
   );
+
+  const insertVideo = useCallback(
+    (url: string) => {
+      editor?.chain().focus().setImage({ src: url }).run();
+      videoDialogRef.current?.close();
+      setVideoDialog(false);
+    },
+    [editor],
+  );
+
+  const uploadCover = useCallback(async (file: File | null) => {
+    if (!file) return;
+    const toastId = toast.loading("Uploading…");
+    try {
+      setImageUrl(await uploadToCloudinary(file, "image"));
+      toast.success("Uploaded", { id: toastId });
+    } catch {
+      toast.error("Upload failed", { id: toastId });
+    }
+  }, []);
 
   const setImageWidth = useCallback(
     (width: ImageWidth) => {
@@ -503,6 +539,16 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             </div>
 
             <div className="space-y-2">
+              <label className="text-xs text-fg/50">Cover image / GIF</label>
+              <ImageUpload
+                value={imageUrl}
+                onChange={setImageUrl}
+                onRemove={() => setImageUrl("")}
+                onFilePending={uploadCover}
+              />
+            </div>
+
+            <div className="space-y-2">
               <label className="text-xs text-fg/50">Tags</label>
               <TagPicker value={tags ?? ""} onChange={setTags} tags={microblogTags} />
             </div>
@@ -532,6 +578,38 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             onClick={() => {
               imageDialogRef.current?.close();
               setImageDialog(false);
+            }}
+            className="mt-3 text-xs text-fg/60 hover:text-fg transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </dialog>
+
+      {/* Video insert dialog */}
+      <dialog
+        ref={videoDialogRef}
+        onClose={() => setVideoDialog(false)}
+        className="bg-transparent backdrop:bg-black/50"
+      >
+        <div className="w-80 rounded-xl border border-nav-border bg-bg p-4 shadow-2xl">
+          <p className="mb-3 text-xs font-medium text-fg">Insert video</p>
+          <ImageUpload
+            accept="video/*"
+            resourceType="video"
+            onChange={insertVideo}
+            onFilePending={async (file) => {
+              if (!file) return;
+              await uploadAndInsert(editor, file);
+              videoDialogRef.current?.close();
+              setVideoDialog(false);
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              videoDialogRef.current?.close();
+              setVideoDialog(false);
             }}
             className="mt-3 text-xs text-fg/60 hover:text-fg transition-colors"
           >

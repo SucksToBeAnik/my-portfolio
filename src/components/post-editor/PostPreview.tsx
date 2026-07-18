@@ -1,13 +1,27 @@
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
-import { isVideoSrc, parseImageTitle } from "@/components/post-editor/imageTitle";
+import { LiteYouTube } from "@/components/LiteYouTube";
+import { getYouTubeId, isVideoSrc, parseImageTitle } from "@/components/post-editor/imageTitle";
 
 const components: Components = {
   img: ({ src, alt, title }) => {
     const { width, height } = parseImageTitle(title);
     const caption = alt?.trim();
     const source = typeof src === "string" ? src : undefined;
+    const ytId = getYouTubeId(source);
+    if (ytId) {
+      return (
+        <>
+          <LiteYouTube
+            id={ytId}
+            title={caption ?? ""}
+            dataWidth={width !== "normal" ? width : undefined}
+          />
+          {caption ? <span className="post-caption">{caption}</span> : null}
+        </>
+      );
+    }
     // For a cropped height, set object-fit but DON'T pin width inline for
     // wide/full — that would override the breakout width from the data-width
     // CSS (and mismatch the editor). Only normal images fill their column.

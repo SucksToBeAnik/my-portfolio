@@ -29,6 +29,18 @@ export function isVideoSrc(src: string | null | undefined): boolean {
   return /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(src) || /\/video\/upload\//.test(src);
 }
 
+/**
+ * Inline media can also be an external embed. YouTube URLs (watch, short, or
+ * embed form) are rendered as a lite player instead of an `<img>`/`<video>`.
+ */
+export function getYouTubeId(src: string | null | undefined): string | null {
+  if (!src) return null;
+  const m = src.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+  );
+  return m?.[1] ?? null;
+}
+
 export function buildImageTitle(width: string, height: number | null): string {
   const tokens: string[] = [];
   if (width && width !== "normal") tokens.push(width);

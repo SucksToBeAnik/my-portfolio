@@ -1,3 +1,5 @@
+import { getYouTubeId, isVideoSrc } from "@/components/post-editor/imageTitle";
+
 const BASE_URL = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -36,6 +38,32 @@ export function firstImage(content?: string | null): string | null {
   if (md?.[1]) return md[1];
   const html = content.match(/<img[^>]*\ssrc=["']([^"']+)["']/i);
   if (html?.[1]) return html[1];
+  return null;
+}
+
+/** Every media URL referenced in markdown/HTML content, in document order. */
+function contentMediaUrls(content: string): string[] {
+  const urls: string[] = [];
+  for (const m of content.matchAll(/!\[[^\]]*\]\(\s*([^)\s]+)/g)) urls.push(m[1]);
+  for (const m of content.matchAll(/<img[^>]*\ssrc=["']([^"']+)["']/gi)) urls.push(m[1]);
+  return urls;
+}
+
+/**
+ * Cover image for a list card. An explicit `imageUrl` always wins; otherwise
+ * fall back to the first content image that would actually render as an image —
+ * skipping YouTube embeds and inline video files (both break inside an `<img>`).
+ */
+export function cardCover(
+  imageUrl: string | null | undefined,
+  content: string | null | undefined,
+): string | null {
+  if (imageUrl) return imageUrl;
+  if (!content) return null;
+  for (const url of contentMediaUrls(content)) {
+    if (getYouTubeId(url) || isVideoSrc(url)) continue;
+    return url;
+  }
   return null;
 }
 

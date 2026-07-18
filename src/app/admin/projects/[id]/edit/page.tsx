@@ -18,7 +18,6 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         published: project.published ?? false,
         featured: project.featured ?? false,
         imageUrl: project.imageUrl ?? "",
-        videoUrl: project.videoUrl ?? "",
         url: project.url ?? "",
         githubUrl: project.githubUrl ?? "",
         workedOn: project.workedOn ?? "",

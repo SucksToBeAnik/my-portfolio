@@ -15,6 +15,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
         content: post.content,
         microview: post.microview ?? "",
         tags: post.tags ?? "",
+        imageUrl: post.imageUrl ?? "",
         published: post.published ?? false,
       }}
     />

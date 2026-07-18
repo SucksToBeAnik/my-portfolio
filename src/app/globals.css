@@ -414,6 +414,29 @@ body {
   border-radius: 1rem;
 }
 
+/* Inline videos (direct files) fill the reading column by default — unlike
+   images they have a tiny intrinsic size, so max-width alone won't stretch them. */
+.post-body video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  margin: 1.4em auto;
+}
+
+.post-body video[data-width="wide"] {
+  width: min(920px, 94vw);
+  max-width: none;
+  margin-left: calc(50% - min(460px, 47vw));
+}
+
+.post-body video[data-width="full"] {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  border-radius: 0;
+}
+
 /* --- Preview / public: bare <img>, break out at the image ---
    Breakout uses negative margins (NOT transform: translateX). A transform
    promotes the image to its own GPU layer, which iOS Safari can fail to
@@ -449,7 +472,8 @@ body {
   width: 100%;
 }
 
-.post-editor-content .post-image-nodeview img {
+.post-editor-content .post-image-nodeview img,
+.post-editor-content .post-image-nodeview video {
   display: block;
   max-width: 100%;
   height: auto;

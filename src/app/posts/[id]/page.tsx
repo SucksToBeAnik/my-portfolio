@@ -17,6 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .select({
       title: microblogs.title,
       content: microblogs.content,
+      imageUrl: microblogs.imageUrl,
       publishedAt: microblogs.publishedAt,
     })
     .from(microblogs)
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .limit(1)
     .then((r) => r[0]);
   if (!post) return { title: "Posts" };
-  const ogImage = firstImage(post.content);
+  const ogImage = post.imageUrl ?? firstImage(post.content);
   return {
     title: `${post.title} | Posts`,
     description: truncate(stripMarkdown(post.content)),
@@ -103,7 +104,9 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             headline: post.title,
             datePublished: post.publishedAt,
             author: { "@type": "Person", name: "Suckstobeanik" },
-            ...(firstImage(post.content) ? { image: firstImage(post.content) } : {}),
+            ...(post.imageUrl ?? firstImage(post.content)
+              ? { image: post.imageUrl ?? firstImage(post.content) }
+              : {}),
           }),
         }}
       />

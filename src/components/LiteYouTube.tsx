@@ -1,13 +1,21 @@
 "use client";
 
-function getYouTubeId(url: string) {
-  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return m?.[1] ?? null;
-}
-
-function LiteYouTube({ id, title }: { id: string; title: string }) {
+/**
+ * Click-to-play YouTube embed: shows the thumbnail until clicked, then swaps in
+ * the real iframe. Keeps the page light (no YouTube JS until the user opts in).
+ */
+export function LiteYouTube({
+  id,
+  title,
+  dataWidth,
+}: {
+  id: string;
+  title: string;
+  dataWidth?: string;
+}) {
   return (
     <div
+      data-width={dataWidth}
       className="relative aspect-video overflow-hidden rounded-xl bg-black cursor-pointer group max-h-[400px]"
       onClick={(e) => {
         const target = e.currentTarget;
@@ -30,26 +38,11 @@ function LiteYouTube({ id, title }: { id: string; title: string }) {
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-12 h-12 bg-fg/90 rounded-full flex items-center justify-center transition-transform group-hover:scale-110">
           <svg viewBox="0 0 24 24" className="w-5 h-5 text-bg ml-0.5" fill="currentColor">
+            <title>Play</title>
             <path d="M8 5v14l11-7z" />
           </svg>
         </div>
       </div>
     </div>
-  );
-}
-
-export function VideoEmbed({ url, title }: { url: string; title: string }) {
-  const ytId = getYouTubeId(url);
-
-  if (ytId) {
-    return <LiteYouTube id={ytId} title={title} />;
-  }
-
-  return (
-    <video src={url} controls className="w-full max-h-[400px] rounded-xl object-contain bg-black">
-      <a href={url} className="text-xs underline">
-        Watch video
-      </a>
-    </video>
   );
 }

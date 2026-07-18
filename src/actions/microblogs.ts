@@ -11,6 +11,7 @@ const schema = z.object({
   content: z.string().min(1),
   microview: z.string().max(180).optional().nullable(),
   tags: z.string().optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
   published: z.boolean().optional(),
   til: z.boolean().optional(),
   publishedAt: z.date().optional().nullable(),

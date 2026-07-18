@@ -2,7 +2,7 @@
 
 import { NodeViewWrapper, type ReactNodeViewProps } from "@tiptap/react";
 import { useRef, useState } from "react";
-import { isVideoSrc } from "@/components/post-editor/imageTitle";
+import { getYouTubeId, isVideoSrc } from "@/components/post-editor/imageTitle";
 
 const MIN_HEIGHT = 80;
 const MAX_HEIGHT = 1400;
@@ -20,7 +20,9 @@ export function ImageNodeView({ node, updateAttributes, selected }: ReactNodeVie
   const height: number | null = node.attrs.height ?? null;
   const dataWidth = width !== "normal" ? width : undefined;
 
-  const isVideo = isVideoSrc(src);
+  const ytId = getYouTubeId(src);
+  const isYouTube = !!ytId;
+  const isVideo = !isYouTube && isVideoSrc(src);
   const [focused, setFocused] = useState(false);
   const [liveHeight, setLiveHeight] = useState<number | null>(null);
 
@@ -33,7 +35,11 @@ export function ImageNodeView({ node, updateAttributes, selected }: ReactNodeVie
 
   const imgStyle = effectiveHeight
     ? { height: `${effectiveHeight}px`, width: "100%", objectFit: "cover" as const }
-    : undefined;
+    : // Videos / YouTube thumbnails have a small intrinsic size, so stretch them
+      // to the column width by default (plain images already fill via max-width).
+      isYouTube || isVideo
+      ? { width: "100%" as const }
+      : undefined;
 
   const onPointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
@@ -65,7 +71,28 @@ export function ImageNodeView({ node, updateAttributes, selected }: ReactNodeVie
   return (
     <NodeViewWrapper className="post-image-nodeview" data-width={dataWidth}>
       <div className="post-image-frame">
-        {isVideo ? (
+        {isYouTube ? (
+          <>
+            <img
+              ref={(el) => {
+                mediaRef.current = el;
+              }}
+              src={`https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`}
+              alt={alt}
+              data-height={effectiveHeight ? String(Math.round(effectiveHeight)) : undefined}
+              style={imgStyle}
+              className={selected ? "ProseMirror-selectednode" : ""}
+            />
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-fg/90">
+                <svg viewBox="0 0 24 24" className="ml-0.5 h-5 w-5 text-bg" fill="currentColor">
+                  <title>Video</title>
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </div>
+          </>
+        ) : isVideo ? (
           <video
             ref={(el) => {
               mediaRef.current = el;

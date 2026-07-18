@@ -3,11 +3,9 @@ import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getHeartsCounts } from "@/actions/heart-counts";
-import { ClickableImage } from "@/components/ClickableImage";
 import { HeartButton } from "@/components/HeartButton";
 import { ProjectLink } from "@/components/ProjectLink";
 import { PostPreview } from "@/components/post-editor/PostPreview";
-import { VideoEmbed } from "@/components/VideoEmbed";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { firstImage, stripMarkdown, truncate } from "@/lib/seo";
@@ -125,35 +123,26 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         </Link>
 
         <article className="space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-heading">{project.title}</h1>
-            {(dateLabel || time) && (
-              <p className="text-xs text-muted">
-                {dateLabel}
-                {dateLabel && time && <span className="text-fg/20 mx-2">·</span>}
-                {time}
-              </p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="text-2xl font-heading">{project.title}</h1>
+              {(dateLabel || time) && (
+                <p className="text-xs text-muted">
+                  {dateLabel}
+                  {dateLabel && time && <span className="text-fg/20 mx-2">·</span>}
+                  {time}
+                </p>
+              )}
+            </div>
+            {(project.url || project.githubUrl) && (
+              <div className="flex shrink-0 items-center gap-2 text-xs">
+                {project.url && <ProjectLink url={project.url} label="Live Site" />}
+                {project.githubUrl && <ProjectLink url={project.githubUrl} label="GitHub" />}
+              </div>
             )}
           </div>
 
-          {project.videoUrl ? (
-            <VideoEmbed url={project.videoUrl} title={project.title} />
-          ) : project.imageUrl ? (
-            <ClickableImage
-              src={project.imageUrl}
-              alt={project.title}
-              className="w-full overflow-hidden rounded-xl bg-hover-bg cursor-pointer hover:opacity-90 transition-opacity"
-            />
-          ) : null}
-
           {project.content && <PostPreview content={project.content} className="text-fg/80" />}
-
-          {(project.url || project.githubUrl) && (
-            <div className="flex items-center gap-2 text-xs">
-              {project.url && <ProjectLink url={project.url} label="Website" />}
-              {project.githubUrl && <ProjectLink url={project.githubUrl} label="GitHub" />}
-            </div>
-          )}
 
           <HeartButton entityType="project" entityId={project.id} initialCount={heartCount} />
         </article>

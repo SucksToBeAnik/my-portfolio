@@ -45,7 +45,6 @@ export interface ProjectEditorInitial {
   published: boolean;
   featured: boolean;
   imageUrl: string;
-  videoUrl: string;
   url: string;
   githubUrl: string;
   workedOn: string;
@@ -82,9 +81,6 @@ export function ProjectEditor({
   const [published, setPublished] = useState(initial.published);
   const [featured, setFeatured] = useState(initial.featured);
   const [imageUrl, setImageUrl] = useState(initial.imageUrl);
-  // Legacy hero video — preserved across saves but no longer edited here (videos
-  // now live inline in the writeup).
-  const [videoUrl] = useState(initial.videoUrl);
   const [url, setUrl] = useState(initial.url);
   const [githubUrl, setGithubUrl] = useState(initial.githubUrl);
   const [workedOn, setWorkedOn] = useState(initial.workedOn);
@@ -121,7 +117,6 @@ export function ProjectEditor({
     published,
     featured,
     imageUrl,
-    videoUrl,
     url,
     githubUrl,
     workedOn,
@@ -135,7 +130,6 @@ export function ProjectEditor({
     published,
     featured,
     imageUrl,
-    videoUrl,
     url,
     githubUrl,
     workedOn,
@@ -260,7 +254,6 @@ export function ProjectEditor({
       published: publishedNow,
       featured: cur.featured,
       imageUrl: cur.imageUrl || null,
-      videoUrl: cur.videoUrl || null,
       url: cur.url || null,
       githubUrl: cur.githubUrl || null,
       workedOn: cur.workedOn || null,

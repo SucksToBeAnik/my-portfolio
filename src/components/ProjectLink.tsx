@@ -4,7 +4,7 @@ import { GithubLogo, Globe } from "@phosphor-icons/react";
 import { LinkPreview } from "@/components/LinkPreview";
 
 const iconMap: Record<string, typeof Globe> = {
-  Website: Globe,
+  "Live Site": Globe,
   GitHub: GithubLogo,
 };
 

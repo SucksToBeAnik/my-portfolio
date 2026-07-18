@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { HeartButton } from "@/components/HeartButton";
-import { firstImage } from "@/lib/seo";
+import { cardCover } from "@/lib/seo";
 
 export interface ProjectCardItem {
   id: number;
@@ -25,7 +25,7 @@ export function ProjectCard({
   heartCount?: number;
 }) {
   const blurb = project.microview?.trim();
-  const cover = project.imageUrl ?? firstImage(project.content);
+  const cover = cardCover(project.imageUrl, project.content);
 
   return (
     <div className="group flex h-full flex-col rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]">

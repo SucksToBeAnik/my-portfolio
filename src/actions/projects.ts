@@ -12,7 +12,6 @@ const schema = z.object({
   microview: z.string().max(180).optional().nullable(),
   tags: z.string().optional().nullable(),
   imageUrl: z.string().optional().nullable(),
-  videoUrl: z.string().optional().nullable(),
   url: z.string().optional().nullable(),
   githubUrl: z.string().optional().nullable(),
   workedOn: z.string().optional().nullable(),
