@@ -8,7 +8,7 @@ function getYouTubeId(url: string) {
 function LiteYouTube({ id, title }: { id: string; title: string }) {
   return (
     <div
-      className="relative aspect-video overflow-hidden rounded-lg bg-black cursor-pointer group max-h-[400px]"
+      className="relative aspect-video overflow-hidden rounded-xl bg-black cursor-pointer group max-h-[400px]"
       onClick={(e) => {
         const target = e.currentTarget;
         const iframe = document.createElement("iframe");
@@ -46,7 +46,7 @@ export function VideoEmbed({ url, title }: { url: string; title: string }) {
   }
 
   return (
-    <video src={url} controls className="w-full max-h-[400px] rounded-lg object-contain bg-black">
+    <video src={url} controls className="w-full max-h-[400px] rounded-xl object-contain bg-black">
       <a href={url} className="text-xs underline">
         Watch video
       </a>

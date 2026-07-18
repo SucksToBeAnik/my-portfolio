@@ -101,7 +101,7 @@ export function ContentTabs({
             return (
               <article
                 key={project.id}
-                className="rounded-xl border border-hairline overflow-hidden transition-transform duration-200 hover:scale-[1.02] flex flex-col"
+                className="rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06] flex flex-col"
               >
                 {project.videoUrl ? (
                   <VideoEmbed url={project.videoUrl} title={project.title} />
@@ -109,13 +109,13 @@ export function ContentTabs({
                   <ClickableImage
                     src={project.imageUrl}
                     alt={project.title}
-                    className="w-full aspect-video overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                    className="w-full aspect-video overflow-hidden rounded-xl bg-hover-bg cursor-pointer hover:opacity-80 transition-opacity"
                   />
                 ) : (
-                  <div className="w-full aspect-video bg-hover-bg" />
+                  <div className="w-full aspect-video rounded-xl bg-hover-bg" />
                 )}
 
-                <div className="p-4 space-y-2 flex-1 flex flex-col">
+                <div className="pt-4 space-y-2 flex-1 flex flex-col">
                   <h2 className="text-base font-heading leading-snug">{project.title}</h2>
                   {project.description && (
                     <p className="text-xs text-fg/70 leading-relaxed line-clamp-4 flex-1">
