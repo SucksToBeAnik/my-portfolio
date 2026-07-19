@@ -1,5 +1,5 @@
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { getHeartsCounts } from "@/actions/heart-counts";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -42,7 +42,7 @@ export default async function PostsPage() {
     .select()
     .from(microblogs)
     .where(eq(microblogs.published, true))
-    .orderBy(desc(microblogs.publishedAt));
+    .orderBy(microblogs.sortOrder);
 
   const heartCounts = await getHeartsCounts(
     "microblog",

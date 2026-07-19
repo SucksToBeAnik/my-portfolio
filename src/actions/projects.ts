@@ -80,5 +80,7 @@ export async function reorderProjects(items: { id: number; sortOrder: number }[]
     await db.update(projects).set({ sortOrder: item.sortOrder }).where(eq(projects.id, item.id));
   }
   revalidatePath("/admin/projects");
+  revalidatePath("/projects");
+  revalidatePath("/projects/[id]", "page");
   revalidatePath("/");
 }

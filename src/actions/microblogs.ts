@@ -111,5 +111,6 @@ export async function reorderMicroblogs(items: { id: number; sortOrder: number }
   }
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
+  revalidatePath("/posts/[id]", "page");
   revalidatePath("/");
 }
