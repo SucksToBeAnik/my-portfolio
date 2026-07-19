@@ -1,22 +1,27 @@
 export type ImageWidth = "normal" | "wide" | "full";
+export type ImageFit = "cover" | "contain" | "fill";
 
 /**
  * Image layout hints are packed into the markdown image title slot as
  * space-separated tokens, e.g. `![alt](src "wide h320")`:
- *   - `wide` | `full`  → width
- *   - `h<px>`          → cropped height
+ *   - `wide` | `full`      → width
+ *   - `h<px>`              → cropped height
+ *   - `contain` | `fill`   → object-fit inside a spread (default is cover)
  */
 export function parseImageTitle(title: string | null | undefined): {
   width: ImageWidth;
   height: number | null;
+  fit: ImageFit;
 } {
   let width: ImageWidth = "normal";
   let height: number | null = null;
+  let fit: ImageFit = "cover";
   for (const token of (title ?? "").split(/\s+/).filter(Boolean)) {
     if (token === "wide" || token === "full") width = token;
+    else if (token === "contain" || token === "fill") fit = token;
     else if (/^h\d+$/.test(token)) height = Number(token.slice(1));
   }
-  return { width, height };
+  return { width, height, fit };
 }
 
 /**
@@ -41,9 +46,10 @@ export function getYouTubeId(src: string | null | undefined): string | null {
   return m?.[1] ?? null;
 }
 
-export function buildImageTitle(width: string, height: number | null): string {
+export function buildImageTitle(width: string, height: number | null, fit?: ImageFit): string {
   const tokens: string[] = [];
   if (width && width !== "normal") tokens.push(width);
   if (height) tokens.push(`h${Math.round(height)}`);
+  if (fit && fit !== "cover") tokens.push(fit);
   return tokens.join(" ");
 }

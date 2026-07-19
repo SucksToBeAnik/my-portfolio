@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ImageWidth } from "@/components/post-editor/imageTitle";
+import type { ImageFit, ImageWidth } from "@/components/post-editor/imageTitle";
 
 /** Clips at or under this length auto-play muted on loop, like a moving still. */
 const AMBIENT_MAX_SECONDS = 12;
@@ -16,12 +16,14 @@ export function PostVideo({
   caption,
   width,
   height,
+  fit = "cover",
   interactive = true,
 }: {
   src: string;
   caption?: string;
   width: ImageWidth;
   height: number | null;
+  fit?: ImageFit;
   interactive?: boolean;
 }) {
   const figureRef = useRef<HTMLElement>(null);
@@ -81,13 +83,16 @@ export function PostVideo({
   }, [interactive, ambient]);
 
   const dataWidth = width !== "normal" ? width : undefined;
-  const videoStyle = height ? { height: `${height}px`, objectFit: "cover" as const } : undefined;
+  // objectFit follows the fit hint so a height-cropped video in a spread can
+  // still letterbox/stretch (inline style would beat the data-fit CSS).
+  const videoStyle = height ? { height: `${height}px`, objectFit: fit } : undefined;
 
   return (
     <span
       ref={figureRef}
       className="post-figure post-figure-video"
       data-width={dataWidth}
+      data-fit={fit !== "cover" ? fit : undefined}
       data-show={show ? "" : undefined}
       data-static=""
     >

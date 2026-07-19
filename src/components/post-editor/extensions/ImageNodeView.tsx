@@ -33,13 +33,11 @@ export function ImageNodeView({ node, updateAttributes, selected }: ReactNodeVie
   const showCaption = selected || focused || alt.length > 0;
   const dragging = liveHeight !== null;
 
+  // Column-width stretching comes from the node-view CSS (width: 100%); the
+  // inline style only carries the drag-cropped height.
   const imgStyle = effectiveHeight
-    ? { height: `${effectiveHeight}px`, width: "100%", objectFit: "cover" as const }
-    : // Videos / YouTube thumbnails have a small intrinsic size, so stretch them
-      // to the column width by default (plain images already fill via max-width).
-      isYouTube || isVideo
-      ? { width: "100%" as const }
-      : undefined;
+    ? { height: `${effectiveHeight}px`, objectFit: "cover" as const }
+    : undefined;
 
   const onPointerDown = (e: React.PointerEvent) => {
     e.preventDefault();

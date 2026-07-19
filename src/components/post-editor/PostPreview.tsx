@@ -54,7 +54,7 @@ function makeComponents(interactive: boolean, slugger: Slugger): Components {
     h2: heading("h2"),
     h3: heading("h3"),
     img: ({ src, alt, title }) => {
-      const { width, height } = parseImageTitle(title);
+      const { width, height, fit } = parseImageTitle(title);
       const caption = alt?.trim() || undefined;
       const source = typeof src === "string" ? src : undefined;
       if (!source) return null;
@@ -86,6 +86,7 @@ function makeComponents(interactive: boolean, slugger: Slugger): Components {
             caption={caption}
             width={width}
             height={height}
+            fit={fit}
             interactive={interactive}
           />
         );
@@ -97,6 +98,7 @@ function makeComponents(interactive: boolean, slugger: Slugger): Components {
           caption={caption}
           width={width}
           height={height}
+          fit={fit}
           interactive={interactive}
         />
       );

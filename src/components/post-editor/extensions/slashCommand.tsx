@@ -3,6 +3,7 @@
 import {
   Code,
   Image as ImageIcon,
+  Images,
   ListBullets,
   ListNumbers,
   Minus,
@@ -107,6 +108,21 @@ const ITEMS: SlashItem[] = [
   },
 ];
 
+// Included only when the editor registers the imageGallery node.
+const GALLERY_ITEM: SlashItem = {
+  title: "Image spread",
+  subtitle: "Diptych / triptych — side by side",
+  icon: Images,
+  aliases: ["diptych", "triptych", "gallery", "grid", "row", "spread"],
+  action: ({ editor, range }) =>
+    editor
+      .chain()
+      .focus()
+      .deleteRange(range)
+      .insertContent({ type: "imageGallery", attrs: { images: [] } })
+      .run(),
+};
+
 // Included only when the editor wires `onVideo` (see SlashCommand options).
 const VIDEO_ITEM: SlashItem = {
   title: "Video",
@@ -150,7 +166,10 @@ const SlashList = forwardRef<{ onKeyDown: (o: { event: KeyboardEvent }) => boole
 
     if (items.length === 0) {
       return (
-        <div className="w-60 rounded-xl border border-nav-border bg-bg shadow-2xl p-2 text-xs text-fg/40">
+        <div
+          data-slash-menu
+          className="w-60 rounded-xl border border-nav-border bg-bg shadow-2xl p-2 text-xs text-fg/40"
+        >
           No matches
         </div>
       );
@@ -192,8 +211,9 @@ SlashList.displayName = "SlashList";
 const POPUP_WIDTH = 264;
 
 // Position the menu at the caret using viewport-fixed coordinates. Flip above
-// the caret when there isn't enough room below, and clamp its height to the
-// available space so the list stays scrollable instead of running off-screen.
+// the caret when the list doesn't actually fit below, and clamp its height to
+// the available space so the list stays scrollable instead of running
+// off-screen.
 function positionPopup(popup: HTMLElement, rect: DOMRect | null) {
   if (!rect) return;
   const margin = 6;
@@ -201,13 +221,17 @@ function positionPopup(popup: HTMLElement, rect: DOMRect | null) {
   const vw = window.innerWidth;
 
   const menu = popup.querySelector<HTMLElement>("[data-slash-menu]");
+  // scrollHeight is the list's real content height (unaffected by a maxHeight
+  // applied on a previous pass), so the flip decision compares against what
+  // the menu actually needs rather than a guessed constant.
+  const menuH = Math.min(340, menu?.scrollHeight || 340);
   const spaceBelow = vh - rect.bottom - margin;
   const spaceAbove = rect.top - margin;
-  const flipUp = spaceBelow < 220 && spaceAbove > spaceBelow;
+  const flipUp = spaceBelow < menuH && spaceAbove > spaceBelow;
   const avail = Math.max(140, flipUp ? spaceAbove : spaceBelow);
 
   if (menu) {
-    menu.style.maxHeight = `${Math.min(340, avail)}px`;
+    menu.style.maxHeight = `${Math.min(menuH, avail)}px`;
     menu.style.overflowY = "auto";
     menu.style.overscrollBehavior = "contain";
   }
@@ -267,6 +291,12 @@ function createRender(trigger: Trigger): SuggestionOptions<SlashItem>["render"] 
       document.body.appendChild(popup);
       popup.appendChild(component.element);
       positionPopup(popup, props.clientRect?.() ?? null);
+      // React may not have painted the list yet on the first pass, leaving
+      // scrollHeight at 0 and the clamp/flip unapplied — which showed the menu
+      // running off the bottom of the screen. Re-measure after paint.
+      requestAnimationFrame(() => {
+        if (popup) positionPopup(popup, props.clientRect?.() ?? null);
+      });
 
       onOutside = (e) => {
         if (popup && !popup.contains(e.target as Node)) close();
@@ -346,7 +376,12 @@ export const SlashCommand = Extension.create<
     const onImage = () => this.options.onImage();
     const onVideoOpt = this.options.onVideo;
     const onVideo = () => onVideoOpt?.();
-    const availableItems = onVideoOpt ? [...ITEMS, VIDEO_ITEM] : ITEMS;
+    const hasGallery = !!this.editor.schema.nodes.imageGallery;
+    const availableItems = [
+      ...ITEMS,
+      ...(hasGallery ? [GALLERY_ITEM] : []),
+      ...(onVideoOpt ? [VIDEO_ITEM] : []),
+    ];
     return [
       Suggestion<SlashItem>({
         editor: this.editor,

@@ -56,7 +56,10 @@ export function EditorBubbleMenu({
     editor,
     selector: ({ editor }) => ({
       isImage: editor.isActive("image"),
-      imageWidth: (editor.getAttributes("image").width ?? "normal") as ImageWidth,
+      isGallery: editor.isActive("imageGallery"),
+      imageWidth: (editor.isActive("imageGallery")
+        ? (editor.getAttributes("imageGallery").width ?? "normal")
+        : (editor.getAttributes("image").width ?? "normal")) as ImageWidth,
       bold: editor.isActive("bold"),
       italic: editor.isActive("italic"),
       code: editor.isActive("code"),
@@ -72,7 +75,7 @@ export function EditorBubbleMenu({
       data-bubble-menu
       className="flex items-center gap-0.5 rounded-lg border border-nav-border bg-bg p-1 shadow-2xl"
     >
-      {s?.isImage ? (
+      {s?.isImage || s?.isGallery ? (
         <>
           {(
             [
@@ -98,7 +101,7 @@ export function EditorBubbleMenu({
           <div className="mx-0.5 h-4 w-px bg-nav-border" />
           <button
             type="button"
-            title="Remove image"
+            title={s?.isGallery ? "Remove spread" : "Remove image"}
             onClick={() => editor.chain().focus().deleteSelection().run()}
             className="flex items-center rounded px-2 py-1 text-red-400 hover:bg-red-500/10 transition-colors"
           >

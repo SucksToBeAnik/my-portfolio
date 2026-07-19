@@ -151,8 +151,13 @@ row twice per render (metadata + page). **Fix:** wrap each per-id fetch in `Reac
 `src/app/books/page.tsx:24` does `db.select().from(books)` but the grid only uses
 title/author/cover/status/category/rating. **Fix:** select only those columns.
 
-### 13. Unoptimized full-size images on public grids — [ ]
+### 13. Unoptimized full-size images on public grids & post/project bodies — [ ]
 - `src/app/media/page.tsx:62` — raw `<img>`, no dimensions, full-size posters in a grid.
+- `src/components/post-editor/PostFigure.tsx` / `PostVideo.tsx` — `/posts/[id]` and
+  `/projects/[id]` bodies render every inline image/video at the original Cloudinary
+  upload URL (raw `<img loading="lazy">`, no `f_auto,q_auto,w_` transform, no reserved
+  dimensions) — media-heavy posts ship multi-MB pages. Same URL-transform helper fix;
+  images never render wider than ~920px (`wide`), so `w_1200` is a safe cap.
 - `src/components/GalleryDisplay.tsx:36-41`, `src/components/ClickableImage.tsx:20` — no
   reserved aspect ratio → masonry layout shift as images load.
 - `src/components/SelectedProjects.tsx:35` — plain `<img>` is *intentional* (animated GIF

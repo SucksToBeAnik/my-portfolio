@@ -874,9 +874,14 @@ body {
   width: 100%;
 }
 
+/* `width: 100%` (not just max-width) so images narrower than the column still
+   stretch to it — matching the public renderer, which always fills the column.
+   Without it, small uploads sat at their intrinsic width until a wide/full
+   shape toggle happened to apply a width rule. */
 .post-editor-content .post-image-nodeview img,
 .post-editor-content .post-image-nodeview video {
   display: block;
+  width: 100%;
   max-width: 100%;
   height: auto;
   margin: 0;
@@ -903,12 +908,14 @@ body {
 }
 
 .post-image-frame:hover .post-image-resize,
+.post-gallery-plate:hover .post-image-resize,
 .post-image-resize.is-visible {
   opacity: 0.5;
   pointer-events: auto;
 }
 
 .post-image-frame:hover .post-image-resize:hover,
+.post-gallery-plate:hover .post-image-resize:hover,
 .post-image-resize.is-visible:hover {
   opacity: 0.85;
 }
@@ -955,6 +962,210 @@ body {
 }
 
 .post-image-caption::placeholder {
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+/* --- Editor: image spread (diptych/triptych) node view. Equal columns
+   cropped to 3:2 with hairline 2px gutters — mirrors the public `.post-body`
+   spread styles below. Breaks out of the column like post-image-nodeview. --- */
+.post-gallery-nodeview {
+  margin: 1.4em 0;
+}
+
+.post-editor-content .post-gallery-nodeview[data-width="wide"] {
+  width: min(920px, 94vw);
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+.post-editor-content .post-gallery-nodeview[data-width="full"] {
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+.post-gallery-row {
+  display: flex;
+  gap: 2px;
+  align-items: flex-start;
+}
+
+.post-gallery-nodeview[data-selected] .post-gallery-row {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.post-gallery-item {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* The media area of one plate — anchors the overlay controls and the row
+   resize handle so the caption below stays clear of them. Plates drag to
+   swap places within the spread. */
+.post-gallery-plate {
+  position: relative;
+  cursor: grab;
+}
+
+.post-gallery-plate[data-drag-source] {
+  opacity: 0.4;
+}
+
+.post-gallery-item img,
+.post-gallery-item video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* Per-image fit toggle: letterbox (contain) or stretch (fill) instead of
+   cropping; the plate keeps its size so the row height stays aligned. */
+.post-gallery-item img[data-fit="contain"],
+.post-gallery-item video[data-fit="contain"] {
+  object-fit: contain;
+  background: var(--hover-bg);
+}
+
+.post-gallery-item img[data-fit="fill"],
+.post-gallery-item video[data-fit="fill"] {
+  object-fit: fill;
+}
+
+/* Round only the spread's outer corners; full-bleed spreads stay square. */
+.post-gallery-nodeview:not([data-width="full"]) .post-gallery-row > :first-child :is(img, video) {
+  border-radius: 0.75rem 0 0 0.75rem;
+}
+
+.post-gallery-nodeview:not([data-width="full"]) .post-gallery-row > :last-child :is(img, video) {
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.post-gallery-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  height: 22px;
+  width: 22px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: var(--bg);
+  color: var(--fg);
+  opacity: 0;
+  transition: opacity 0.15s;
+  cursor: pointer;
+}
+
+.post-gallery-item:hover .post-gallery-remove,
+.post-gallery-nodeview[data-selected] .post-gallery-remove {
+  opacity: 0.9;
+}
+
+/* Crop/fit toggle — mirrors the remove button on the opposite corner. */
+.post-gallery-fit {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  height: 22px;
+  width: 22px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: var(--bg);
+  color: var(--fg);
+  opacity: 0;
+  transition: opacity 0.15s;
+  cursor: pointer;
+}
+
+.post-gallery-item:hover .post-gallery-fit,
+.post-gallery-nodeview[data-selected] .post-gallery-fit {
+  opacity: 0.9;
+}
+
+/* Empty slot — a dashed invitation the size of the image it will hold. */
+.post-gallery-slot {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  aspect-ratio: 3 / 2;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed var(--hairline);
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.post-gallery-slot:hover {
+  border-color: var(--fg);
+  color: var(--fg);
+}
+
+.post-gallery-slot:disabled {
+  cursor: wait;
+}
+
+/* Slim tile to grow a diptych into a triptych; surfaces on hover/selection. */
+.post-gallery-add {
+  display: flex;
+  flex: 0 0 44px;
+  align-self: stretch;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--hairline);
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+  cursor: pointer;
+}
+
+.post-gallery-row:hover .post-gallery-add,
+.post-gallery-nodeview[data-selected] .post-gallery-add {
+  opacity: 1;
+}
+
+.post-gallery-add:hover {
+  border-color: var(--fg);
+  color: var(--fg);
+}
+
+.post-gallery-add:disabled {
+  cursor: wait;
+}
+
+.post-gallery-caption {
+  display: block;
+  width: 100%;
+  margin-top: 0.5em;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.post-gallery-caption::placeholder {
   color: var(--muted);
   opacity: 0.5;
 }
@@ -1189,6 +1400,92 @@ body {
    so the figure owns its own rhythm. */
 .post-body p:has(> .post-figure) {
   margin: 0;
+}
+
+/* Image spread — a diptych/triptych: 2–3 images written on one line
+   (`![a](1 "full") ![b](2)`) render side by side with hairline 2px gutters
+   and no mats, like plates in a spread. Equal flex columns cropped to 3:2 so
+   the row shares one height; captions hang under their own image. The width
+   token on the FIRST image ("wide"/"full") breaks the whole row out of the
+   reading column. */
+.post-body p:has(> .post-figure + .post-figure) {
+  display: flex;
+  gap: 2px;
+  align-items: flex-start;
+  margin: 1.8em 0;
+}
+
+.post-body p:has(> .post-figure[data-width="wide"] + .post-figure) {
+  width: min(920px, 94vw);
+  max-width: none;
+  margin-left: calc(50% - min(460px, 47vw));
+}
+
+.post-body p:has(> .post-figure[data-width="full"] + .post-figure) {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+}
+
+/* Inside a spread, figures are equal columns — neutralize the per-figure
+   breakout rules the width hint would otherwise trigger. */
+.post-body p:has(> .post-figure + .post-figure) > .post-figure {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  margin: 0;
+}
+
+/* No passe-partout inside spreads: images sit flush against the gutters. */
+.post-body p:has(> .post-figure + .post-figure) .post-figure-media {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.post-body p:has(> .post-figure + .post-figure) .post-figure-media > img,
+.post-body p:has(> .post-figure + .post-figure) .post-figure-media > video {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+/* Per-image fit tokens: `contain` letterboxes, `fill` stretches — the plate
+   size is unchanged either way. */
+.post-body
+  p:has(> .post-figure + .post-figure)
+  > .post-figure[data-fit="contain"]
+  .post-figure-media
+  > :is(img, video) {
+  object-fit: contain;
+  background: var(--hover-bg);
+}
+
+.post-body
+  p:has(> .post-figure + .post-figure)
+  > .post-figure[data-fit="fill"]
+  .post-figure-media
+  > :is(img, video) {
+  object-fit: fill;
+}
+
+/* Round only the spread's outer corners; full-bleed spreads stay square. */
+.post-body
+  p:has(> .post-figure + .post-figure):not(:has(> .post-figure[data-width="full"]))
+  > .post-figure:first-child
+  .post-figure-media
+  > :is(img, video) {
+  border-radius: 0.75rem 0 0 0.75rem;
+}
+
+.post-body
+  p:has(> .post-figure + .post-figure):not(:has(> .post-figure[data-width="full"]))
+  > .post-figure:last-child
+  .post-figure-media
+  > :is(img, video) {
+  border-radius: 0 0.75rem 0.75rem 0;
 }
 
 .post-body .post-figure[data-width="wide"] {

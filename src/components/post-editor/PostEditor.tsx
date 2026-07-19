@@ -25,6 +25,7 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { PostToc } from "@/components/PostToc";
 import { EditorBubbleMenu } from "@/components/post-editor/EditorBubbleMenu";
 import { CodeBlockTab } from "@/components/post-editor/extensions/codeBlockTab";
+import { ImageGallery } from "@/components/post-editor/extensions/ImageGallery";
 import { PostCodeBlock } from "@/components/post-editor/extensions/PostCodeBlock";
 import { type ImageWidth, PostImage } from "@/components/post-editor/extensions/PostImage";
 import { SlashCommand } from "@/components/post-editor/extensions/slashCommand";
@@ -139,6 +140,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
       LinkExtension.configure({ openOnClick: false }),
       PostCodeBlock,
       PostImage,
+      ImageGallery,
       Placeholder.configure({
         placeholder: "Write, or press '/' for blocks…",
       }),
@@ -321,9 +323,13 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     }
   }, []);
 
+  // The bubble-menu width toggle applies to whichever media node is selected —
+  // a single image or an image spread (diptych/triptych).
   const setImageWidth = useCallback(
     (width: ImageWidth) => {
-      editor?.chain().focus().updateAttributes("image", { width }).run();
+      if (!editor) return;
+      const type = editor.isActive("imageGallery") ? "imageGallery" : "image";
+      editor.chain().focus().updateAttributes(type, { width }).run();
     },
     [editor],
   );

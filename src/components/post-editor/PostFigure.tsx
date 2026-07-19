@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ImageViewer } from "@/components/ImageViewer";
-import type { ImageWidth } from "@/components/post-editor/imageTitle";
+import type { ImageFit, ImageWidth } from "@/components/post-editor/imageTitle";
 
 /**
  * A post image rendered as a gallery print: a hairline mat frames it, it fades
@@ -15,12 +15,14 @@ export function PostFigure({
   caption,
   width,
   height,
+  fit = "cover",
   interactive = true,
 }: {
   src: string;
   caption?: string;
   width: ImageWidth;
   height: number | null;
+  fit?: ImageFit;
   interactive?: boolean;
 }) {
   const figureRef = useRef<HTMLElement>(null);
@@ -61,7 +63,9 @@ export function PostFigure({
   }, [interactive]);
 
   const dataWidth = width !== "normal" ? width : undefined;
-  const imgStyle = height ? { height: `${height}px`, objectFit: "cover" as const } : undefined;
+  // objectFit follows the fit hint so a height-cropped image in a spread can
+  // still letterbox/stretch (inline style would beat the data-fit CSS).
+  const imgStyle = height ? { height: `${height}px`, objectFit: fit } : undefined;
 
   const img = (
     <img
@@ -79,6 +83,7 @@ export function PostFigure({
       ref={figureRef}
       className="post-figure"
       data-width={dataWidth}
+      data-fit={fit !== "cover" ? fit : undefined}
       data-show={show ? "" : undefined}
       data-static={interactive ? undefined : ""}
     >
