@@ -562,8 +562,14 @@ body {
 /* Code body: a non-selectable line-number gutter beside the highlighted <pre>.
    Both share the same line-height so the numbers line up; the code scrolls
    horizontally on its own so long lines never break the gutter alignment. */
+/* The gutter and the code must share EXACTLY one font-size, line-height and
+   font family, or the two columns drift line by line. The container owns all
+   three; both children inherit them and every competing rule (`.post-body pre`
+   at 0.9rem, `.post-body code` at 0.9em, the proportional body font on the
+   gutter <span>) is overridden below with `inherit`/`font: inherit`. */
 .post-body .post-code-body {
   display: flex;
+  font-family: var(--font-heading), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.82rem;
   line-height: 1.5;
 }
@@ -577,6 +583,8 @@ body {
   user-select: none;
   border-right: 1px solid var(--hairline);
   font-variant-numeric: tabular-nums;
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .post-body .post-code-pre {
@@ -584,6 +592,7 @@ body {
   border: none;
   border-radius: 0;
   background: transparent;
+  font: inherit;
   padding: 0.7em 1em;
   overflow-x: auto;
   flex: 1;
@@ -592,7 +601,7 @@ body {
 }
 
 .post-body .post-code-pre code {
-  font-size: inherit;
+  font: inherit;
 }
 
 .post-editor-content code,
