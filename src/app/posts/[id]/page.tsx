@@ -136,51 +136,60 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           </div>
 
           <PostPreview content={post.content} className="mt-12 text-fg/80" />
-
-          <div className="mt-10">
-            <HeartButton entityType="microblog" entityId={post.id} initialCount={heartCount} />
-          </div>
         </article>
-
-        <SubscribeForm />
-
-        <div className="grid grid-cols-2 gap-3">
-          {prev ? (
-            <Link
-              href={`/posts/${prev.id}`}
-              className="group flex flex-col gap-1 rounded-xl bg-fg/5 p-3 hover:bg-fg/10 transition-colors"
-            >
-              <span className="flex items-center gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
-                <ArrowLeft
-                  weight="thin"
-                  className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform"
-                />
-                Previous
-              </span>
-              <span className="text-xs text-fg truncate">{prev.title}</span>
-            </Link>
-          ) : (
-            <div />
-          )}
-          {next ? (
-            <Link
-              href={`/posts/${next.id}`}
-              className="group flex flex-col gap-1 rounded-xl bg-fg/5 p-3 text-right hover:bg-fg/10 transition-colors"
-            >
-              <span className="flex items-center justify-end gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
-                Next
-                <ArrowRight
-                  weight="thin"
-                  className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"
-                />
-              </span>
-              <span className="text-xs text-fg truncate">{next.title}</span>
-            </Link>
-          ) : (
-            <div />
-          )}
-        </div>
       </div>
+
+      <footer className="mt-16 rounded-3xl bg-fg/[0.03] p-6 sm:p-8">
+        <div className="flex items-center justify-between gap-4">
+          <p className="font-heading text-xs uppercase tracking-[0.15em] text-muted">
+            Thanks for reading
+          </p>
+          <HeartButton entityType="microblog" entityId={post.id} initialCount={heartCount} />
+        </div>
+
+        <div className="mt-10">
+          <SubscribeForm />
+        </div>
+
+        {(prev || next) && (
+          <nav className="mt-10 grid grid-cols-2 gap-3">
+            {prev ? (
+              <Link
+                href={`/posts/${prev.id}`}
+                className="group flex flex-col gap-1 rounded-xl bg-fg/[0.04] p-3 hover:bg-fg/[0.08] transition-colors"
+              >
+                <span className="flex items-center gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
+                  <ArrowLeft
+                    weight="thin"
+                    className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform"
+                  />
+                  Previous
+                </span>
+                <span className="text-xs text-fg truncate">{prev.title}</span>
+              </Link>
+            ) : (
+              <div />
+            )}
+            {next ? (
+              <Link
+                href={`/posts/${next.id}`}
+                className="group flex flex-col gap-1 rounded-xl bg-fg/[0.04] p-3 text-right hover:bg-fg/[0.08] transition-colors"
+              >
+                <span className="flex items-center justify-end gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
+                  Next
+                  <ArrowRight
+                    weight="thin"
+                    className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"
+                  />
+                </span>
+                <span className="text-xs text-fg truncate">{next.title}</span>
+              </Link>
+            ) : (
+              <div />
+            )}
+          </nav>
+        )}
+      </footer>
     </>
   );
 }

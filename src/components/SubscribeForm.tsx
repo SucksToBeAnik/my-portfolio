@@ -31,7 +31,7 @@ export function SubscribeForm() {
   }
 
   return (
-    <div className="rounded-2xl bg-fg/[0.04] p-5 sm:p-6">
+    <div>
       <h2 className="font-heading text-sm uppercase tracking-wide">Subscribe</h2>
       <p className="mt-1.5 text-sm text-muted">
         Get an email when I publish something new. No spam, unsubscribe anytime.
