@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { publications } from "@/db/schema";
+import { requireAdmin } from "@/lib/auth";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -19,6 +20,7 @@ export async function getPublications() {
 }
 
 export async function createPublication(data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   const maxOrder = await db
     .select({ max: sql<number>`max(${publications.sortOrder})` })
@@ -31,6 +33,7 @@ export async function createPublication(data: z.infer<typeof schema>) {
 }
 
 export async function updatePublication(id: number, data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   await db
     .update(publications)
@@ -41,12 +44,14 @@ export async function updatePublication(id: number, data: z.infer<typeof schema>
 }
 
 export async function deletePublication(id: number) {
+  await requireAdmin();
   await db.delete(publications).where(eq(publications.id, id));
   revalidatePath("/admin/publications");
   revalidatePath("/");
 }
 
 export async function reorderPublications(items: { id: number; sortOrder: number }[]) {
+  await requireAdmin();
   await Promise.all(
     items.map(({ id, sortOrder }) =>
       db.update(publications).set({ sortOrder }).where(eq(publications.id, id)),

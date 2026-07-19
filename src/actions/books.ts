@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { books } from "@/db/schema";
+import { requireAdmin } from "@/lib/auth";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -23,6 +24,7 @@ export async function getBooks() {
 }
 
 export async function createBook(data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   await db.insert(books).values(parsed);
   revalidatePath("/admin/books");
@@ -30,6 +32,7 @@ export async function createBook(data: z.infer<typeof schema>) {
 }
 
 export async function updateBook(id: number, data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   await db
     .update(books)
@@ -40,13 +43,16 @@ export async function updateBook(id: number, data: z.infer<typeof schema>) {
 }
 
 export async function deleteBook(id: number) {
+  await requireAdmin();
   await db.delete(books).where(eq(books.id, id));
   revalidatePath("/admin/books");
+  revalidatePath("/books");
 }
 
 export async function reorderBooks(
   items: { id: number; sortOrder: number; status?: "reading" | "read" | "want_to_read" }[],
 ) {
+  await requireAdmin();
   for (const item of items) {
     await db
       .update(books)
@@ -61,6 +67,7 @@ export async function reorderBooks(
 }
 
 export async function searchBooks(query: string) {
+  await requireAdmin();
   if (!query.trim()) return [];
   try {
     const res = await fetch(
@@ -73,9 +80,7 @@ export async function searchBooks(query: string) {
         id: item.key as string,
         title: item.title as string,
         authors: (item.author_name as string[] | undefined) ?? [],
-        coverUrl: item.cover_i
-          ? `https://covers.openlibrary.org/b/id/${item.cover_i}-M.jpg`
-          : null,
+        coverUrl: item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-M.jpg` : null,
         publishedDate: item.first_publish_year ? String(item.first_publish_year) : null,
       }))
       .filter((item) => item.title);

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { tils } from "@/db/schema";
+import { requireAdmin } from "@/lib/auth";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -28,6 +29,7 @@ export async function getTilsPublic() {
 }
 
 export async function createTil(data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   const maxOrder = await db
     .select({ max: sql<number>`max(${tils.sortOrder})` })
@@ -40,6 +42,7 @@ export async function createTil(data: z.infer<typeof schema>) {
 }
 
 export async function updateTil(id: number, data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   await db
     .update(tils)
@@ -50,12 +53,14 @@ export async function updateTil(id: number, data: z.infer<typeof schema>) {
 }
 
 export async function deleteTil(id: number) {
+  await requireAdmin();
   await db.delete(tils).where(eq(tils.id, id));
   revalidatePath("/admin/tils");
   revalidatePath("/til");
 }
 
 export async function reorderTils(items: { id: number; sortOrder: number }[]) {
+  await requireAdmin();
   await Promise.all(
     items.map(({ id, sortOrder }) => db.update(tils).set({ sortOrder }).where(eq(tils.id, id))),
   );

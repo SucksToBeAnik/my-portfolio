@@ -26,3 +26,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/admin",
   },
 });
+
+/**
+ * Guard for server actions. Middleware only protects /admin page routes —
+ * actions are POST endpoints reachable from any route they're imported into,
+ * so every mutating action must call this first.
+ */
+export async function requireAdmin() {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+}

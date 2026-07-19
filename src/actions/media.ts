@@ -1,10 +1,11 @@
 "use server";
 
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { media } from "@/db/schema";
+import { requireAdmin } from "@/lib/auth";
 import { env } from "@/lib/env";
 
 const mediaSchema = z.object({
@@ -26,11 +27,7 @@ export async function getMedia() {
 }
 
 export async function getMediaItem(id: number) {
-  const rows = await db
-    .select()
-    .from(media)
-    .where(eq(media.id, id))
-    .limit(1);
+  const rows = await db.select().from(media).where(eq(media.id, id)).limit(1);
   return rows[0] ?? null;
 }
 
@@ -57,11 +54,11 @@ export async function getMediaPublic() {
 }
 
 export async function createMedia(data: z.infer<typeof mediaSchema>) {
+  await requireAdmin();
   const parsed = mediaSchema.parse(data);
   const maxOrder = await db
-    .select({ max: media.sortOrder })
+    .select({ max: sql<number>`max(${media.sortOrder})` })
     .from(media)
-    .limit(1)
     .then((r) => r[0]?.max ?? -1);
 
   await db.insert(media).values({ ...parsed, sortOrder: maxOrder + 1 });
@@ -70,6 +67,7 @@ export async function createMedia(data: z.infer<typeof mediaSchema>) {
 }
 
 export async function updateMedia(id: number, data: z.infer<typeof mediaSchema>) {
+  await requireAdmin();
   const parsed = mediaSchema.parse(data);
   await db.update(media).set(parsed).where(eq(media.id, id));
   revalidatePath("/admin/media");
@@ -77,12 +75,14 @@ export async function updateMedia(id: number, data: z.infer<typeof mediaSchema>)
 }
 
 export async function deleteMedia(id: number) {
+  await requireAdmin();
   await db.delete(media).where(eq(media.id, id));
   revalidatePath("/admin/media");
   revalidatePath("/media");
 }
 
 export async function reorderMedia(items: { id: number; sortOrder: number }[]) {
+  await requireAdmin();
   await Promise.all(
     items.map(({ id, sortOrder }) => db.update(media).set({ sortOrder }).where(eq(media.id, id))),
   );
@@ -91,6 +91,7 @@ export async function reorderMedia(items: { id: number; sortOrder: number }[]) {
 }
 
 export async function lookupIMDb(imdbId: string) {
+  await requireAdmin();
   if (!env.OMDB_API_KEY) return null;
   try {
     const res = await fetch(`https://www.omdbapi.com/?apikey=${env.OMDB_API_KEY}&i=${imdbId}`);
@@ -115,9 +116,12 @@ export async function lookupIMDb(imdbId: string) {
 }
 
 export async function searchIMDb(query: string) {
+  await requireAdmin();
   if (!env.OMDB_API_KEY || !query.trim()) return [];
   try {
-    const res = await fetch(`https://www.omdbapi.com/?apikey=${env.OMDB_API_KEY}&s=${encodeURIComponent(query)}`);
+    const res = await fetch(
+      `https://www.omdbapi.com/?apikey=${env.OMDB_API_KEY}&s=${encodeURIComponent(query)}`,
+    );
     const data = await res.json();
     if (data.Response === "False" || !data.Search) return [];
     return (data.Search as any[]).map((item) => ({

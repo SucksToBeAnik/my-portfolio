@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
+import { requireAdmin } from "@/lib/auth";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -39,6 +40,7 @@ function enforceFeatureRule<T extends { featured?: boolean; published?: boolean 
 }
 
 export async function createProject(data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = enforceFeatureRule(schema.parse(data));
   const maxOrder = await db
     .select({ max: sql<number>`max(${projects.sortOrder})` })
@@ -56,6 +58,7 @@ export async function createProject(data: z.infer<typeof schema>) {
 }
 
 export async function updateProject(id: number, data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = enforceFeatureRule(schema.parse(data));
   await db
     .update(projects)
@@ -68,6 +71,7 @@ export async function updateProject(id: number, data: z.infer<typeof schema>) {
 }
 
 export async function deleteProject(id: number) {
+  await requireAdmin();
   await db.delete(projects).where(eq(projects.id, id));
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
@@ -76,6 +80,7 @@ export async function deleteProject(id: number) {
 }
 
 export async function reorderProjects(items: { id: number; sortOrder: number }[]) {
+  await requireAdmin();
   for (const item of items) {
     await db.update(projects).set({ sortOrder: item.sortOrder }).where(eq(projects.id, item.id));
   }

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { lifeEvents } from "@/db/schema";
+import { requireAdmin } from "@/lib/auth";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -27,6 +28,7 @@ export async function getLifeEvents() {
 }
 
 export async function createLifeEvent(data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   await db.insert(lifeEvents).values(parsed);
   revalidatePath("/admin/life-events");
@@ -35,6 +37,7 @@ export async function createLifeEvent(data: z.infer<typeof schema>) {
 }
 
 export async function updateLifeEvent(id: number, data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   await db
     .update(lifeEvents)
@@ -46,6 +49,7 @@ export async function updateLifeEvent(id: number, data: z.infer<typeof schema>) 
 }
 
 export async function deleteLifeEvent(id: number) {
+  await requireAdmin();
   await db.delete(lifeEvents).where(eq(lifeEvents.id, id));
   revalidatePath("/admin/life-events");
   revalidatePath("/life");
@@ -53,6 +57,7 @@ export async function deleteLifeEvent(id: number) {
 }
 
 export async function reorderLifeEvents(items: { id: number; sortOrder: number }[]) {
+  await requireAdmin();
   for (const item of items) {
     await db
       .update(lifeEvents)

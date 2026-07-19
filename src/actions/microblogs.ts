@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { auth, requireAdmin } from "@/lib/auth";
 import { buttondownConfigured, sendBroadcast } from "@/lib/buttondown";
 import { siteUrl, stripMarkdown, truncate } from "@/lib/seo";
 
@@ -34,6 +34,7 @@ export async function getMicroblog(id: number) {
 }
 
 export async function createMicroblog(data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   const maxOrder = await db
     .select({ max: sql<number>`max(${microblogs.sortOrder})` })
@@ -55,6 +56,7 @@ export async function createMicroblog(data: z.infer<typeof schema>) {
 }
 
 export async function updateMicroblog(id: number, data: z.infer<typeof schema>) {
+  await requireAdmin();
   const parsed = schema.parse(data);
   await db
     .update(microblogs)
@@ -71,6 +73,7 @@ export async function updateMicroblog(id: number, data: z.infer<typeof schema>) 
 }
 
 export async function deleteMicroblog(id: number) {
+  await requireAdmin();
   await db.delete(microblogs).where(eq(microblogs.id, id));
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
@@ -103,6 +106,7 @@ export async function notifySubscribers(id: number): Promise<{
 }
 
 export async function reorderMicroblogs(items: { id: number; sortOrder: number }[]) {
+  await requireAdmin();
   for (const item of items) {
     await db
       .update(microblogs)

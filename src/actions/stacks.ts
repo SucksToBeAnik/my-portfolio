@@ -1,10 +1,11 @@
 "use server";
 
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { stacks } from "@/db/schema";
+import { requireAdmin } from "@/lib/auth";
 
 const stackSchema = z.object({
   name: z.string().min(1),
@@ -20,11 +21,11 @@ export async function getStacks() {
 }
 
 export async function createStack(data: z.infer<typeof stackSchema>) {
+  await requireAdmin();
   const parsed = stackSchema.parse(data);
   const maxOrder = await db
-    .select({ max: stacks.sortOrder })
+    .select({ max: sql<number>`max(${stacks.sortOrder})` })
     .from(stacks)
-    .limit(1)
     .then((r) => r[0]?.max ?? -1);
 
   await db.insert(stacks).values({ ...parsed, sortOrder: maxOrder + 1 });
@@ -33,6 +34,7 @@ export async function createStack(data: z.infer<typeof stackSchema>) {
 }
 
 export async function updateStack(id: number, data: z.infer<typeof stackSchema>) {
+  await requireAdmin();
   const parsed = stackSchema.parse(data);
   await db.update(stacks).set(parsed).where(eq(stacks.id, id));
   revalidatePath("/admin/stacks");
@@ -40,12 +42,14 @@ export async function updateStack(id: number, data: z.infer<typeof stackSchema>)
 }
 
 export async function deleteStack(id: number) {
+  await requireAdmin();
   await db.delete(stacks).where(eq(stacks.id, id));
   revalidatePath("/admin/stacks");
   revalidatePath("/stacks");
 }
 
 export async function reorderStacks(ids: number[]) {
+  await requireAdmin();
   await Promise.all(
     ids.map((id, index) => db.update(stacks).set({ sortOrder: index }).where(eq(stacks.id, id))),
   );
