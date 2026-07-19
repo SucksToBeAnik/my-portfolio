@@ -62,7 +62,15 @@ returns the *first row's* sortOrder, not the max, so new items get colliding sor
 
 ## P1 — High-impact performance (public bundle & rendering)
 
-### 5. `lowlight` (~35 highlight.js languages) ships to public post/project pages — [ ] **[verified]**
+> All five done 2026-07-19. Measured route JS (uncompressed, prod build):
+> `/` 818→725 KB, `/posts/[id]` 1008→720 KB, `/projects/[id]` 1029→747 KB,
+> `/sites` 824→729 KB, `/books` 806→711 KB.
+
+### 5. `lowlight` (~35 highlight.js languages) ships to public post/project pages — [x] DONE (2026-07-19) **[verified]**
+> Fixed: `CodeBlock` is no longer `"use client"` (highlighting runs server-side on public
+> pages; the admin editors still compile it into their client tree, which already bundles
+> lowlight); new tiny `CopyButton` client component. Verified: hljs spans present in SSR
+> HTML, zero public chunks contain the highlighter. −~285 KB on post/project pages.
 `src/components/post-editor/CodeBlock.tsx` is `"use client"` and imports
 `lowlight` + `hast-util-to-jsx-runtime`, running `lowlight.highlight()` in render. It's
 rendered by `PostPreview` (a server component) on `/posts/[id]` and `/projects/[id]`, so
@@ -73,7 +81,9 @@ markup is already in the SSR HTML. The only real interactivity is the copy butto
   `"use client"` `CopyButton`. The editor keeps its own lowlight instance — this only
   changes the public reader path.
 
-### 6. Phosphor icon barrel imports likely inflate every route — [ ]
+### 6. Phosphor icon barrel imports likely inflate every route — [x] DONE (2026-07-19)
+> Fixed: `experimental.optimizePackageImports: ["@phosphor-icons/react"]` in
+> `next.config.ts` (part of the ~95 KB/route drop measured above).
 Many client components import from the `@phosphor-icons/react` barrel (`BottomNav`,
 `AuthMenu`, `QuickAdd`, `SearchModal`, `ChatPopup`, `HeartButton`, `ShareButton`,
 `StarRating`, `ProjectLink`, `FilterPopover`, …) while others already use the tree-shaken
@@ -85,7 +95,9 @@ Many client components import from the `@phosphor-icons/react` barrel (`BottomNa
 - **Verify with a before/after build** — if Next 16 already optimizes this package by
   default the change is a no-op, close the item.
 
-### 7. `QuickAdd` (admin-only) ships to every anonymous visitor — [ ] **[verified]**
+### 7. `QuickAdd` (admin-only) ships to every anonymous visitor — [x] DONE (2026-07-19) **[verified]**
+> Fixed: new `QuickAddGate` (checks `useSession`, then `next/dynamic`-imports QuickAdd,
+> `ssr: false`); the session gate inside QuickAdd itself was removed.
 Mounted unconditionally in `src/app/layout.tsx:101`; it renders `null` without a session
 (`QuickAdd.tsx:388`) but its full module graph (`BookSearch`, `TagPicker`, `StarRating`,
 six server-action client refs) is in every public page's bundle.
@@ -93,7 +105,9 @@ six server-action client refs) is in every public page's bundle.
 - **Fix:** wrap in a small client gate that checks `useSession()` and only then
   `next/dynamic`-imports the real QuickAdd, so anonymous visitors download nothing.
 
-### 8. `SearchModal` is eagerly bundled globally — [ ]
+### 8. `SearchModal` is eagerly bundled globally — [x] DONE (2026-07-19)
+> Fixed: `SearchOverlay` keeps only the keydown listener; the modal is
+> `next/dynamic`-imported and first mounted on the first ⌘K.
 `SearchOverlay` (root layout) statically imports `SearchModal`
 (`src/components/SearchOverlay.tsx:4`), which returns `null` until ⌘K. The whole search UI
 is in every route's initial JS.
@@ -101,7 +115,12 @@ is in every route's initial JS.
 - **Fix:** `next/dynamic` the modal and mount it on first open (keep the keydown listener
   in the tiny `SearchOverlay` shell).
 
-### 9. `SessionProvider` wraps the whole public site — [ ]
+### 9. `SessionProvider` wraps the whole public site — [x] DONE (2026-07-19, amended)
+> Resolution: passing `session` from the layout is NOT viable — `auth()` reads cookies and
+> would force every page dynamic, killing ISR. The provider must stay (the nav `AuthMenu`
+> login uses `useSession` on every page). Applied instead: `refetchOnWindowFocus={false}`
+> so visitors make at most one session fetch per load, with a comment in the layout
+> explaining the constraint. Don't revisit unless AuthMenu moves off `useSession`.
 `src/app/layout.tsx:94` mounts next-auth's `SessionProvider` with no `session` prop, so
 every visitor's browser fetches `/api/auth/session` on every page load, and the next-auth
 client ships in the shared bundle — for a site with exactly one logged-in user (you).

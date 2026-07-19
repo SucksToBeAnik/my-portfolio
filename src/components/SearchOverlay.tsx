@@ -1,14 +1,22 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { SearchModal } from "@/components/SearchModal";
+
+// Only shown on ⌘K — don't put the whole search UI in every route's
+// initial bundle; fetch the chunk on first open instead.
+const SearchModal = dynamic(() => import("@/components/SearchModal").then((m) => m.SearchModal), {
+  ssr: false,
+});
 
 export function SearchOverlay() {
   const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const openRef = useRef(false);
 
   useEffect(() => {
     openRef.current = open;
+    if (open) setLoaded(true);
   }, [open]);
 
   useEffect(() => {
@@ -51,5 +59,6 @@ export function SearchOverlay() {
     };
   }, []);
 
+  if (!loaded) return null;
   return <SearchModal open={open} onClose={() => setOpen(false)} />;
 }

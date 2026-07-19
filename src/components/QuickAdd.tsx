@@ -12,11 +12,10 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { createBook } from "@/actions/books";
-import { BookSearch, type BookResult } from "@/components/BookSearch";
+import { type BookResult, BookSearch } from "@/components/BookSearch";
 import { StarRating } from "@/components/StarRating";
 import { TagPicker } from "@/components/TagPicker";
 
@@ -44,6 +43,7 @@ const STACK_CATEGORIES = [
   "Productivity",
   "Hardware",
 ];
+
 import { createGalleryItem } from "@/actions/gallery";
 import { createMedia, lookupIMDb, searchIMDb } from "@/actions/media";
 import { createSite } from "@/actions/sites";
@@ -73,8 +73,8 @@ const TYPE_QUERY_KEYS: Partial<Record<ContentType, string[]>> = {
   stack: ["stacks"],
 };
 
+// Session-gated by QuickAddGate — this component only mounts for the admin.
 export function QuickAdd() {
-  const { data: session } = useSession();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>("type");
@@ -385,7 +385,6 @@ export function QuickAdd() {
     }
   }
 
-  if (!session?.user) return null;
   if (!open) return null;
 
   const typeInfo = TYPES.find((t) => t.id === selectedType);

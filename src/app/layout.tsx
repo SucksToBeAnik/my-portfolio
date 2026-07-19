@@ -5,7 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { BottomNav } from "@/components/BottomNav";
 import { NavHistoryTracker } from "@/components/NavHistoryTracker";
 import { PageShell } from "@/components/PageShell";
-import { QuickAdd } from "@/components/QuickAdd";
+import { QuickAddGate } from "@/components/QuickAddGate";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { QueryProvider } from "@/lib/QueryProvider";
 import { siteUrl } from "@/lib/seo";
@@ -91,14 +91,17 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <SessionProvider>
+        {/* No `session` prop on purpose: reading auth() here would make every
+            page dynamic and kill ISR. One client-side session fetch per load
+            is the price of the nav login menu; focus-refetch is disabled. */}
+        <SessionProvider refetchOnWindowFocus={false}>
           <ThemeProvider>
             <QueryProvider>
               <NavHistoryTracker />
               <PageShell>{children}</PageShell>
               <BottomNav />
               <SearchOverlay />
-              <QuickAdd />
+              <QuickAddGate />
             </QueryProvider>
           </ThemeProvider>
         </SessionProvider>
