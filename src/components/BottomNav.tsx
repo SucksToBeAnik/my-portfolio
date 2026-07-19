@@ -205,6 +205,14 @@ export function BottomNav() {
   }, [chatOpen]);
   const [hoveredRail, setHoveredRail] = useState<number | null>(null);
 
+  // Reset the rail magnification on navigation: clicking a tile that leaves for
+  // a page without the nav (e.g. /admin) unmounts the rail before onMouseLeave
+  // can fire, so the hovered index would otherwise persist and re-render the
+  // tile pre-scaled on return.
+  useEffect(() => {
+    setHoveredRail(null);
+  }, [pathname]);
+
   useEffect(() => {
     const handler = () => {
       window.dispatchEvent(new CustomEvent("closesearch"));
