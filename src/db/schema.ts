@@ -111,6 +111,9 @@ export const stacks = sqliteTable("stacks", {
   url: text("url").notNull(),
   platform: text("platform"),
   category: text("category"),
+  // Microlink og-image, fetched server-side on create (+ one-time backfill).
+  // "" = lookup succeeded but the site has no og image; don't refetch.
+  previewImage: text("preview_image"),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()

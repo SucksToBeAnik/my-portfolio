@@ -78,7 +78,7 @@ function SiteItem({ site }: { site: SiteEntry }) {
 
         <ArrowRight
           weight="thin"
-          className="ml-auto w-3.5 h-3.5 text-muted shrink-0 transition -translate-x-1 group-hover:translate-x-0 group-hover:text-fg"
+          className="ml-auto hidden sm:block w-3.5 h-3.5 text-muted shrink-0 opacity-0 -translate-x-1 transition group-hover:opacity-100 group-hover:translate-x-0"
         />
       </a>
     </LinkPreview>

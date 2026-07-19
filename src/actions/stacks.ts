@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { stacks } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import { fetchSiteMeta } from "@/lib/microlink";
 
 const stackSchema = z.object({
   name: z.string().min(1),
@@ -23,12 +24,19 @@ export async function getStacks() {
 export async function createStack(data: z.infer<typeof stackSchema>) {
   await requireAdmin();
   const parsed = stackSchema.parse(data);
-  const maxOrder = await db
-    .select({ max: sql<number>`max(${stacks.sortOrder})` })
-    .from(stacks)
-    .then((r) => r[0]?.max ?? -1);
+  const [maxOrder, meta] = await Promise.all([
+    db
+      .select({ max: sql<number>`max(${stacks.sortOrder})` })
+      .from(stacks)
+      .then((r) => r[0]?.max ?? -1),
+    fetchSiteMeta(parsed.url),
+  ]);
 
-  await db.insert(stacks).values({ ...parsed, sortOrder: maxOrder + 1 });
+  await db.insert(stacks).values({
+    ...parsed,
+    previewImage: meta ? (meta.image ?? "") : null,
+    sortOrder: maxOrder + 1,
+  });
   revalidatePath("/admin/stacks");
   revalidatePath("/stacks");
 }

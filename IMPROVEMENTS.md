@@ -41,6 +41,10 @@ mutating action, verifies a session. Anyone can create/update/delete content.
 > so visitors make zero Microlink calls and zero DB writes. `saveSiteDescription` is
 > deleted; `createSiteFromUrl` collapsed into `createSite`. Verified against a prod
 > build: `/sites` HTML contains server-rendered titles, no spinner.
+> 2026-07-20 follow-up: `/stacks` gained hover link previews and got the same treatment —
+> `stacks.previewImage` column (og-image via `fetchSiteMeta` in `createStack` + page
+> backfill; `""` = fetched, no image), preview preloads the curated name/description/logo,
+> so visitors make zero Microlink calls there too.
 Was: a fully client-rendered page (blank spinner, no SSR/SEO) where every visitor's
 browser called the rate-limited Microlink API once per site and invoked a mutating server
 action (`saveSiteDescription`) during anonymous reads.

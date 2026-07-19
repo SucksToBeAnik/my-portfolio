@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchMicrolink } from "@/lib/microlink-cache";
 
@@ -44,6 +44,32 @@ export function LinkPreview({
   const [pos, setPos] = useState<React.CSSProperties>({});
   const fetchedRef = useRef(Boolean(preload));
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  // Runs before paint: measures the rendered popup and nudges it back inside
+  // the viewport. Re-runs when data arrives, since the image changes its height.
+  useLayoutEffect(() => {
+    if (!visible || !popupRef.current) return;
+    const margin = 12;
+    const rect = popupRef.current.getBoundingClientRect();
+    let dx = 0;
+    let dy = 0;
+    if (rect.bottom > window.innerHeight - margin) {
+      dy = window.innerHeight - margin - rect.bottom;
+    }
+    if (rect.top + dy < margin) dy = margin - rect.top;
+    if (rect.right > window.innerWidth - margin) {
+      dx = window.innerWidth - margin - rect.right;
+    }
+    if (rect.left + dx < margin) dx = margin - rect.left;
+    if (dx || dy) {
+      setPos((p) => ({
+        ...p,
+        top: (p.top as number) + dy,
+        left: (p.left as number) + dx,
+      }));
+    }
+  }, [visible, data]);
 
   function handleMouseEnter(e: React.MouseEvent<HTMLSpanElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -77,6 +103,7 @@ export function LinkPreview({
 
   const popup = visible ? (
     <div
+      ref={popupRef}
       style={{
         position: "fixed",
         transform: position === "bottom" ? "translateX(-50%)" : undefined,
