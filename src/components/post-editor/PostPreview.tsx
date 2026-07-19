@@ -12,6 +12,7 @@ import {
   remarkSidenotes,
 } from "@/components/post-editor/postMarkdownPlugins";
 import { SidenoteTooltips } from "@/components/post-editor/SidenoteTooltips";
+import { Slugger } from "@/lib/toc";
 
 /** Minimal shape of the hast nodes react-markdown hands to component renderers. */
 type HastNode =
@@ -38,8 +39,20 @@ function nodeText(node: HastNode | undefined): string {
  * (see imageTitle). `interactive` is true on the public page (scroll-reveal +
  * lightbox) and false in the editor preview (images just appear, no lightbox).
  */
-function makeComponents(interactive: boolean): Components {
+function makeComponents(interactive: boolean, slugger: Slugger): Components {
+  // Ids match src/lib/toc.ts's extractHeadings so the floating TOC can link
+  // straight to a section. Only h1–h3 get ids (the levels the TOC surfaces),
+  // and the slugger is walked in document order to keep dedup counters aligned.
+  const heading = (Tag: "h1" | "h2" | "h3") =>
+    function Heading({ node, children }: { node?: unknown; children?: React.ReactNode }) {
+      const id = slugger.slug(nodeText(node as HastNode));
+      return <Tag id={id}>{children}</Tag>;
+    };
+
   return {
+    h1: heading("h1"),
+    h2: heading("h2"),
+    h3: heading("h3"),
     img: ({ src, alt, title }) => {
       const { width, height } = parseImageTitle(title);
       const caption = alt?.trim() || undefined;
@@ -111,9 +124,6 @@ function makeComponents(interactive: boolean): Components {
   };
 }
 
-const readerComponents = makeComponents(true);
-const editorComponents = makeComponents(false);
-
 /**
  * Renders post markdown the same way the public page will. Text stays within
  * the reading column; images with a `wide`/`full` width hint break out via the
@@ -128,11 +138,14 @@ export function PostPreview({
   className?: string;
   interactive?: boolean;
 }) {
+  // Fresh slugger per render so heading-id dedup counters restart each pass
+  // (never accumulate across re-renders) and stay in sync with the TOC.
+  const components = makeComponents(interactive, new Slugger());
   return (
     <div className={`post-body text-fg/55 ${className ?? ""}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks, remarkCallout, remarkSidenotes]}
-        components={interactive ? readerComponents : editorComponents}
+        components={components}
       >
         {normalizeFootnotes(content)}
       </ReactMarkdown>

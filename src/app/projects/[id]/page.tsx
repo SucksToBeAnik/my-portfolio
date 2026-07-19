@@ -5,11 +5,13 @@ import { notFound } from "next/navigation";
 import { getHeartsCounts } from "@/actions/heart-counts";
 import { BackButton } from "@/components/BackButton";
 import { HeartButton } from "@/components/HeartButton";
+import { PostToc } from "@/components/PostToc";
 import { ProjectLink } from "@/components/ProjectLink";
 import { PostPreview } from "@/components/post-editor/PostPreview";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { firstImage, stripMarkdown, truncate } from "@/lib/seo";
+import { extractHeadings } from "@/lib/toc";
 
 export const revalidate = 3600;
 
@@ -105,6 +107,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
   const dateLabel = project.workedOn ? formatDate(project.workedOn) : null;
   const time = project.content ? readTime(project.content) : null;
+  const headings = project.content ? extractHeadings(project.content) : [];
 
   return (
     <>
@@ -122,6 +125,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           }),
         }}
       />
+      <PostToc headings={headings} />
       <div className="space-y-6 md:space-y-8">
         <BackButton label="Projects" fallbackHref="/projects" />
 

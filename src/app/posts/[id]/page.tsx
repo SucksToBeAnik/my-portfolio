@@ -5,11 +5,13 @@ import { notFound } from "next/navigation";
 import { getHeartsCounts } from "@/actions/heart-counts";
 import { BackButton } from "@/components/BackButton";
 import { HeartButton } from "@/components/HeartButton";
+import { PostToc } from "@/components/PostToc";
 import { PostPreview } from "@/components/post-editor/PostPreview";
 import { SubscribeForm } from "@/components/SubscribeForm";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
 import { firstImage, stripMarkdown, truncate } from "@/lib/seo";
+import { extractHeadings } from "@/lib/toc";
 
 export const revalidate = 3600;
 
@@ -82,6 +84,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
   const [heartCounts] = await Promise.all([getHeartsCounts("microblog", [post.id])]);
   const heartCount = heartCounts[post.id] ?? 0;
+  const headings = extractHeadings(post.content);
 
   const prev =
     (
@@ -120,6 +123,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           }),
         }}
       />
+      <PostToc headings={headings} />
       <div className="space-y-6 md:space-y-8">
         <BackButton label="Posts" fallbackHref="/posts" />
 

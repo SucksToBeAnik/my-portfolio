@@ -305,6 +305,11 @@ body {
   hanging-punctuation: first last;
 }
 
+/* Reader line-height — trialling 1.5 (editor surface stays at 1.75 above). */
+.post-body {
+  line-height: 1.5;
+}
+
 .post-body p {
   margin: 1em 0;
   /* Avoid orphans / ragged last lines. */
@@ -317,6 +322,8 @@ body {
 .post-body h3 {
   text-wrap: balance;
   letter-spacing: -0.01em;
+  /* Room so TOC-anchored scrolls don't tuck the heading against the top edge. */
+  scroll-margin-top: 2rem;
 }
 
 .post-editor-content h1,
