@@ -16,12 +16,13 @@ import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Markdown } from "tiptap-markdown";
 import { createProject, updateProject } from "@/actions/projects";
 import { EditPreviewToggle } from "@/components/EditPreviewToggle";
 import { ImageUpload } from "@/components/ImageUpload";
+import { PostToc } from "@/components/PostToc";
 import { EditorBubbleMenu } from "@/components/post-editor/EditorBubbleMenu";
 import { CodeBlockTab } from "@/components/post-editor/extensions/codeBlockTab";
 import { type ImageWidth, PostImage } from "@/components/post-editor/extensions/PostImage";
@@ -29,6 +30,7 @@ import { SlashCommand } from "@/components/post-editor/extensions/slashCommand";
 import { PostPreview } from "@/components/post-editor/PostPreview";
 import { TagPicker } from "@/components/TagPicker";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { extractHeadings } from "@/lib/toc";
 
 const projectTags = [
   "web",
@@ -101,6 +103,10 @@ export function ProjectEditor({
   const imageDialogRef = useRef<HTMLDialogElement>(null);
   const videoDialogRef = useRef<HTMLDialogElement>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Section list for the preview TOC, recomputed as the draft content changes.
+  const headings = useMemo(() => extractHeadings(content), [content]);
 
   // Auto-grow the title box so it matches the preview <h1> (no layout shift).
   const growTitle = useCallback(() => {
@@ -496,7 +502,8 @@ export function ProjectEditor({
       </header>
 
       {/* Body */}
-      <div className="relative flex-1 overflow-y-auto overflow-x-hidden">
+      <div ref={bodyRef} className="relative flex-1 overflow-y-auto overflow-x-hidden">
+        {preview && <PostToc headings={headings} scrollRootRef={bodyRef} />}
         <div className="post-print mx-auto max-w-[720px] px-5 py-10 md:py-14">
           {preview ? (
             <article>

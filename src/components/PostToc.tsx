@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { TocHeading } from "@/lib/toc";
 
 /**
@@ -8,43 +8,82 @@ import type { TocHeading } from "@/lib/toc";
  * the left margin as a stack of thin bars (one per heading); hovering swaps the
  * bars for a glass overlay listing the sections. Scroll-spy tracks the section
  * currently in view. Hidden below `xl`, where there's no room beside the column.
+ *
+ * On the public pages the scroll container is the window (default). In the admin
+ * editor preview, scrolling happens inside an `overflow-y-auto` panel — pass
+ * that element via `scrollRootRef` so scroll tracking and jumps target it.
+ *
+ * Active section and navigation are driven by the *live* heading elements
+ * (matched to `headings` by document order), not by id, so they work even if a
+ * slug ever diverged from the rendered id.
  */
-export function PostToc({ headings }: { headings: TocHeading[] }) {
-  const [activeId, setActiveId] = useState<string | null>(null);
+export function PostToc({
+  headings,
+  scrollRootRef,
+}: {
+  headings: TocHeading[];
+  scrollRootRef?: React.RefObject<HTMLElement | null>;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
   const [open, setOpen] = useState(false);
+  const elementsRef = useRef<HTMLElement[]>([]);
+
+  // The heading nearest above the top of the reading viewport is "active".
+  const computeActive = useCallback(() => {
+    const els = elementsRef.current;
+    if (els.length === 0) return;
+    const root = scrollRootRef?.current ?? null;
+
+    // A short trailing section can't be scrolled up to the activation line, so
+    // once the scroller bottoms out, force the last heading active.
+    const atBottom = root
+      ? root.scrollTop + root.clientHeight >= root.scrollHeight - 2
+      : window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+    if (atBottom) {
+      setActiveIndex(els.length - 1);
+      return;
+    }
+
+    const line = (root ? root.getBoundingClientRect().top : 0) + 100;
+    let idx = 0;
+    for (let i = 0; i < els.length; i++) {
+      if (els[i].getBoundingClientRect().top - line <= 0) idx = i;
+      else break;
+    }
+    setActiveIndex(idx);
+  }, [scrollRootRef]);
 
   useEffect(() => {
     if (headings.length < 2) return;
-    const elements = headings
-      .map((h) => document.getElementById(h.id))
-      .filter((el): el is HTMLElement => el !== null);
-    if (elements.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible.length > 0) setActiveId(visible[0].target.id);
-      },
-      // Fire once a heading crosses into the top third of the viewport.
-      { rootMargin: "0px 0px -66% 0px", threshold: 0 },
+    const root = scrollRootRef?.current ?? null;
+    const scope: ParentNode = root ?? document;
+    elementsRef.current = Array.from(
+      scope.querySelectorAll<HTMLElement>(".post-body h1, .post-body h2, .post-body h3"),
     );
-    for (const el of elements) observer.observe(el);
-    return () => observer.disconnect();
-  }, [headings]);
+    computeActive();
+
+    const scroller: HTMLElement | Window = root ?? window;
+    scroller.addEventListener("scroll", computeActive, { passive: true });
+    window.addEventListener("resize", computeActive);
+    return () => {
+      scroller.removeEventListener("scroll", computeActive);
+      window.removeEventListener("resize", computeActive);
+    };
+  }, [headings, scrollRootRef, computeActive]);
 
   if (headings.length < 2) return null;
 
   const minLevel = Math.min(...headings.map((h) => h.level));
 
-  function handleClick(e: React.MouseEvent, id: string) {
+  function handleClick(e: React.MouseEvent, index: number, id: string) {
     e.preventDefault();
-    const el = document.getElementById(id);
+    const el = elementsRef.current[index];
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });
-    history.replaceState(null, "", `#${id}`);
-    setActiveId(id);
+    // Reflect the section in the URL on public pages only — not in the editor,
+    // where a custom scroll root means we're inside an admin route.
+    if (!scrollRootRef) history.replaceState(null, "", `#${id}`);
+    setActiveIndex(index);
   }
 
   return (
@@ -60,9 +99,9 @@ export function PostToc({ headings }: { headings: TocHeading[] }) {
         }`}
         aria-hidden
       >
-        {headings.map((h) => {
+        {headings.map((h, i) => {
           const indent = h.level - minLevel;
-          const isActive = h.id === activeId;
+          const isActive = i === activeIndex;
           return (
             <span
               key={h.id}
@@ -85,14 +124,14 @@ export function PostToc({ headings }: { headings: TocHeading[] }) {
           On this page
         </p>
         <ul className="flex flex-col">
-          {headings.map((h) => {
+          {headings.map((h, i) => {
             const indent = h.level - minLevel;
-            const isActive = h.id === activeId;
+            const isActive = i === activeIndex;
             return (
               <li key={h.id}>
                 <a
                   href={`#${h.id}`}
-                  onClick={(e) => handleClick(e, h.id)}
+                  onClick={(e) => handleClick(e, i, h.id)}
                   className={`block rounded-lg py-1.5 pr-2 text-xs leading-snug transition-colors ${
                     isActive
                       ? "bg-fg/[0.06] text-fg"
