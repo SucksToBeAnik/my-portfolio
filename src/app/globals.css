@@ -312,8 +312,16 @@ body {
 
 .post-body p {
   margin: 1em 0;
-  /* Avoid orphans / ragged last lines. */
-  text-wrap: pretty;
+}
+
+/* Avoid orphans / ragged last lines — but only on wider screens. At phone
+   widths `text-wrap: pretty` reflows short lines to reduce raggedness and
+   leaves visible trailing space, so lines look like they don't fill the row
+   (the editor, which has no pretty, wraps normally — hence the mismatch). */
+@media (min-width: 640px) {
+  .post-body p {
+    text-wrap: pretty;
+  }
 }
 
 /* Headings balance their line breaks and tighten slightly (mono runs wide). */
