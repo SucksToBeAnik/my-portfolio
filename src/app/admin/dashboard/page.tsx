@@ -1,6 +1,8 @@
 import { count, eq } from "drizzle-orm";
 import Link from "next/link";
 import { updateWorkingOn } from "@/actions/site-config";
+import { LogoutButton } from "@/components/LogoutButton";
+import UserEmail from "@/components/UserEmail";
 import { db } from "@/db";
 import {
   books,
@@ -15,12 +17,14 @@ import {
   stacks,
   tils,
 } from "@/db/schema";
+import { auth } from "@/lib/auth";
 
 export const metadata = {
   title: "Dashboard | Admin",
 };
 
 export default async function DashboardPage() {
+  const session = await auth();
   const [projectCount] = await db.select({ c: count() }).from(projects);
   const [publicationCount] = await db.select({ c: count() }).from(publications);
   const [lifeCount] = await db.select({ c: count() }).from(lifeEvents);
@@ -65,7 +69,9 @@ export default async function DashboardPage() {
         <h1 className="text-lg font-heading">Dashboard</h1>
         <span className="flex items-center gap-1.5 text-[10px] text-muted">
           Quick add
-          <kbd className="px-1.5 py-0.5 bg-hover-bg border border-hairline rounded text-[9px] leading-none">⌘I</kbd>
+          <kbd className="px-1.5 py-0.5 bg-hover-bg border border-hairline rounded text-[9px] leading-none">
+            ⌘I
+          </kbd>
         </span>
       </div>
 
@@ -104,6 +110,11 @@ export default async function DashboardPage() {
           Save
         </button>
       </form>
+
+      <footer className="flex items-center justify-between gap-3x pt-4">
+        <UserEmail email={session?.user?.email} />
+        <LogoutButton />
+      </footer>
     </div>
   );
 }

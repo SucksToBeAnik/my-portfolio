@@ -339,14 +339,14 @@ export function BottomNav() {
               )}
             </RailItem>
             <div
-              className="flex items-center justify-center rounded-2xl bg-nav-bg transition-all duration-200 ease-out shrink-0"
+              className="flex items-center justify-center rounded-2xl bg-nav-bg text-nav-text hover:bg-hover-bg hover:text-nav-text-hover transition-all duration-200 ease-out shrink-0"
               style={{
                 width: `${RAIL_BASE * sc(authPos)}px`,
                 height: `${RAIL_BASE * sc(authPos)}px`,
               }}
               onMouseEnter={() => setHoveredRail(authPos)}
             >
-              <AuthMenu placement="right" />
+              <AuthMenu placement="right" fill />
             </div>
           </nav>
         );

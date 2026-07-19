@@ -7,6 +7,8 @@ import {
   Rectangle,
   RectangleDashed,
   TextB,
+  TextHOne,
+  TextHThree,
   TextHTwo,
   TextItalic,
   Trash,
@@ -59,7 +61,9 @@ export function EditorBubbleMenu({
       italic: editor.isActive("italic"),
       code: editor.isActive("code"),
       link: editor.isActive("link"),
+      h1: editor.isActive("heading", { level: 1 }),
       h2: editor.isActive("heading", { level: 2 }),
+      h3: editor.isActive("heading", { level: 3 }),
     }),
   });
 
@@ -117,10 +121,22 @@ export function EditorBubbleMenu({
           </BubbleBtn>
           <div className="mx-0.5 h-4 w-px bg-nav-border" />
           <BubbleBtn
+            active={s?.h1}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          >
+            <TextHOne weight="thin" className="h-4 w-4" />
+          </BubbleBtn>
+          <BubbleBtn
             active={s?.h2}
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           >
             <TextHTwo weight="thin" className="h-4 w-4" />
+          </BubbleBtn>
+          <BubbleBtn
+            active={s?.h3}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          >
+            <TextHThree weight="thin" className="h-4 w-4" />
           </BubbleBtn>
         </>
       )}
