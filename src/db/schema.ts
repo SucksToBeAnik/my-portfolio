@@ -121,7 +121,10 @@ export const sites = sqliteTable("sites", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   url: text("url").notNull(),
   tags: text("tags"),
+  title: text("title"),
   description: text("description"),
+  logo: text("logo"),
+  image: text("image"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

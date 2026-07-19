@@ -10,6 +10,8 @@ interface LinkPreviewProps {
   children: React.ReactNode;
   className?: string;
   position?: "right" | "bottom";
+  /** Pre-fetched metadata; when set, no microlink request is made on hover. */
+  preload?: Omit<PreviewData, "domain">;
 }
 
 interface PreviewData {
@@ -20,25 +22,28 @@ interface PreviewData {
   domain: string;
 }
 
+function getDomain(u: string): string {
+  try {
+    return new URL(u.startsWith("http") ? u : `https://${u}`).hostname.replace("www.", "");
+  } catch {
+    return u;
+  }
+}
+
 export function LinkPreview({
   url,
   children,
   className = "",
   position = "right",
+  preload,
 }: LinkPreviewProps) {
-  const [data, setData] = useState<PreviewData | null>(null);
+  const [data, setData] = useState<PreviewData | null>(
+    preload ? { ...preload, domain: getDomain(url) } : null,
+  );
   const [visible, setVisible] = useState(false);
   const [pos, setPos] = useState<React.CSSProperties>({});
-  const fetchedRef = useRef(false);
+  const fetchedRef = useRef(Boolean(preload));
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  function getDomain(u: string): string {
-    try {
-      return new URL(u.startsWith("http") ? u : `https://${u}`).hostname.replace("www.", "");
-    } catch {
-      return u;
-    }
-  }
 
   function handleMouseEnter(e: React.MouseEvent<HTMLSpanElement>) {
     const rect = e.currentTarget.getBoundingClientRect();

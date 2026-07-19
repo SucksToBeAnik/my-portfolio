@@ -32,21 +32,18 @@ mutating action, verifies a session. Anyone can create/update/delete content.
 - **Fix:** add a shared `requireAdmin()` helper (in `src/lib/auth.ts`) that throws when
   `(await auth())?.user` is missing; call it first in every mutating action.
 
-### 2. `/sites` page: anonymous visitors trigger DB writes + it's fully client-rendered — [ ] **[verified]**
-`src/app/sites/page.tsx` is `"use client"`: the list loads via React Query after hydration
-(blank spinner on every visit, no SSR/SEO), then each `SiteItem` fetches Microlink metadata
-from the *browser* (`src/app/sites/page.tsx:50-59`) — one API call per site per visitor
-session against Microlink's heavily rate-limited free tier — and calls
-`saveSiteDescription` (a mutating server action) from anonymous visitors' browsers.
-
-- **Fix:** convert to an async server component with `export const revalidate`; fetch
-  Microlink metadata server-side once per site and persist it (title/logo/description
-  columns), so the page is static, the write-on-read disappears, and Microlink is hit
-  once per site instead of once per visitor.
-- Interim (2026-07-19): `saveSiteDescription` is now admin-gated and calls
-  `revalidatePath("/sites")` — anonymous visitors' save attempts fail silently (the page
-  already catches rejections), so only your own logged-in browsing backfills descriptions.
-  The server-side rework is still the real fix.
+### 2. `/sites` page: anonymous visitors trigger DB writes + it's fully client-rendered — [x] DONE (2026-07-19) **[verified]**
+> Fixed: `sites` table gained `title`/`logo`/`image` columns; `src/lib/microlink.ts`
+> (server-only) fetches metadata once per site — on create in `createSite`, plus a
+> one-time backfill in the page for pre-existing rows. The page is now a static/ISR
+> server component (`revalidate = 3600`, proper `<title>`/description) with a small
+> `SitesIndex` client island for tag filtering; `LinkPreview` accepts preloaded metadata
+> so visitors make zero Microlink calls and zero DB writes. `saveSiteDescription` is
+> deleted; `createSiteFromUrl` collapsed into `createSite`. Verified against a prod
+> build: `/sites` HTML contains server-rendered titles, no spinner.
+Was: a fully client-rendered page (blank spinner, no SSR/SEO) where every visitor's
+browser called the rate-limited Microlink API once per site and invoked a mutating server
+action (`saveSiteDescription`) during anonymous reads.
 
 ### 3. `maxOrder` computed wrong in three create actions — [x] DONE (2026-07-19) **[verified]**
 > Fixed alongside item 1 (same functions): `createMedia`, `createGalleryItem`,
