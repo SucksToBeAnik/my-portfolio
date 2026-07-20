@@ -369,6 +369,7 @@ export function GalleryNodeView({
         onClose={() => setDialogOpen(false)}
         onMouseDown={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
+        onPaste={(e) => e.stopPropagation()}
         className="bg-transparent backdrop:bg-black/50"
         contentEditable={false}
       >
