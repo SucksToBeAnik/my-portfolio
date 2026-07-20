@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import { type ProjectDraft, projectDraftSchema } from "@/lib/drafts";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -62,12 +63,35 @@ export async function updateProject(id: number, data: z.infer<typeof schema>) {
   const parsed = enforceFeatureRule(schema.parse(data));
   await db
     .update(projects)
-    .set({ ...parsed, updatedAt: new Date() })
+    // A live write applies (and therefore clears) any buffered draft.
+    .set({ ...parsed, updatedAt: new Date(), draft: null })
     .where(eq(projects.id, id));
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   revalidatePath(`/projects/${id}`);
   revalidatePath("/");
+}
+
+/**
+ * Buffer unpublished edits to a published project. Writes only the `draft`
+ * column — the live columns the public reads stay frozen — so this deliberately
+ * does NOT revalidate the public paths.
+ */
+export async function saveProjectDraft(id: number, data: ProjectDraft) {
+  await requireAdmin();
+  const parsed = projectDraftSchema.parse(data);
+  await db
+    .update(projects)
+    .set({ draft: JSON.stringify(parsed), updatedAt: new Date() })
+    .where(eq(projects.id, id));
+  revalidatePath("/admin/projects");
+}
+
+/** Drop a buffered draft, reverting the project to its last-published state. */
+export async function discardProjectDraft(id: number) {
+  await requireAdmin();
+  await db.update(projects).set({ draft: null }).where(eq(projects.id, id));
+  revalidatePath("/admin/projects");
 }
 
 export async function deleteProject(id: number) {

@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { microblogs } from "@/db/schema";
 import { auth, requireAdmin } from "@/lib/auth";
 import { buttondownConfigured, sendBroadcast } from "@/lib/buttondown";
+import { type MicroblogDraft, microblogDraftSchema } from "@/lib/drafts";
 import { siteUrl, stripMarkdown, truncate } from "@/lib/seo";
 
 const schema = z.object({
@@ -58,18 +59,51 @@ export async function createMicroblog(data: z.infer<typeof schema>) {
 export async function updateMicroblog(id: number, data: z.infer<typeof schema>) {
   await requireAdmin();
   const parsed = schema.parse(data);
+  // Preserve the original publish date across edits — only stamp it the first
+  // time the post goes live, and clear it when unpublished.
+  const existing = await db
+    .select({ publishedAt: microblogs.publishedAt })
+    .from(microblogs)
+    .where(eq(microblogs.id, id))
+    .then((r) => r[0]);
   await db
     .update(microblogs)
     .set({
       ...parsed,
       updatedAt: new Date(),
-      publishedAt: parsed.published ? parsed.publishedAt || new Date() : null,
+      publishedAt: parsed.published
+        ? (parsed.publishedAt ?? existing?.publishedAt ?? new Date())
+        : null,
+      // A live write applies (and therefore clears) any buffered draft.
+      draft: null,
     })
     .where(eq(microblogs.id, id));
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
   revalidatePath("/");
+}
+
+/**
+ * Buffer unpublished edits to a published post. Writes only the `draft` column
+ * — the live columns the public reads stay frozen — so this deliberately does
+ * NOT revalidate the public paths.
+ */
+export async function saveMicroblogDraft(id: number, data: MicroblogDraft) {
+  await requireAdmin();
+  const parsed = microblogDraftSchema.parse(data);
+  await db
+    .update(microblogs)
+    .set({ draft: JSON.stringify(parsed), updatedAt: new Date() })
+    .where(eq(microblogs.id, id));
+  revalidatePath("/admin/microblogs");
+}
+
+/** Drop a buffered draft, reverting the post to its last-published state. */
+export async function discardMicroblogDraft(id: number) {
+  await requireAdmin();
+  await db.update(microblogs).set({ draft: null }).where(eq(microblogs.id, id));
+  revalidatePath("/admin/microblogs");
 }
 
 export async function deleteMicroblog(id: number) {

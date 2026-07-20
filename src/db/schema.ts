@@ -22,6 +22,10 @@ export const projects = sqliteTable("projects", {
   workedOn: text("worked_on"),
   featured: integer("featured", { mode: "boolean" }).default(false),
   published: integer("published", { mode: "boolean" }).default(false),
+  // JSON snapshot of unpublished edits to a published project. When set, the
+  // public page keeps rendering the live columns above until the draft is
+  // explicitly published. Null for unpublished projects (they edit live).
+  draft: text("draft"),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -84,6 +88,8 @@ export const microblogs = sqliteTable("microblogs", {
   imageUrl: text("image_url"),
   published: integer("published", { mode: "boolean" }).default(false),
   publishedAt: integer("published_at", { mode: "timestamp" }),
+  // JSON snapshot of unpublished edits to a published post — see projects.draft.
+  draft: text("draft"),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()

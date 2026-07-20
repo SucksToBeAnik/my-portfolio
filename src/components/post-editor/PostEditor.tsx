@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowCounterClockwise,
   ArrowLeft,
   Check,
   CloudArrowUp,
@@ -19,7 +20,12 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Markdown } from "tiptap-markdown";
-import { createMicroblog, updateMicroblog } from "@/actions/microblogs";
+import {
+  createMicroblog,
+  discardMicroblogDraft,
+  saveMicroblogDraft,
+  updateMicroblog,
+} from "@/actions/microblogs";
 import { EditPreviewToggle } from "@/components/EditPreviewToggle";
 import { ImageUpload } from "@/components/ImageUpload";
 import { PostToc } from "@/components/PostToc";
@@ -54,6 +60,18 @@ export interface PostEditorInitial {
   tags: string;
   imageUrl: string;
   published: boolean;
+  /**
+   * Buffered, not-yet-published edits to a published post. When present the
+   * editor opens on these (resume where you left off) while the live columns
+   * above stay frozen for the public until "Publish changes".
+   */
+  draft?: {
+    title: string;
+    content: string;
+    microview: string;
+    tags: string;
+    imageUrl: string;
+  } | null;
 }
 
 const MICROVIEW_MAX = 180;
@@ -70,17 +88,42 @@ function slugify(s: string) {
   );
 }
 
+// Canonical form of the editable fields — used both as the save payload and to
+// compare the current state against the last-published values (dirty check).
+function normalizePost(s: {
+  title: string;
+  content: string;
+  microview: string;
+  tags: string;
+  imageUrl: string;
+}) {
+  return {
+    title: s.title.trim() || "Untitled",
+    content: s.content.trim() || " ",
+    microview: s.microview.trim() || null,
+    tags: s.tags || null,
+    imageUrl: s.imageUrl || null,
+  };
+}
+
 export function PostEditor({ postId, initial }: { postId?: number; initial: PostEditorInitial }) {
   const router = useRouter();
   const qc = useQueryClient();
 
+  // `base` is the last-published (live) snapshot; `start` is what the editor
+  // opens on — the buffered draft if one exists, otherwise the live values.
+  const base = initial;
+  const start = initial.draft ?? initial;
+
   const [id, setId] = useState<number | undefined>(postId);
-  const [title, setTitle] = useState(initial.title);
-  const [content, setContent] = useState(initial.content);
-  const [microview, setMicroview] = useState(initial.microview);
-  const [tags, setTags] = useState(initial.tags);
-  const [imageUrl, setImageUrl] = useState(initial.imageUrl);
+  const [title, setTitle] = useState(start.title);
+  const [content, setContent] = useState(start.content);
+  const [microview, setMicroview] = useState(start.microview);
+  const [tags, setTags] = useState(start.tags);
+  const [imageUrl, setImageUrl] = useState(start.imageUrl);
   const [published, setPublished] = useState(initial.published);
+  // True when a published post has buffered edits not yet pushed live.
+  const [hasDraft, setHasDraft] = useState(!!initial.draft);
 
   const [preview, setPreview] = useState(false);
   const [metaOpen, setMetaOpen] = useState(false);
@@ -113,6 +156,14 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   stateRef.current = { id, title, content, microview, tags, imageUrl, published };
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
+  // Set to skip the next debounced autosave — used after discarding a draft so
+  // resetting the fields to live values doesn't immediately re-buffer them.
+  const suppressAutosaveRef = useRef(false);
+  // The last-published (live) snapshot, updated on every live write. Editing a
+  // published post back to these values means there are no real changes to
+  // buffer, so the draft is cleared.
+  const baseRef = useRef(normalizePost(base));
+  const hasDraftRef = useRef(!!initial.draft);
 
   // Images and videos ride the same node/markdown pipeline — a video is just an
   // image node whose src points at a video file (see imageTitle.isVideoSrc).
@@ -155,7 +206,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
       }),
       CodeBlockTab,
     ],
-    content: initial.content,
+    content: start.content,
     editorProps: {
       attributes: {
         class: "post-editor-content focus:outline-none min-h-[60vh]",
@@ -234,20 +285,37 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
 
       savingRef.current = true;
       setStatus("saving");
-      const data = {
-        title: cur.title.trim() || "Untitled",
-        content: cur.content.trim() || " ",
-        microview: cur.microview.trim() || null,
-        tags: cur.tags || null,
-        imageUrl: cur.imageUrl || null,
-        published: publishedNow,
-      };
+      const data = normalizePost(cur);
+      // A plain autosave (no publish override) of an already-published post
+      // buffers to the draft column instead of touching the live/public copy.
+      const bufferOnly = opts?.publishOverride === undefined && cur.published && !!cur.id;
+      // Have the editable fields diverged from the last-published values?
+      const isDirty = JSON.stringify(data) !== JSON.stringify(baseRef.current);
       try {
-        if (cur.id) {
-          await updateMicroblog(cur.id, data);
+        if (bufferOnly && cur.id) {
+          if (!isDirty) {
+            // Edited back to the live version — drop any buffered draft so the
+            // "Publish changes"/"Discard" controls disappear.
+            if (hasDraftRef.current) {
+              await discardMicroblogDraft(cur.id);
+              hasDraftRef.current = false;
+              setHasDraft(false);
+            }
+            setStatus("saved");
+            return;
+          }
+          await saveMicroblogDraft(cur.id, data);
+          hasDraftRef.current = true;
+          setHasDraft(true);
+        } else if (cur.id) {
+          await updateMicroblog(cur.id, { ...data, published: publishedNow });
+          baseRef.current = data;
+          hasDraftRef.current = false;
+          setHasDraft(false);
         } else {
-          const { id: newId } = await createMicroblog(data);
+          const { id: newId } = await createMicroblog({ ...data, published: publishedNow });
           setId(newId);
+          baseRef.current = data;
           window.history.replaceState(null, "", `/admin/microblogs/${newId}/edit`);
         }
         // The admin list caches rows in React Query; mark them stale so the list
@@ -269,6 +337,10 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   // latest values from stateRef and is stable, so it isn't a dependency.
   useEffect(() => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
+    if (suppressAutosaveRef.current) {
+      suppressAutosaveRef.current = false;
+      return;
+    }
     saveTimer.current = setTimeout(() => doSave({ silent: true }), 1300);
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -293,6 +365,35 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     stateRef.current.published = next;
     await doSave({ publishOverride: next });
   }, [doSave]);
+
+  // Push buffered draft edits to the live/public copy (post stays published).
+  const handlePublishChanges = useCallback(async () => {
+    if (!stateRef.current.microview.trim()) {
+      toast.error("Add a microview before publishing");
+      setMetaOpen(true);
+      return;
+    }
+    await doSave({ publishOverride: true });
+  }, [doSave]);
+
+  // Drop the buffered draft and reset the editor to the last-published values.
+  const handleDiscard = useCallback(async () => {
+    const cur = stateRef.current;
+    if (!cur.id) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    await discardMicroblogDraft(cur.id);
+    suppressAutosaveRef.current = true; // resetting fields shouldn't re-buffer
+    setTitle(base.title);
+    setContent(base.content);
+    setMicroview(base.microview);
+    setTags(base.tags);
+    setImageUrl(base.imageUrl);
+    editor?.commands.setContent(base.content);
+    hasDraftRef.current = false;
+    setHasDraft(false);
+    setStatus("saved");
+    toast.success("Changes discarded");
+  }, [base, editor]);
 
   const insertImage = useCallback(
     (url: string) => {
@@ -373,13 +474,15 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   const statusLabel =
     status === "saving"
       ? "Saving…"
-      : status === "saved"
-        ? "Saved"
-        : status === "error"
-          ? "Save failed"
-          : id
+      : status === "error"
+        ? "Save failed"
+        : published && hasDraft
+          ? "Unpublished changes"
+          : status === "saved"
             ? "Saved"
-            : "Draft";
+            : id
+              ? "Saved"
+              : "Draft";
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-bg text-fg">
@@ -394,15 +497,24 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             <ArrowLeft weight="thin" className="h-4 w-4" />
             <span className="hidden sm:inline">Posts</span>
           </button>
-          <span className="flex items-center gap-1.5 text-[11px] text-fg/40">
+          <span
+            className={`flex items-center gap-1.5 text-[11px] ${
+              published && hasDraft && status !== "saving" ? "text-amber-500" : "text-fg/40"
+            }`}
+          >
             {status === "saving" ? (
               <CloudArrowUp weight="thin" className="h-3.5 w-3.5" />
             ) : status === "error" ? (
               <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+            ) : published && hasDraft ? (
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-bounce" />
             ) : (
               <Check weight="thin" className="h-3.5 w-3.5" />
             )}
-            {statusLabel}
+            {/* On mobile the buffered-changes state is just the bouncing dot. */}
+            <span className={published && hasDraft ? "hidden sm:inline" : undefined}>
+              {statusLabel}
+            </span>
           </span>
         </div>
 
@@ -457,6 +569,18 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             <span className="hidden sm:inline">Details</span>
           </button>
 
+          {published && hasDraft && (
+            <button
+              type="button"
+              onClick={handleDiscard}
+              aria-label="Discard changes"
+              className="ml-0.5 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs text-fg/60 hover:bg-hover-bg hover:text-fg transition-colors sm:px-3"
+            >
+              <ArrowCounterClockwise weight="thin" className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">Discard</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handlePublish}
@@ -472,6 +596,18 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             )}
             <span className="hidden sm:inline">{published ? "Unpublish" : "Publish"}</span>
           </button>
+
+          {published && hasDraft && (
+            <button
+              type="button"
+              onClick={handlePublishChanges}
+              aria-label="Publish changes"
+              className="ml-0.5 flex items-center gap-1.5 rounded-lg bg-fg px-2 py-1.5 text-xs font-medium text-bg transition-all hover:opacity-90 sm:px-3"
+            >
+              <CloudArrowUp weight="thin" className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">Publish changes</span>
+            </button>
+          )}
         </div>
       </header>
 
