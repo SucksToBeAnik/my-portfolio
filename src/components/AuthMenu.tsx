@@ -1,6 +1,7 @@
 "use client";
 
 import { Envelope, Lock, UserCircle } from "@phosphor-icons/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
@@ -79,9 +80,13 @@ export function AuthMenu({
   if (isLoggedIn) {
     return (
       <Link href="/admin/dashboard" aria-label="Admin dashboard" className={triggerCls}>
-        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-nav-active-bg text-nav-active-text text-[10px] font-medium">
-          A
-        </span>
+        <Image
+          src="/logo.png"
+          alt="Admin"
+          width={28}
+          height={28}
+          className="w-7 h-7 rounded-full object-cover"
+        />
       </Link>
     );
   }
