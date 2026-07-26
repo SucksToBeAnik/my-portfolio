@@ -153,9 +153,12 @@ function LocalTime() {
   useEffect(() => {
     const format = () =>
       setTime(
-        new Intl.DateTimeFormat("en-US", {
+        new Intl.DateTimeFormat("en-GB", {
           timeZone: TIME_ZONE,
-          hour: "numeric",
+          // 24-hour: the trailing "AM"/"PM" is three characters the byline row
+          // can't spare on a phone.
+          hour12: false,
+          hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
         }).format(new Date()),
@@ -166,8 +169,8 @@ function LocalTime() {
   }, []);
 
   return (
-    <p className="flex items-center gap-2 font-heading text-xs tracking-wider text-fg/50">
-      <Clock weight="regular" className="h-4 w-4 shrink-0" />
+    <p className="flex shrink-0 items-center gap-1.5 whitespace-nowrap font-heading text-[11px] tracking-normal text-fg/50 sm:gap-2 sm:text-xs sm:tracking-wider">
+      <Clock weight="regular" className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
       {/* min-height holds the row while the clock is still null on first paint. */}
       <span className="min-h-[1em] tabular-nums">{time && `${time} ${TIME_ZONE_LABEL}`}</span>
     </p>
@@ -231,17 +234,21 @@ export function HomeFooter() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        {/* One row at every width: no wrapping, so the tracking and both type
+            sizes tighten on phones instead of the clock dropping to its own line. */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
             <Image
               src="/profile.jpeg"
               alt="Al Jami Islam Anik"
               width={36}
               height={36}
-              className="h-9 w-9 rounded-xl object-cover"
+              className="h-8 w-8 shrink-0 rounded-xl object-cover sm:h-9 sm:w-9"
             />
-            <span className="font-heading text-xs uppercase tracking-[0.16em] text-fg/50">
-              Al Jami Islam Anik
+            {/* Phones get the short name so the row never wraps or truncates. */}
+            <span className="font-heading text-[11px] uppercase tracking-[0.1em] text-fg/50 sm:text-xs sm:tracking-[0.16em]">
+              <span className="sm:hidden">Anik</span>
+              <span className="hidden sm:inline">Al Jami Islam Anik</span>
             </span>
           </div>
           <LocalTime />
