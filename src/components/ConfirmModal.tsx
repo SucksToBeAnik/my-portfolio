@@ -47,6 +47,7 @@ export function ConfirmModal({
           <button
             type="button"
             onClick={onConfirm}
+            data-sound="success"
             className="px-3 py-1.5 text-xs font-medium bg-red-500/80 text-white rounded-lg hover:bg-red-500 transition-all"
           >
             {confirmLabel}

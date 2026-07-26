@@ -13,8 +13,11 @@ export default auth((req) => {
     });
   }
 
+  // Asking for an admin route while signed out lands on the login form rather
+  // than the homepage: /admin is the address you'd type from memory, and it
+  // should get you somewhere useful.
   if (!req.auth && url.pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/", url));
+    return NextResponse.redirect(new URL("/login", url));
   }
 
   return res;

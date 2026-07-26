@@ -6,7 +6,7 @@ type Theme = "dark" | "light";
 
 const ThemeContext = createContext<{
   theme: Theme;
-  toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
 } | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -27,11 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("theme", theme);
   }, [theme, mounted]);
 
-  const toggleTheme = () => {
-    setTheme((t) => (t === "dark" ? "light" : "dark"));
-  };
-
-  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

@@ -5,9 +5,7 @@ import {
   Briefcase,
   Heart,
   House,
-  Moon,
   Quotes,
-  SunDim,
   Television,
   Wrench,
 } from "@phosphor-icons/react";
@@ -15,8 +13,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { AuthMenu } from "@/components/AuthMenu";
-import { useTheme } from "@/lib/ThemeProvider";
+import { PreferencesMenu } from "@/components/PreferencesMenu";
 
 const ChatPopup = dynamic(() => import("@/components/ChatPopup").then((m) => m.ChatPopup), {
   ssr: false,
@@ -197,13 +194,17 @@ function RailItem({
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { theme, toggleTheme } = useTheme();
   const [chatOpen, setChatOpen] = useState(false);
   const chatOpenRef = useRef(false);
   useEffect(() => {
     chatOpenRef.current = chatOpen;
   }, [chatOpen]);
   const [hoveredRail, setHoveredRail] = useState<number | null>(null);
+  // The mobile pill and the desktop rail are both mounted at all times (only
+  // hidden by breakpoint), so they need separate open state — sharing one would
+  // let the hidden copy's outside-click handler close the visible popover.
+  const [pillPrefsOpen, setPillPrefsOpen] = useState(false);
+  const [railPrefsOpen, setRailPrefsOpen] = useState(false);
 
   // Reset the rail magnification on navigation: clicking a tile that leaves for
   // a page without the nav (e.g. /admin) unmounts the rail before onMouseLeave
@@ -258,7 +259,9 @@ export function BottomNav() {
     <>
       <ChatPopup open={chatOpen} onClose={() => setChatOpen(false)} />
       <nav className="fixed bottom-0 left-0 right-0 flex justify-center pb-4 pointer-events-none z-50 lg:hidden">
-        <div className="flex items-center justify-center w-full max-w-[700px] mx-4 px-1.5 py-1.5 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
+        {/* Width comes from the tiles, not the viewport — the pill should read as
+            a floating object, so it hugs its contents and stays centred. */}
+        <div className="flex items-center justify-center max-w-[calc(100%-2rem)] px-1.5 py-1.5 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
           <div className="flex items-center gap-0 sm:gap-0.5">
             {navItems.map((item) => (
               <NavItem
@@ -273,27 +276,18 @@ export function BottomNav() {
 
           <div className="flex items-center shrink-0 ml-1">
             <div className="w-px h-4 mx-2 bg-nav-border" />
-            <AuthMenu />
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-sm text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 cursor-pointer"
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? (
-                <SunDim weight="thin" className="w-4 h-4 shrink-0" />
-              ) : (
-                <Moon weight="thin" className="w-4 h-4 shrink-0" />
-              )}
-            </button>
+            <PreferencesMenu open={pillPrefsOpen} onOpenChange={setPillPrefsOpen} />
           </div>
         </div>
       </nav>
 
       {/* Left rail (desktop) — icon tiles, hover reveals the label + Dock-style magnify */}
       {(() => {
+        // Magnification is suspended while the preferences popover is open: the
+        // popover is anchored to its tile, so letting that tile resize under an
+        // open menu would slide the menu around.
         const sc = (pos: number) =>
-          hoveredRail === null ? 1 : railScale(Math.abs(pos - hoveredRail));
+          hoveredRail === null || railPrefsOpen ? 1 : railScale(Math.abs(pos - hoveredRail));
         // Nav tiles kept as one continuous position sequence so the
         // magnification reads spatially.
         const tiles = navItems.map((item) => ({
@@ -305,8 +299,7 @@ export function BottomNav() {
           icon: item.icon,
         }));
         const dividerPos = tiles.length;
-        const themePos = dividerPos + 1;
-        const authPos = dividerPos + 2;
+        const prefsPos = dividerPos + 1;
         return (
           <nav
             className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-50 flex-col items-start gap-2"
@@ -334,27 +327,24 @@ export function BottomNav() {
               onMouseEnter={() => setHoveredRail(dividerPos)}
             />
 
-            <RailItem
-              label={theme === "dark" ? "Light" : "Dark"}
-              onClick={toggleTheme}
-              scale={sc(themePos)}
-              onMouseEnter={() => setHoveredRail(themePos)}
-            >
-              {theme === "dark" ? (
-                <SunDim weight="thin" className="w-5 h-5 shrink-0" />
-              ) : (
-                <Moon weight="thin" className="w-5 h-5 shrink-0" />
-              )}
-            </RailItem>
             <div
-              className="flex items-center justify-center rounded-2xl bg-nav-bg text-nav-text hover:bg-hover-bg hover:text-nav-text-hover transition-all duration-200 ease-out shrink-0"
+              className={`flex items-center justify-center rounded-2xl transition-all duration-200 ease-out shrink-0 ${
+                railPrefsOpen
+                  ? "bg-hover-bg text-nav-text-hover"
+                  : "bg-nav-bg text-nav-text hover:bg-hover-bg hover:text-nav-text-hover"
+              }`}
               style={{
-                width: `${RAIL_BASE * sc(authPos)}px`,
-                height: `${RAIL_BASE * sc(authPos)}px`,
+                width: `${RAIL_BASE * sc(prefsPos)}px`,
+                height: `${RAIL_BASE * sc(prefsPos)}px`,
               }}
-              onMouseEnter={() => setHoveredRail(authPos)}
+              onMouseEnter={() => setHoveredRail(prefsPos)}
             >
-              <AuthMenu placement="right" fill />
+              <PreferencesMenu
+                open={railPrefsOpen}
+                onOpenChange={setRailPrefsOpen}
+                placement="right"
+                fill
+              />
             </div>
           </nav>
         );

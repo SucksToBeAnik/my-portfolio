@@ -11,7 +11,12 @@ interface HeartButtonProps {
   initialHearted?: boolean;
 }
 
-export function HeartButton({ entityType, entityId, initialCount, initialHearted }: HeartButtonProps) {
+export function HeartButton({
+  entityType,
+  entityId,
+  initialCount,
+  initialHearted,
+}: HeartButtonProps) {
   const [hearted, setHearted] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [heartedLoaded, setHeartedLoaded] = useState(false);
@@ -50,6 +55,7 @@ export function HeartButton({ entityType, entityId, initialCount, initialHearted
     <button
       type="button"
       onClick={handleClick}
+      data-sound="success"
       disabled={pending || !heartedLoaded}
       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-hover-bg transition-all cursor-pointer disabled:opacity-50 hover:scale-105"
     >

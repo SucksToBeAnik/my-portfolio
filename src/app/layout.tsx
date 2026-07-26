@@ -8,6 +8,7 @@ import { PageShell } from "@/components/PageShell";
 import { QuickAddGate } from "@/components/QuickAddGate";
 import { SearchOverlay } from "@/components/SearchOverlay";
 import { QueryProvider } from "@/lib/QueryProvider";
+import { SoundProvider } from "@/lib/SoundProvider";
 import { siteUrl } from "@/lib/seo";
 import { ThemeProvider } from "@/lib/ThemeProvider";
 
@@ -96,13 +97,15 @@ export default function RootLayout({
             is the price of the nav login menu; focus-refetch is disabled. */}
         <SessionProvider refetchOnWindowFocus={false}>
           <ThemeProvider>
-            <QueryProvider>
-              <NavHistoryTracker />
-              <PageShell>{children}</PageShell>
-              <BottomNav />
-              <SearchOverlay />
-              <QuickAddGate />
-            </QueryProvider>
+            <SoundProvider>
+              <QueryProvider>
+                <NavHistoryTracker />
+                <PageShell>{children}</PageShell>
+                <BottomNav />
+                <SearchOverlay />
+                <QuickAddGate />
+              </QueryProvider>
+            </SoundProvider>
           </ThemeProvider>
         </SessionProvider>
       </body>

@@ -33,6 +33,7 @@
     "@tiptap/suggestion": "^3.28.0",
     "ai": "^6.0.207",
     "bcryptjs": "^3.0.3",
+    "cuelume": "^0.1.2",
     "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.2",
     "envalid": "^8.2.0",

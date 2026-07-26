@@ -628,6 +628,7 @@ export function ProjectEditor({
           <button
             type="button"
             onClick={handlePublish}
+            data-sound="success"
             aria-label={published ? "Unpublish" : "Publish"}
             className={`ml-0.5 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-all sm:px-3 ${
               published ? "bg-hover-bg text-fg/70 hover:text-fg" : "bg-fg text-bg hover:opacity-90"
@@ -645,6 +646,7 @@ export function ProjectEditor({
             <button
               type="button"
               onClick={handlePublishChanges}
+              data-sound="success"
               aria-label="Publish changes"
               className="ml-0.5 flex items-center gap-1.5 rounded-lg bg-fg px-2 py-1.5 text-xs font-medium text-bg transition-all hover:opacity-90 sm:px-3"
             >
