@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ExploreStack, type ExploreStackVariant } from "@/components/ExploreStack";
+import { TileSketch } from "@/components/TileSketch";
 import type { ExploreSection, ExploreSectionKey } from "@/lib/explore";
 
 /**
@@ -51,10 +52,13 @@ export function ExploreTiles({
             <Link
               key={tile.href}
               href={tile.href}
-              className="group/tile flex flex-col items-center gap-3 px-2 py-7 transition-colors hover:bg-hover-bg/40 sm:px-4 sm:py-8"
+              className="group/tile relative flex flex-col items-center gap-3 px-2 py-7 transition-colors hover:bg-hover-bg/40 sm:px-4 sm:py-8"
             >
+              {/* Sits behind everything; the label needs `relative` of its own
+                  to out-paint an absolutely positioned sibling. */}
+              <TileSketch seed={tile.key} />
               <ExploreStack variant={tile.variant} images={images} />
-              <div className="space-y-1 text-center">
+              <div className="relative space-y-1 text-center">
                 <p className="font-heading text-sm text-fg">{tile.label}</p>
                 <p className="text-xs text-muted">
                   {total} {total === 1 ? tile.noun[0] : tile.noun[1]}
