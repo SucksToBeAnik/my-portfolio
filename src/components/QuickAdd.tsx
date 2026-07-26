@@ -61,7 +61,7 @@ const TYPES: { id: ContentType; label: string; icon: React.ElementType; desc: st
   { id: "book", label: "Book", icon: BookOpenText, desc: "Add to reading list" },
   { id: "til", label: "TIL", icon: Lightbulb, desc: "Something you learned" },
   { id: "stack", label: "Stack", icon: Wrench, desc: "Tool or service" },
-  { id: "gallery", label: "Gallery", icon: Image, desc: "Photo to gallery" },
+  { id: "gallery", label: "Photos", icon: Image, desc: "Add a photo" },
 ];
 
 const COLS = 2;
@@ -428,7 +428,7 @@ export function QuickAdd() {
                 ? "Done"
                 : step === "form" && typeInfo
                   ? selectedType === "gallery"
-                    ? "Add to Gallery"
+                    ? "Add Photo"
                     : `Add ${typeInfo.label}`
                   : "Quick Add"}
             </span>
@@ -876,7 +876,7 @@ export function QuickAdd() {
               {loading
                 ? "Saving..."
                 : selectedType === "gallery"
-                  ? "Add to Gallery"
+                  ? "Add Photo"
                   : `Add ${typeInfo?.label}`}
             </button>
           </form>

@@ -22,7 +22,8 @@ export function HomeListRow({
     </>
   );
 
-  const cls = "group flex items-center justify-between gap-3 border-b border-hairline/50 py-2.5";
+  const cls =
+    "group flex items-center justify-between gap-3 border-b border-hairline/50 py-2.5 last:border-b-0";
 
   if (!href) {
     return <div className={cls}>{inner}</div>;

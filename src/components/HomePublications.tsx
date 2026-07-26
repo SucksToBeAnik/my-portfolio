@@ -19,7 +19,7 @@ export function HomePublications({ publications }: { publications: PublicationIt
 
   return (
     <section>
-      <SectionHeader label="Publications" />
+      <SectionHeader label="Publications" bordered />
       <div>
         {publications.map((pub) => (
           <HomeListRow

@@ -18,7 +18,7 @@ export function RecentPosts({ posts }: { posts: PostItem[] }) {
 
   return (
     <section>
-      <SectionHeader label="Recent Posts" />
+      <SectionHeader label="Recent Posts" href="/posts" linkLabel="View all" bordered />
       <div>
         {posts.map((post) => (
           <HomeListRow

@@ -3,9 +3,11 @@ import { desc, eq } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
 import { getShowcasedCv } from "@/actions/cvs";
+import { getFeaturedGallery } from "@/actions/gallery";
 import { AskButton } from "@/components/AskButton";
 import { CareerTrack } from "@/components/CareerTrack";
 import { CvLink } from "@/components/CvLink";
+import { FeaturedPhotos } from "@/components/FeaturedPhotos";
 import { HomePublications } from "@/components/HomePublications";
 import { LinkPreview } from "@/components/LinkPreview";
 import { RecentPosts } from "@/components/RecentPosts";
@@ -43,6 +45,7 @@ export default async function Home() {
     workingOnRow,
     workingOnUrlRow,
     showcasedCv,
+    featuredPhotos,
   ] = await Promise.all([
     db
       .select({
@@ -56,7 +59,7 @@ export default async function Home() {
       .from(projects)
       .where(eq(projects.featured, true))
       .orderBy(projects.sortOrder)
-      .limit(6),
+      .limit(4),
     db
       .select({
         id: publications.id,
@@ -91,6 +94,7 @@ export default async function Home() {
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
     getShowcasedCv(),
+    getFeaturedGallery(6),
   ]);
 
   const workingOn = workingOnRow[0]?.value ?? null;
@@ -207,6 +211,7 @@ export default async function Home() {
         <RecentPosts posts={recentPosts} />
         <HomePublications publications={allPublications} />
         <CareerTrack items={workEvents} />
+        <FeaturedPhotos photos={featuredPhotos} />
       </div>
     </>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { DotsSixVertical, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
+import { DotsSixVertical, PencilSimple, Plus, Star, Trash } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import {
   deleteGalleryItem,
   getGallery,
   reorderGallery,
+  toggleGalleryFeatured,
   updateGalleryItem,
 } from "@/actions/gallery";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -17,6 +18,7 @@ import { Drawer } from "@/components/Drawer";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Spinner } from "@/components/Spinner";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { MAX_FEATURED_PHOTOS } from "@/lib/photos";
 
 interface Item {
   id: number;
@@ -25,6 +27,7 @@ interface Item {
   width: number | null;
   height: number | null;
   takenAt: string | null;
+  featured: boolean | null;
 }
 
 function getImageDimensions(url: string): Promise<{ width: number; height: number }> {
@@ -36,9 +39,16 @@ function getImageDimensions(url: string): Promise<{ width: number; height: numbe
   });
 }
 
-const empty = { title: "", imageUrl: "", width: null, height: null, takenAt: null as string | null };
+const empty = {
+  title: "",
+  imageUrl: "",
+  width: null,
+  height: null,
+  takenAt: null as string | null,
+  featured: false,
+};
 
-export default function GalleryAdminPage() {
+export default function PhotosAdminPage() {
   const qc = useQueryClient();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -108,6 +118,24 @@ export default function GalleryAdminPage() {
     onSettled: () => qc.invalidateQueries({ queryKey: ["gallery"] }),
   });
 
+  const featureMut = useMutation({
+    mutationFn: ({ id, featured }: { id: number; featured: boolean }) =>
+      toggleGalleryFeatured(id, featured),
+    onMutate: async ({ id, featured }) => {
+      await qc.cancelQueries({ queryKey: ["gallery"] });
+      const prev = qc.getQueryData<Item[]>(["gallery"]);
+      qc.setQueryData<Item[]>(["gallery"], (old) =>
+        old?.map((item) => (item.id === id ? { ...item, featured } : item)),
+      );
+      return { prev };
+    },
+    onError: (_err, _data, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["gallery"], ctx.prev);
+      toast.error("Failed to update");
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["gallery"] }),
+  });
+
   const reorderMut = useMutation({
     mutationFn: (items: { id: number; sortOrder: number }[]) => reorderGallery(items),
     onError: () => toast.error("Failed to reorder"),
@@ -124,6 +152,18 @@ export default function GalleryAdminPage() {
     reorderMut.mutate(updates);
   }
 
+  const featuredCount = items.filter((item) => item.featured).length;
+
+  function toggleFeatured(item: Item) {
+    // Checked here as well as server-side so the admin gets a real explanation
+    // instead of a generic action failure.
+    if (!item.featured && featuredCount >= MAX_FEATURED_PHOTOS) {
+      toast.error(`Only ${MAX_FEATURED_PHOTOS} photos can be featured at once`);
+      return;
+    }
+    featureMut.mutate({ id: item.id, featured: !item.featured });
+  }
+
   const isPending = createMut.isPending || updateMut.isPending;
   const f = (k: string) => (form as any)?.[k] ?? "";
   const s = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
@@ -135,7 +175,12 @@ export default function GalleryAdminPage() {
   return (
     <div className="space-y-6">
       <div className="sticky top-0 z-10 -mx-4 md:-mx-6 px-4 md:px-6 pt-5 md:pt-2 pb-3 bg-bg/70 backdrop-blur-md flex items-center justify-between">
-        <h1 className="text-lg font-heading">Gallery</h1>
+        <div className="flex items-baseline gap-2.5">
+          <h1 className="text-lg font-heading">Photos</h1>
+          <span className="text-[11px] text-fg/40">
+            {featuredCount}/{MAX_FEATURED_PHOTOS} featured
+          </span>
+        </div>
         <button
           onClick={() => {
             setForm(empty);
@@ -188,6 +233,13 @@ export default function GalleryAdminPage() {
                       </div>
                       <div className="flex gap-1.5 shrink-0 ml-3">
                         <button
+                          onClick={() => toggleFeatured(item)}
+                          title={item.featured ? "Remove from homepage" : "Feature on homepage"}
+                          className={`p-2.5 rounded-lg transition-all hover:bg-hover-bg ${item.featured ? "text-fg" : "text-fg/30 hover:text-fg/60"}`}
+                        >
+                          <Star weight={item.featured ? "fill" : "thin"} className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => {
                             setForm(item);
                             setEditId(item.id);
@@ -217,7 +269,7 @@ export default function GalleryAdminPage() {
         </Droppable>
       </DragDropContext>
 
-      {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No images yet.</p>}
+      {items.length === 0 && <p className="text-xs text-fg/50 text-center py-8">No photos yet.</p>}
 
       {confirmId === null && (
         <Drawer
@@ -227,7 +279,7 @@ export default function GalleryAdminPage() {
             setEditId(null);
             setDrawerOpen(false);
           }}
-          title={editId ? "Edit Image" : "Add Image"}
+          title={editId ? "Edit Photo" : "Add Photo"}
           headerActions={
             <div className="flex items-center gap-2">
               <button
@@ -307,7 +359,7 @@ export default function GalleryAdminPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-fg/50">Image</label>
+              <label className="text-xs text-fg/50">Photo</label>
               <ImageUpload
                 key={drawerOpen ? (editId ?? "new") : "closed"}
                 value={f("imageUrl")}
@@ -339,8 +391,8 @@ export default function GalleryAdminPage() {
 
       <ConfirmModal
         open={confirmId !== null}
-        title="Delete image"
-        message="Are you sure you want to delete this image?"
+        title="Delete photo"
+        message="Are you sure you want to delete this photo?"
         confirmLabel="Delete"
         onConfirm={() => {
           if (confirmId !== null) deleteMut.mutate(confirmId);

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { gallery } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import { MAX_FEATURED_PHOTOS } from "@/lib/photos";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -13,10 +14,35 @@ const schema = z.object({
   width: z.number().int().positive().nullable().optional(),
   height: z.number().int().positive().nullable().optional(),
   takenAt: z.string().nullable().optional(),
+  featured: z.boolean().optional(),
 });
+
+// Photos surface in three places: the admin list, the /photos page, and the
+// featured pile on the homepage.
+function revalidateGallery() {
+  revalidatePath("/admin/photos");
+  revalidatePath("/photos");
+  revalidatePath("/");
+}
 
 export async function getGallery() {
   return db.select().from(gallery).orderBy(asc(gallery.sortOrder));
+}
+
+export async function getFeaturedGallery(limit = MAX_FEATURED_PHOTOS) {
+  return db
+    .select({
+      id: gallery.id,
+      title: gallery.title,
+      imageUrl: gallery.imageUrl,
+      width: gallery.width,
+      height: gallery.height,
+      takenAt: gallery.takenAt,
+    })
+    .from(gallery)
+    .where(eq(gallery.featured, true))
+    .orderBy(asc(gallery.sortOrder))
+    .limit(limit);
 }
 
 export async function createGalleryItem(data: z.infer<typeof schema>) {
@@ -33,10 +59,10 @@ export async function createGalleryItem(data: z.infer<typeof schema>) {
     width: parsed.width ?? null,
     height: parsed.height ?? null,
     takenAt: parsed.takenAt ?? null,
+    featured: parsed.featured ?? false,
     sortOrder: maxOrder + 1,
   });
-  revalidatePath("/admin/gallery");
-  revalidatePath("/life");
+  revalidateGallery();
 }
 
 export async function updateGalleryItem(id: number, data: z.infer<typeof schema>) {
@@ -50,17 +76,35 @@ export async function updateGalleryItem(id: number, data: z.infer<typeof schema>
       width: parsed.width ?? null,
       height: parsed.height ?? null,
       takenAt: parsed.takenAt ?? null,
+      featured: parsed.featured ?? false,
     })
     .where(eq(gallery.id, id));
-  revalidatePath("/admin/gallery");
-  revalidatePath("/life");
+  revalidateGallery();
+}
+
+export async function toggleGalleryFeatured(id: number, featured: boolean) {
+  await requireAdmin();
+
+  // The homepage pile has a fixed number of slots, so featuring is capped.
+  if (featured) {
+    const count = await db
+      .select({ n: sql<number>`count(*)` })
+      .from(gallery)
+      .where(eq(gallery.featured, true))
+      .then((r) => r[0]?.n ?? 0);
+    if (count >= MAX_FEATURED_PHOTOS) {
+      throw new Error(`Only ${MAX_FEATURED_PHOTOS} photos can be featured at once.`);
+    }
+  }
+
+  await db.update(gallery).set({ featured }).where(eq(gallery.id, id));
+  revalidateGallery();
 }
 
 export async function deleteGalleryItem(id: number) {
   await requireAdmin();
   await db.delete(gallery).where(eq(gallery.id, id));
-  revalidatePath("/admin/gallery");
-  revalidatePath("/life");
+  revalidateGallery();
 }
 
 export async function reorderGallery(items: { id: number; sortOrder: number }[]) {
@@ -70,6 +114,5 @@ export async function reorderGallery(items: { id: number; sortOrder: number }[])
       db.update(gallery).set({ sortOrder }).where(eq(gallery.id, id)),
     ),
   );
-  revalidatePath("/admin/gallery");
-  revalidatePath("/life");
+  revalidateGallery();
 }

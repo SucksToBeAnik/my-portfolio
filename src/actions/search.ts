@@ -47,6 +47,7 @@ const staticPages: SearchIndexItem[] = [
     type: "page",
   },
   { id: 22, title: "Sites", subtitle: "Websites I find useful", url: "/sites", type: "page" },
+  { id: 23, title: "Photos", subtitle: "Photographs", url: "/photos", type: "page" },
 ];
 
 const adminPages: SearchIndexItem[] = [
@@ -97,9 +98,9 @@ const adminPages: SearchIndexItem[] = [
   },
   {
     id: 109,
-    title: "Admin / Gallery",
-    subtitle: "Manage gallery images",
-    url: "/admin/gallery",
+    title: "Admin / Photos",
+    subtitle: "Manage photos",
+    url: "/admin/photos",
     type: "page",
   },
   {
@@ -231,7 +232,7 @@ export async function getSearchIndex() {
       id: g.id,
       title: g.title,
       subtitle: g.takenAt ? new Date(g.takenAt).getFullYear().toString() : "",
-      url: "/life?tab=gallery",
+      url: "/photos",
       type: "gallery" as const,
     })),
   ];

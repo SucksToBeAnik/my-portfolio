@@ -28,7 +28,7 @@ const typeConfig: Record<string, { icon: React.ElementType; label: string }> = {
   lifeEvent: { icon: Heart, label: "Life" },
   stack: { icon: Wrench, label: "Stacks" },
   media: { icon: Television, label: "Media" },
-  gallery: { icon: Image, label: "Gallery" },
+  gallery: { icon: Image, label: "Photos" },
 };
 
 const typeOrder = [
@@ -61,6 +61,10 @@ const TYPE_ALIAS: Record<string, string> = {
   stack: "stack",
   stacks: "stack",
   media: "media",
+  // The index key stays `gallery` (it's the table name); `@photos` is the
+  // label users see, with `@gallery` kept as an alias.
+  photo: "gallery",
+  photos: "gallery",
   gallery: "gallery",
   galleries: "gallery",
 };
@@ -75,7 +79,7 @@ const TYPE_SUGGESTIONS = [
   "@life",
   "@stacks",
   "@media",
-  "@gallery",
+  "@photos",
 ];
 
 function escapeRegex(s: string) {
@@ -248,7 +252,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
           <input
             ref={inputRef}
             type="text"
-            placeholder='Search or use @gallery, @stacks, @til...'
+            placeholder='Search or use @photos, @stacks, @til...'
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}

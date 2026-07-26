@@ -1,8 +1,7 @@
-import { Suspense } from "react";
 import { asc } from "drizzle-orm";
-import { LifeContent } from "./LifeContent";
 import { db } from "@/db";
-import { gallery, lifeEvents } from "@/db/schema";
+import { lifeEvents } from "@/db/schema";
+import { LifeContent } from "./LifeContent";
 
 export const metadata = {
   title: "Life",
@@ -21,14 +20,7 @@ export const metadata = {
 export const revalidate = 3600;
 
 export default async function LifePage() {
-  const [items, galleryItems] = await Promise.all([
-    db.select().from(lifeEvents).orderBy(asc(lifeEvents.sortOrder)),
-    db.select().from(gallery).orderBy(asc(gallery.sortOrder)),
-  ]);
+  const items = await db.select().from(lifeEvents).orderBy(asc(lifeEvents.sortOrder));
 
-  return (
-    <Suspense>
-      <LifeContent items={items} galleryItems={galleryItems} />
-    </Suspense>
-  );
+  return <LifeContent items={items} />;
 }

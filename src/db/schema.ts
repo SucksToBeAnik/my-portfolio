@@ -194,6 +194,7 @@ export const gallery = sqliteTable("gallery", {
   width: integer("width"),
   height: integer("height"),
   takenAt: text("taken_at"),
+  featured: integer("featured", { mode: "boolean" }).default(false),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
