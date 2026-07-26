@@ -31,7 +31,7 @@ export default async function TilPage() {
       <div className="mb-8 md:mb-12">
         <Breadcrumb
           crumbs={[
-            { icon: <Quotes weight="thin" className="w-3.5 h-3.5" />, href: "/posts" },
+            { icon: <Quotes weight="regular" className="w-4 h-4" />, href: "/posts" },
             { label: "Today I Learned" },
           ]}
         />

@@ -116,7 +116,7 @@ export function PostToc({
 
       {/* Expanded: the section list, swapped in over the bars on hover. */}
       <nav
-        className={`absolute left-0 top-1/2 min-w-[200px] max-w-[240px] -translate-y-1/2 rounded-2xl border border-nav-border bg-nav-popup-bg p-3 shadow-xl backdrop-blur-xl transition-all duration-200 ${
+        className={`absolute left-0 top-1/2 min-w-[200px] max-w-[240px] -translate-y-1/2 rounded-2xl border border-nav-border bg-nav-popup-bg p-3 shadow-xl transition-all duration-200 ${
           open ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-2 opacity-0"
         }`}
       >

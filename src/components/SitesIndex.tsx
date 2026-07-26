@@ -105,7 +105,7 @@ export function SitesIndex({ sites }: { sites: SiteEntry[] }) {
       <div className="flex items-center justify-between mb-8 md:mb-12">
         <Breadcrumb
           crumbs={[
-            { icon: <Wrench weight="thin" className="w-3.5 h-3.5" />, href: "/stacks" },
+            { icon: <Wrench weight="regular" className="w-4 h-4" />, href: "/stacks" },
             { label: "Sites I Find Useful" },
           ]}
         />

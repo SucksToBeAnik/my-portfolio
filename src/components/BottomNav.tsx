@@ -110,7 +110,7 @@ function NavItem({
       }}
     >
       {open && (
-        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 flex flex-col items-stretch bg-nav-popup-bg backdrop-blur-xl border border-nav-border rounded-2xl px-1.5 py-1.5 shadow-xl min-w-max">
+        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 flex flex-col items-stretch bg-nav-popup-bg border border-nav-border rounded-2xl px-1.5 py-1.5 shadow-xl min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.href}
@@ -204,7 +204,7 @@ export function BottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 flex justify-center pb-4 pointer-events-none z-50">
         {/* Width comes from the tiles, not the viewport — the pill should read as
             a floating object, so it hugs its contents and stays centred. */}
-        <div className="flex items-center justify-center max-w-[calc(100%-2rem)] px-1.5 py-1.5 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
+        <div className="flex items-center justify-center max-w-[calc(100%-2rem)] px-1.5 py-1.5 bg-nav-bg rounded-full border border-nav-border shadow-lg pointer-events-auto">
           <div className="flex items-center gap-1">
             {navItems.map((item, i) => (
               <Fragment key={item.href}>

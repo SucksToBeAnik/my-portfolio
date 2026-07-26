@@ -132,7 +132,7 @@ export function PreferencesMenu({
 
       {open && (
         <div
-          className={`absolute w-56 py-1.5 bg-nav-popup-bg backdrop-blur-xl border border-nav-border rounded-2xl shadow-2xl overflow-hidden z-[100] ${
+          className={`absolute w-56 py-1.5 bg-nav-popup-bg border border-nav-border rounded-2xl shadow-2xl overflow-hidden z-[100] ${
             placement === "right"
               ? "left-full bottom-0 ml-3"
               : "bottom-full right-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 mb-3"

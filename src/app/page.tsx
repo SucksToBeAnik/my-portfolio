@@ -9,6 +9,7 @@ import { CareerTrack } from "@/components/CareerTrack";
 import { CvLink } from "@/components/CvLink";
 import { ExploreTiles } from "@/components/ExploreTiles";
 import { FeaturedPhotos } from "@/components/FeaturedPhotos";
+import { HomeFooter } from "@/components/HomeFooter";
 import { HomePublications } from "@/components/HomePublications";
 import { LinkPreview } from "@/components/LinkPreview";
 import { RecentPosts } from "@/components/RecentPosts";
@@ -147,7 +148,7 @@ export default async function Home() {
               alt="Suckstobeanik"
               width={56}
               height={56}
-              className="rounded-full object-cover w-14 h-14"
+              className="rounded-2xl object-cover w-14 h-14"
             />
             {/* Ask used to sit beside search here; it lives in the nav pill now
                 so it's reachable from every page. */}
@@ -161,13 +162,13 @@ export default async function Home() {
               little bit of everything that interests me.
             </p>
             {workingOn && (
-              <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
-                <span className="text-fg/30">Currently working on </span>
+              <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs">
+                <span className="text-fg/55">Currently working on </span>
                 {workingOnUrl ? (
                   <Link
                     href={workingOnUrl}
                     target="_blank"
-                    className="font-medium text-fg/80 transition-colors hover:text-fg"
+                    className="font-medium text-fg/80 underline decoration-fg/30 underline-offset-4 transition-colors hover:text-fg hover:decoration-fg"
                   >
                     {workingOn}
                   </Link>
@@ -178,7 +179,10 @@ export default async function Home() {
             )}
           </div>
 
-          <div className="flex items-center gap-3 text-fg/60">
+          {/* `light` weight, not `thin`: hairline strokes disappear against the
+              near-white light background. Kept at a low opacity so the row stays
+              secondary to the intro above it. */}
+          <div className="flex items-center gap-3 text-fg/45">
             <LinkPreview url="https://github.com/SucksToBeAnik" position="bottom">
               <Link
                 href="https://github.com/SucksToBeAnik"
@@ -186,7 +190,7 @@ export default async function Home() {
                 className="flex items-center gap-1.5 hover:text-fg transition-colors"
                 aria-label="GitHub"
               >
-                <GithubLogo weight="thin" className="w-5 h-5" />
+                <GithubLogo weight="light" className="w-5 h-5" />
               </Link>
             </LinkPreview>
             <LinkPreview
@@ -199,7 +203,7 @@ export default async function Home() {
                 className="flex items-center gap-1.5 hover:text-fg transition-colors"
                 aria-label="LinkedIn"
               >
-                <LinkedinLogo weight="thin" className="w-5 h-5" />
+                <LinkedinLogo weight="light" className="w-5 h-5" />
               </Link>
             </LinkPreview>
             <LinkPreview url="https://x.com/suckstobeanik" position="bottom">
@@ -209,7 +213,7 @@ export default async function Home() {
                 className="flex items-center gap-1.5 hover:text-fg transition-colors"
                 aria-label="X / Twitter"
               >
-                <XLogo weight="thin" className="w-5 h-5" />
+                <XLogo weight="light" className="w-5 h-5" />
               </Link>
             </LinkPreview>
             {showcasedCv && <CvLink url={showcasedCv.fileUrl} />}
@@ -222,6 +226,7 @@ export default async function Home() {
         <CareerTrack items={workEvents} />
         <FeaturedPhotos photos={featuredPhotos} />
         <ExploreTiles sections={exploreSections} />
+        <HomeFooter />
       </div>
     </>
   );

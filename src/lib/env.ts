@@ -29,4 +29,8 @@ export const env = cleanEnv(process.env, {
     desc: "Buttondown API key for email subscribers + new-post broadcasts",
     default: "",
   }),
+  RESEND_API_KEY: str({
+    desc: "Resend API key for the homepage contact form. Unset disables the form.",
+    default: "",
+  }),
 });

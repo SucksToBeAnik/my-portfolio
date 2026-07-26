@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Mono } from "next/font/google";
+import { Caveat, Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { BottomNav } from "@/components/BottomNav";
@@ -21,6 +21,13 @@ const spaceMono = Space_Mono({
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+});
+
+// Handwriting, used for the one line on the site that should read as written
+// rather than typeset: the homepage sign-off quote.
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-hand",
 });
 
 export const metadata: Metadata = {
@@ -72,7 +79,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${spaceMono.variable} ${inter.variable}`} data-theme="dark">
+    <html
+      lang="en"
+      className={`${spaceMono.variable} ${inter.variable} ${caveat.variable}`}
+      data-theme="dark"
+    >
       <head>
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />

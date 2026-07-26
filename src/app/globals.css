@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* fine matte grain for the bookshelf surfaces — a fractal-noise speckle laid
@@ -36,9 +42,14 @@ html {
   --hover-bg: rgba(255, 255, 255, 0.08);
   --code-bg: #1a1a1a;
   --code-fg: #d4d4d4;
-  --nav-bg: rgba(255, 255, 255, 0.1);
-  --nav-border: rgba(255, 255, 255, 0.1);
-  --nav-popup-bg: rgba(18, 18, 18, 0.95);
+  /* The nav pill and its popups are opaque, not glass — a solid surface lifted
+     off the page background by a step of lightness plus a shadow. */
+  --nav-bg: #1e1e1e;
+  --nav-border: rgba(255, 255, 255, 0.12);
+  --nav-popup-bg: #1e1e1e;
+  /* Border for outlined controls (search pill, CV badge) — a hairline is too
+     faint to read on the near-white light background, so it's its own token. */
+  --control-border: rgba(255, 255, 255, 0.2);
   --nav-text: rgba(255, 255, 255, 0.75);
   --nav-text-hover: rgb(255, 255, 255);
   --nav-hover-bg: rgba(255, 255, 255, 0.08);
@@ -46,7 +57,7 @@ html {
   --nav-active-text: rgb(0, 0, 0);
   /* The filled icon marking the current page. Deliberately not pure #fff — a
      solid white glyph outshouts the page it points at. */
-  --nav-active-icon: #5b5954;
+  --nav-active-icon: #a9a49a;
   --shelf-top: #5c5c5c;
   --shelf-top-2: #4a4a4a;
   --shelf-front-1: #262626;
@@ -64,15 +75,16 @@ html {
   --hover-bg: rgba(0, 0, 0, 0.08);
   --code-bg: #f6f8fa;
   --code-fg: #24292e;
-  --nav-bg: rgba(0, 0, 0, 0.08);
-  --nav-border: rgba(0, 0, 0, 0.1);
-  --nav-popup-bg: rgba(250, 250, 250, 0.95);
+  --nav-bg: #ffffff;
+  --nav-border: rgba(0, 0, 0, 0.14);
+  --nav-popup-bg: #ffffff;
+  --control-border: rgba(0, 0, 0, 0.24);
   --nav-text: rgba(0, 0, 0, 0.8);
   --nav-text-hover: rgb(0, 0, 0);
   --nav-hover-bg: rgba(0, 0, 0, 0.08);
   --nav-active-bg: rgb(0, 0, 0);
   --nav-active-text: rgb(255, 255, 255);
-  --nav-active-icon: #b0b0af;
+  --nav-active-icon: #6a6a64;
   --shelf-top: #f2f2f2;
   --shelf-top-2: #e0e0e0;
   --shelf-front-1: #c9c9c9;
@@ -98,8 +110,10 @@ html {
   --color-nav-active-bg: var(--nav-active-bg);
   --color-nav-active-text: var(--nav-active-text);
   --color-nav-active-icon: var(--nav-active-icon);
+  --color-control-border: var(--control-border);
   --font-heading: var(--font-heading);
   --font-sans: var(--font-sans);
+  --font-hand: var(--font-hand);
 }
 
 body {
@@ -1115,7 +1129,9 @@ body {
   color: var(--muted);
   font-size: 0.75rem;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .post-gallery-slot:hover {
@@ -1139,7 +1155,10 @@ body {
   background: transparent;
   color: var(--muted);
   opacity: 0;
-  transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    opacity 0.15s,
+    border-color 0.15s,
+    color 0.15s;
   cursor: pointer;
 }
 
@@ -1459,8 +1478,7 @@ body {
 
 /* Per-image fit tokens: `contain` letterboxes, `fill` stretches — the plate
    size is unchanged either way. */
-.post-body
-  p:has(> .post-figure + .post-figure)
+.post-body p:has(> .post-figure + .post-figure)
   > .post-figure[data-fit="contain"]
   .post-figure-media
   > :is(img, video) {
@@ -1477,8 +1495,7 @@ body {
 }
 
 /* Round only the spread's outer corners; full-bleed spreads stay square. */
-.post-body
-  p:has(> .post-figure + .post-figure):not(:has(> .post-figure[data-width="full"]))
+.post-body p:has(> .post-figure + .post-figure):not(:has(> .post-figure[data-width="full"]))
   > .post-figure:first-child
   .post-figure-media
   > :is(img, video) {
