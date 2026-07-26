@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { books } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import { mirrorToCloudinary } from "@/lib/cloudinary";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -19,12 +20,24 @@ const schema = z.object({
   sortOrder: z.number().optional(),
 });
 
-// Books surface in three places: the admin list, /books, and the homepage
-// explore tile (which shows the count and the first few covers).
-function revalidateBooks() {
+// Books surface in four places: the admin list, /books, /books/[id], and the
+// homepage explore tile (which shows the count and the first few covers).
+// Every one of those is cached until a write, so all of them have to be named.
+function revalidateBooks(id?: number) {
   revalidatePath("/admin/books");
   revalidatePath("/books");
   revalidatePath("/");
+  if (id !== undefined) revalidatePath(`/books/${id}`);
+}
+
+/**
+ * OpenLibrary's search returns `-M` covers (~180px). That's fine on the shelf
+ * but soft in the 200×300 slot on /books/[id], and it's the size we'd freeze
+ * on our own CDN — so take `-L` before mirroring.
+ */
+function upgradeCoverSource(url: string | null | undefined): string | null | undefined {
+  if (!url?.includes("covers.openlibrary.org")) return url;
+  return url.replace(/-[SM]\.jpg$/, "-L.jpg");
 }
 
 export async function getBooks() {
@@ -34,24 +47,28 @@ export async function getBooks() {
 export async function createBook(data: z.infer<typeof schema>) {
   await requireAdmin();
   const parsed = schema.parse(data);
-  await db.insert(books).values(parsed);
+  const source = upgradeCoverSource(parsed.coverUrl);
+  const coverUrl = (await mirrorToCloudinary(source)) ?? source;
+  await db.insert(books).values({ ...parsed, coverUrl });
   revalidateBooks();
 }
 
 export async function updateBook(id: number, data: z.infer<typeof schema>) {
   await requireAdmin();
   const parsed = schema.parse(data);
+  const source = upgradeCoverSource(parsed.coverUrl);
+  const coverUrl = (await mirrorToCloudinary(source)) ?? source;
   await db
     .update(books)
-    .set({ ...parsed, updatedAt: new Date() })
+    .set({ ...parsed, coverUrl, updatedAt: new Date() })
     .where(eq(books.id, id));
-  revalidateBooks();
+  revalidateBooks(id);
 }
 
 export async function deleteBook(id: number) {
   await requireAdmin();
   await db.delete(books).where(eq(books.id, id));
-  revalidateBooks();
+  revalidateBooks(id);
 }
 
 export async function reorderBooks(

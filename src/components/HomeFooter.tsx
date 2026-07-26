@@ -187,7 +187,7 @@ export function HomeFooter() {
   return (
     <footer className="flex flex-col gap-14">
       <section className="flex flex-col gap-1.5">
-        <Them tail>so, remind me again, how do I reach you?</Them>
+        <Them tail>so, how do I reach you?</Them>
 
         <Me tail>
           <p>well, email is the most reliable. send it from here and it lands in my inbox.</p>

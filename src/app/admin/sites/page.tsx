@@ -3,17 +3,20 @@
 import { PencilSimple, Trash } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { createSiteFromUrl, deleteSite, getSites, updateSite } from "@/actions/sites";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { Drawer } from "@/components/Drawer";
 import { Spinner } from "@/components/Spinner";
+import { cdnImage } from "@/lib/cloudinary";
 
 interface Site {
   id: number;
   url: string;
   tags: string | null;
+  title: string | null;
+  logo: string | null;
   createdAt: Date;
 }
 
@@ -35,29 +38,13 @@ function SiteRow({
   onEdit: (site: Site) => void;
 }) {
   const domain = getDomain(site.url);
-  const [meta, setMeta] = useState<{ title: string | null; logo: string | null } | null>(null);
-  const fetchedUrl = useRef("");
 
-  useEffect(() => {
-    if (fetchedUrl.current === site.url) return;
-    fetchedUrl.current = site.url;
-    setMeta(null);
-    fetch(`https://api.microlink.io/?url=${encodeURIComponent(site.url)}`)
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.status === "success") {
-          setMeta({
-            title: json.data.title || null,
-            logo: json.data.logo?.url || null,
-          });
-        }
-      })
-      .catch(() => {});
-  }, [site.url]);
-
+  // Title and logo are persisted on the row (fetched once, server-side, when
+  // the site is created or its URL changes). This list used to re-query
+  // Microlink from the browser for every row on every visit.
   const fallbackFavicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-  const displayFavicon = meta?.logo || fallbackFavicon;
-  const displayTitle = meta?.title || domain;
+  const displayFavicon = site.logo ? cdnImage(site.logo, 40) : fallbackFavicon;
+  const displayTitle = site.title || domain;
 
   return (
     <div className="flex items-center px-4 py-3 border border-hairline rounded-xl hover:bg-hover-bg transition-colors">

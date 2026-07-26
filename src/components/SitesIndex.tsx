@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, Wrench } from "@phosphor-icons/react/dist/ssr";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { FilterPopover } from "@/components/FilterPopover";
 import { LinkPreview } from "@/components/LinkPreview";
@@ -14,11 +14,22 @@ export interface SiteEntry {
   description: string | null;
   logo: string | null;
   image: string | null;
-  /** Index into GROUP_LABELS, computed server-side from createdAt. */
-  group: number;
+  /** Epoch ms — bucketed into GROUP_LABELS against the reader's clock. */
+  createdAt: number;
 }
 
 export const GROUP_LABELS = ["Today", "This Week", "This Month", "Older"];
+
+/** Keep in sync with PRELOAD_COUNT in src/app/sites/page.tsx. */
+export const EAGER_COUNT = 12;
+
+function siteGroup(createdAt: number, now: number): number {
+  const days = (now - createdAt) / 86_400_000;
+  if (days < 1) return 0;
+  if (days < 7) return 1;
+  if (days < 30) return 2;
+  return 3;
+}
 
 function getDomain(url: string): string {
   try {
@@ -35,7 +46,7 @@ function siteTags(site: SiteEntry): string[] {
     .filter(Boolean);
 }
 
-function SiteItem({ site }: { site: SiteEntry }) {
+function SiteItem({ site, eager }: { site: SiteEntry; eager: boolean }) {
   const domain = getDomain(site.url);
   const fallbackFavicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
   const hasMeta = Boolean(site.title || site.description || site.image || site.logo);
@@ -67,7 +78,8 @@ function SiteItem({ site }: { site: SiteEntry }) {
             alt=""
             width={20}
             height={20}
-            loading="lazy"
+            loading={eager ? "eager" : "lazy"}
+            fetchPriority={eager ? "high" : undefined}
             className="w-full h-full object-contain rounded"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = "none";
@@ -85,10 +97,18 @@ function SiteItem({ site }: { site: SiteEntry }) {
   );
 }
 
-export function SitesIndex({ sites }: { sites: SiteEntry[] }) {
+export function SitesIndex({ sites, renderedAt }: { sites: SiteEntry[]; renderedAt: number }) {
   const [activeTags, setActiveTags] = useState<string[]>([]);
+  // The page is cached until an admin write, so "Today" baked into the HTML
+  // would keep meaning the day of that write. Start from the server's clock so
+  // hydration matches, then re-bucket against the reader's on mount.
+  const [now, setNow] = useState(renderedAt);
+  useEffect(() => setNow(Date.now()), []);
 
   const allTags = Array.from(new Set(sites.flatMap(siteTags))).sort();
+  // Mirrors the set the server preloads, so those rows skip lazy-loading and
+  // paint from the same request the document arrived on.
+  const eagerIds = new Set(sites.slice(0, EAGER_COUNT).map((s) => s.id));
 
   const filtered =
     activeTags.length > 0
@@ -97,7 +117,7 @@ export function SitesIndex({ sites }: { sites: SiteEntry[] }) {
 
   const grouped = GROUP_LABELS.map((label, g) => ({
     label,
-    items: filtered.filter((s) => s.group === g),
+    items: filtered.filter((s) => siteGroup(s.createdAt, now) === g),
   })).filter((group) => group.items.length > 0);
 
   return (
@@ -122,7 +142,7 @@ export function SitesIndex({ sites }: { sites: SiteEntry[] }) {
             </h2>
             <div>
               {group.items.map((site) => (
-                <SiteItem key={site.id} site={site} />
+                <SiteItem key={site.id} site={site} eager={eagerIds.has(site.id)} />
               ))}
             </div>
           </section>

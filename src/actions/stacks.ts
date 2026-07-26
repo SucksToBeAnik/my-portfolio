@@ -6,7 +6,8 @@ import { z } from "zod";
 import { db } from "@/db";
 import { stacks } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
-import { fetchSiteMeta } from "@/lib/microlink";
+import { mirrorToCloudinary } from "@/lib/cloudinary";
+import { fetchPreviewImageMirrored } from "@/lib/microlink";
 
 const stackSchema = z.object({
   name: z.string().min(1),
@@ -24,17 +25,19 @@ export async function getStacks() {
 export async function createStack(data: z.infer<typeof stackSchema>) {
   await requireAdmin();
   const parsed = stackSchema.parse(data);
-  const [maxOrder, meta] = await Promise.all([
+  const [maxOrder, previewImage, imageUrl] = await Promise.all([
     db
       .select({ max: sql<number>`max(${stacks.sortOrder})` })
       .from(stacks)
       .then((r) => r[0]?.max ?? -1),
-    fetchSiteMeta(parsed.url),
+    fetchPreviewImageMirrored(parsed.url),
+    mirrorToCloudinary(parsed.imageUrl),
   ]);
 
   await db.insert(stacks).values({
     ...parsed,
-    previewImage: meta ? (meta.image ?? "") : null,
+    imageUrl: imageUrl ?? parsed.imageUrl,
+    previewImage,
     sortOrder: maxOrder + 1,
   });
   revalidatePath("/admin/stacks");
@@ -44,7 +47,29 @@ export async function createStack(data: z.infer<typeof stackSchema>) {
 export async function updateStack(id: number, data: z.infer<typeof stackSchema>) {
   await requireAdmin();
   const parsed = stackSchema.parse(data);
-  await db.update(stacks).set(parsed).where(eq(stacks.id, id));
+
+  const [existing] = await db
+    .select({ url: stacks.url, imageUrl: stacks.imageUrl })
+    .from(stacks)
+    .where(eq(stacks.id, id));
+
+  // The preview is derived from the URL, so it only needs refetching when the
+  // URL moves. A pasted icon URL gets mirrored whenever it changes.
+  const [previewImage, imageUrl] = await Promise.all([
+    existing && existing.url !== parsed.url ? fetchPreviewImageMirrored(parsed.url) : undefined,
+    existing && existing.imageUrl !== parsed.imageUrl
+      ? mirrorToCloudinary(parsed.imageUrl)
+      : undefined,
+  ]);
+
+  await db
+    .update(stacks)
+    .set({
+      ...parsed,
+      ...(previewImage !== undefined ? { previewImage } : {}),
+      ...(imageUrl ? { imageUrl } : {}),
+    })
+    .where(eq(stacks.id, id));
   revalidatePath("/admin/stacks");
   revalidatePath("/stacks");
 }

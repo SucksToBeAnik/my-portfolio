@@ -19,7 +19,8 @@ const statusLabels: Record<string, string> = {
   want_to_read: "Want to read",
 };
 
-export const revalidate = 3600;
+// Cached until an admin write — updateBook/deleteBook revalidate `/books/[id]`.
+export const revalidate = false;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

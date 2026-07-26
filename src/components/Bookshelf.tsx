@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { cdnImage } from "@/lib/cloudinary";
 
 export type ShelfBook = {
   id: number;
@@ -9,6 +10,9 @@ export type ShelfBook = {
   author: string;
   coverUrl: string | null;
 };
+
+/** Covers render at 84–96 CSS px; this covers a 2× display. */
+export const COVER_WIDTH = 200;
 
 function ShelfBook({ book }: { book: ShelfBook }) {
   return (
@@ -34,7 +38,7 @@ function ShelfBook({ book }: { book: ShelfBook }) {
         {book.coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={book.coverUrl}
+            src={cdnImage(book.coverUrl, COVER_WIDTH)}
             alt={book.title}
             loading="lazy"
             className="h-full w-full object-cover"
@@ -121,8 +125,7 @@ export function Bookshelf({ label, books }: { label: string; books: ShelfBook[] 
             className="shelf-grain relative h-[13px] rounded-b-[9px]"
             style={{
               background: "linear-gradient(180deg, var(--shelf-front-1), var(--shelf-front-2))",
-              boxShadow:
-                "inset 0 1px 0 var(--shelf-edge), inset 0 -2px 3px -1px rgba(0,0,0,0.55)",
+              boxShadow: "inset 0 1px 0 var(--shelf-edge), inset 0 -2px 3px -1px rgba(0,0,0,0.55)",
             }}
           />
           {/* vertical dividers across the top surface — hairline grooves (dark

@@ -147,9 +147,10 @@ row twice per render (metadata + page). **Fix:** wrap each per-id fetch in `Reac
 `heartCounts`, `prev`, and `next` in three sequential Turso round-trips.
 **Fix:** one `Promise.all` for the three queries after the post loads.
 
-### 12. `/books` list fetches full review HTML for the grid — [ ]
-`src/app/books/page.tsx:24` does `db.select().from(books)` but the grid only uses
-title/author/cover/status/category/rating. **Fix:** select only those columns.
+### 12. `/books` list fetches full review HTML for the grid — [x] DONE (2026-07-27) **[verified]**
+> Done alongside items 23–26. Worth recording the size: the review HTML across all 8 books
+> totals **713 bytes**, so this was hygiene, not a payload win. Don't expect a measurable
+> difference from column-narrowing on a table this small.
 
 ### 13. Unoptimized full-size images on public grids & post/project bodies — [ ]
 - `src/app/media/page.tsx:62` — raw `<img>`, no dimensions, full-size posters in a grid.
@@ -258,19 +259,56 @@ Line numbers in this section are as of commit `e2c23a6` + the homepage change th
 > Also deleted as dead: `getHeartData` (0 refs), `GithubActivityLine.tsx` + `lib/github.ts`
 > (component unreferenced; the lib was imported only by it).
 
-### 23. Still on the 1-hour timer — same flip, needs the same audit — [ ]
-`/books`, `/life`, `/media`, `/til`, `/photos` are all still `revalidate = 3600`. Each needs
-the item-22 checklist before flipping: (a) every write path revalidates the route,
-(b) nothing reads the clock at render time, (c) no per-visitor data baked into the HTML.
+### 23. Still on the 1-hour timer — same flip, needs the same audit — [~] PARTLY DONE (2026-07-27)
+> Flipped to `revalidate = false`: **`/sites`, `/stacks`, `/books`, and `/books/[id]`**.
+> Still on `3600`: `/life`, `/media`, `/til`, `/photos`.
+>
+> What the flip needed on each:
+> - **`/books/[id]` had a revalidation hole** — it was on the timer and *nothing*
+>   revalidated it; `revalidateBooks()` only named `/admin/books`, `/books` and `/`. Flipping
+>   it without fixing that would have frozen every book detail page permanently.
+>   `revalidateBooks(id?)` now takes the id, and update/delete pass it.
+> - **`/sites` clock read** — `siteGroup` moved into `SitesIndex`. Note the pattern differs
+>   from `RelativeDate`: a lazy `useState` initializer is fine for a text node, but the
+>   buckets change DOM *structure*, so it takes a `renderedAt` prop (matching SSR at
+>   hydration) and re-buckets in a `useEffect` on mount.
+> - `/stacks`, `/books` had no clock reads; all their write paths already revalidated.
 
 - `/til` bakes heart counts (`til/page.tsx:27`) — same situation as the detail pages, so
   harmless, but confirm before flipping.
-- **`/sites` is blocked on item 25** — `siteGroup` buckets rows into Today / This Week /
-  This Month from `Date.now()`, which would freeze. Needs the same client-side treatment as
-  `RelativeDate`, or bucket by stored date at write time.
-- `/stacks` has no clock reads — blocked only on item 25's backfill.
 
-### 24. Third-party image origins on `/stacks`, `/sites`, `/books` — [ ]
+### 24. Third-party image origins on `/stacks`, `/sites`, `/books` — [x] DONE (2026-07-27) **[measured]**
+> Measured before, by fetching every image these pages load:
+> `/sites` 29 logos / **216 KB** / **24 hosts** (into 20×20 slots), `/stacks` 8 / 62 KB /
+> 8 hosts, `/books` 8 covers / 145 KB / 3 hosts. After: `/sites` 31 logos / **15 KB** /
+> **1 host**, `/books` 8 covers / **72 KB** / 1 host — at a *higher* source resolution.
+>
+> **The obvious fix does not work here.** 9 of the 29 site logos are SVG and 5 are `.ico`:
+> Next's optimizer 400s on SVG without `dangerouslyAllowSVG`, and sharp cannot decode ICO
+> at all, so ~14/29 would have broken. Don't retry the `next/image` route on this data.
+>
+> What landed instead (step 1 + step 3 of the plan below):
+> - `mirrorToCloudinary()` in `src/lib/cloudinary.ts` — Cloudinary fetches the remote URL
+>   itself, so no bytes pass through us. Verified against the live account that the existing
+>   *unsigned* `portfolio` preset accepts a remote URL and handles png, **ico and svg**
+>   (15.4 KB ico → 0.7 KB delivered). Called from `createSite`/`updateSite`/`createStack`/
+>   `updateStack`/`createBook`/`updateBook`, and stored in place — no schema change.
+> - `cdnImage(url, width)` for delivery (`c_fit,w_,f_auto,q_auto`; `c_fit` never upscales,
+>   so a 16px favicon stays 16px). Non-Cloudinary URLs pass through untouched.
+> - `ReactDOM.preload` for above-the-fold images on all three pages (12 / 16 / 8).
+> - Book covers take OpenLibrary's `-L` instead of `-M` before mirroring — `-M` is 180px and
+>   was rendering soft in the 200×300 slot on `/books/[id]`.
+> - One-time migration of 47 rows; originals saved to `metadata-backup.json` (delete it once
+>   you're happy). **3 test assets** from the feasibility check are in the media library:
+>   `f9lt00yjokzzwjppwmz7`, `ftxbmcslqrkkxdbo3ggx`, `n2mjhtn8fr0v2bqvzvkk` — delete manually.
+>
+> **Known limits.** There's no `CLOUDINARY_API_SECRET` in the env, so uploads are unsigned
+> and nothing can be deleted programmatically — deleting a site/stack/book orphans its
+> Cloudinary asset. At ~50 rows that's noise; add the secret if it ever matters.
+> `remotePatterns: "**"` (item 21) is *now* tightenable for these three pages but was left
+> alone: `/media` and `/life` still legitimately point at arbitrary hosts.
+>
+> Original finding follows.
 The user-visible symptom: favicons, logos and book covers only start loading when someone
 lands on the page, so rows and shelves pop in. Root cause is not lazy-loading alone — every
 image is on a *different* third-party origin, so the browser pays DNS + TLS per host with no
@@ -297,7 +335,22 @@ about assets on hosts we don't control.
   4. Only if third-party origins survive step 1: `<link rel="preconnect">` for the one or
      two that remain.
 
-### 25. `/sites` and `/stacks` do Microlink lookups + DB writes inside a cached render — [ ]
+### 25. `/sites` and `/stacks` do Microlink lookups + DB writes inside a cached render — [x] DONE (2026-07-27) **[verified]**
+> Both pages are pure reads now. Repair moved to `refreshMetadata()` in
+> `src/actions/maintenance.ts`, behind a **"Refresh metadata"** button on the admin
+> dashboard (`maxDuration = 60` on that route, bounded concurrency of 4).
+>
+> The failure mode was live, not theoretical: **3 of 31 sites** have a Microlink lookup that
+> fails every time (`ray.so`, `streamlinehq.com`, `makingsoftware.com`), so `/sites` was
+> re-requesting them — 8s timeout each — on every single revalidation, forever. Those rows
+> now get a *mirrored* favicon and keep `title = null` as the retry marker, so they cost
+> nothing per render. `/stacks`' backfill turned out to already be a no-op loop (0 of 8 rows
+> had a null `previewImage`).
+>
+> Also self-healing now: a stored og-image URL that 404s (cmux's had rotated) is re-derived
+> from the page instead of being re-copied forever.
+>
+> Original finding follows.
 `src/app/sites/page.tsx:26-38` and `src/app/stacks/page.tsx:43-55` back-fill metadata for
 rows where it's null — inside the page render, `await`ing up to 8s of third-party calls
 (`Promise.all` over every null row) and issuing `db.update()`s. On a cold cache that *is*
@@ -307,7 +360,20 @@ was a deliberate one-time-backfill compromise when item 2 landed; it has outlive
 already fetch on create), leaving the public pages as pure reads. Unblocks item 23 for
 `/stacks` and removes the last reason these pages can't be cached until a write.
 
-### 26. `LinkPreview` popup images start loading on hover — [ ]
+### 26. `LinkPreview` popup images start loading on hover — [x] DONE (2026-07-27) **[verified]**
+> Done, but **the fix as originally written would not have worked**: the popup rendered its
+> image through `next/image`, so `new Image().src = data.image` would have warmed a URL the
+> browser never requests (`/_next/image?url=…&w=…`). The popup now uses a plain `<img>` on
+> a `cdnImage()` URL — which is also the right call for hover previews, since routing
+> arbitrary hover URLs through the optimizer spends transformations on images most visitors
+> never see — and `handleMouseEnter` warms exactly that URL before the 400 ms timer.
+> Broken/rotated og-images now hide their frame via `onError` instead of showing a broken box.
+>
+> `src/lib/microlink-cache.ts` **stays**. The tail of this item assumed only `/sites` and
+> `/stacks` use `LinkPreview`, but the homepage, `Timeline`, `ProjectLink` and media
+> `SourceLink` all use it *without* preloaded metadata and depend on that client fetch.
+>
+> Original finding follows.
 `src/components/LinkPreview.tsx:115` renders the og-image only once the popup is visible, so
 there's a visible blank box on first hover. Preloading all ~30 og-images upfront is the wrong
 trade (heavy, and most are never hovered). **Fix:** in `handleMouseEnter`, kick off
@@ -350,9 +416,20 @@ falling back to domain + favicon when metadata is genuinely missing.
 
 Revised tail (2026-07-26), for the caching/image thread specifically:
 
-8. Item 25 (backfill out of the `/sites` + `/stacks` render) — unblocks 23, and it's the
-   slowest thing left on those two routes.
-9. Item 26 (`LinkPreview` warm-on-hover) — a few lines, do it alongside 25.
-10. Item 24 (own the image origins) — do step 1 (Cloudinary persistence + backfill) and
-    step 3 (preload above-the-fold) together; that's the whole "instant feel" win.
-11. Item 23 (flip the remaining pages to `revalidate = false`) — last, once 25 is done.
+8. ~~Item 25~~ — done 2026-07-27.
+9. ~~Item 26~~ — done 2026-07-27.
+10. ~~Item 24~~ — done 2026-07-27 for `/sites`, `/stacks`, `/books`.
+11. Item 23 — `/sites`, `/stacks`, `/books`, `/books/[id]` flipped 2026-07-27;
+    `/life`, `/media`, `/til`, `/photos` still on the timer.
+
+---
+
+## Fixed 2026-07-27 while doing items 23–26 (weren't in this tracker)
+
+- **`/admin/sites` re-queried Microlink from the browser for every row, every visit** —
+  31 requests per page load, even though `title`/`logo` have been persisted on the row since
+  item 2 and `getSites()` already returned them. Now reads the stored fields.
+- **`updateSite` / `updateStack` let you change the URL without refreshing metadata**, so a
+  row kept the previous site's title, logo and og-image indefinitely. Both re-look up on URL
+  change; a failed lookup clears to null (reads as the domain) rather than lying.
+- **`/books/[id]` was never revalidated by any write path** — see item 23.

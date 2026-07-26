@@ -1,52 +1,50 @@
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import type { Metadata } from "next";
-import { type SiteEntry, SitesIndex } from "@/components/SitesIndex";
+import ReactDOM from "react-dom";
+import { EAGER_COUNT, type SiteEntry, SitesIndex } from "@/components/SitesIndex";
 import { db } from "@/db";
 import { sites } from "@/db/schema";
-import { fetchSiteMeta } from "@/lib/microlink";
+import { cdnImage } from "@/lib/cloudinary";
 
-export const revalidate = 3600;
+// Cached until an admin write — createSite/updateSite/deleteSite all
+// revalidate this path, and nothing here reads the clock (the Today / This
+// Week buckets are derived in the browser, see SitesIndex).
+export const revalidate = false;
 
 export const metadata: Metadata = {
   title: "Sites I Find Useful",
   description: "A running list of websites and tools worth bookmarking.",
 };
 
-function siteGroup(createdAt: Date): number {
-  const days = (Date.now() - createdAt.getTime()) / 86_400_000;
-  if (days < 1) return 0;
-  if (days < 7) return 1;
-  if (days < 30) return 2;
-  return 3;
-}
-
 export default async function SitesPage() {
-  const rows = await db.select().from(sites).orderBy(desc(sites.createdAt));
-
-  // One-time backfill for rows created before metadata was persisted (new
-  // sites get theirs in createSite). Failed lookups retry on the next
-  // revalidation; the UI falls back to domain + favicon meanwhile.
-  await Promise.all(
-    rows
-      .filter((row) => row.title === null)
-      .map(async (row) => {
-        const meta = await fetchSiteMeta(row.url);
-        if (!meta) return;
-        await db.update(sites).set(meta).where(eq(sites.id, row.id));
-        Object.assign(row, meta);
-      }),
-  );
+  const rows = await db
+    .select({
+      id: sites.id,
+      url: sites.url,
+      tags: sites.tags,
+      title: sites.title,
+      description: sites.description,
+      logo: sites.logo,
+      image: sites.image,
+      createdAt: sites.createdAt,
+    })
+    .from(sites)
+    .orderBy(desc(sites.createdAt));
 
   const entries: SiteEntry[] = rows.map((row) => ({
-    id: row.id,
-    url: row.url,
-    tags: row.tags,
-    title: row.title,
-    description: row.description,
-    logo: row.logo,
-    image: row.image,
-    group: siteGroup(row.createdAt),
+    ...row,
+    logo: row.logo ? cdnImage(row.logo, 40) : null,
+    createdAt: row.createdAt.getTime(),
   }));
 
-  return <SitesIndex sites={entries} />;
+  // Above-the-fold logos download with the document rather than waiting for
+  // layout, which is what made the rows visibly pop in one by one.
+  for (const entry of entries.slice(0, EAGER_COUNT)) {
+    if (entry.logo) ReactDOM.preload(entry.logo, { as: "image" });
+  }
+
+  // The clock at render time, which for a cached page is the clock at the last
+  // admin write. Good enough for the first paint; SitesIndex re-derives the
+  // buckets against the visitor's clock on mount.
+  return <SitesIndex sites={entries} renderedAt={Date.now()} />;
 }

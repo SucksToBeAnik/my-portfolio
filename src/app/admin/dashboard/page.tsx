@@ -2,6 +2,7 @@ import { count, eq } from "drizzle-orm";
 import Link from "next/link";
 import { updateWorkingOn } from "@/actions/site-config";
 import { LogoutButton } from "@/components/LogoutButton";
+import { RefreshMetadataButton } from "@/components/RefreshMetadataButton";
 import UserEmail from "@/components/UserEmail";
 import { db } from "@/db";
 import {
@@ -22,6 +23,10 @@ import { auth } from "@/lib/auth";
 export const metadata = {
   title: "Dashboard | Admin",
 };
+
+// `refreshMetadata` is dispatched from this route and can walk every site,
+// stack and book on a first run. 60s is the Hobby-plan ceiling.
+export const maxDuration = 60;
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -110,6 +115,8 @@ export default async function DashboardPage() {
           Save
         </button>
       </form>
+
+      <RefreshMetadataButton />
 
       <footer className="flex items-center justify-between gap-3x pt-4">
         <UserEmail email={session?.user?.email} />

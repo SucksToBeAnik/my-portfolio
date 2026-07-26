@@ -1,9 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { cdnImage } from "@/lib/cloudinary";
 import { fetchMicrolink } from "@/lib/microlink-cache";
+
+const POPUP_IMAGE_WIDTH = 512;
+const POPUP_LOGO_WIDTH = 32;
 
 interface LinkPreviewProps {
   url: string;
@@ -41,6 +44,9 @@ export function LinkPreview({
     preload ? { ...preload, domain: getDomain(url) } : null,
   );
   const [visible, setVisible] = useState(false);
+  // og-image URLs rotate and go 404; drop the frame rather than show a broken
+  // image on top of an otherwise fine preview.
+  const [imageBroken, setImageBroken] = useState(false);
   const [pos, setPos] = useState<React.CSSProperties>({});
   const fetchedRef = useRef(Boolean(preload));
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -73,6 +79,11 @@ export function LinkPreview({
 
   function handleMouseEnter(e: React.MouseEvent<HTMLSpanElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
+
+    // Start the og-image before the 400 ms intent delay, so the popup paints
+    // with its image instead of a blank box. Costs nothing for the visitor who
+    // never pauses long enough to open it.
+    if (data?.image) new Image().src = cdnImage(data.image, POPUP_IMAGE_WIDTH);
 
     timerRef.current = setTimeout(() => {
       if (position === "bottom") {
@@ -112,16 +123,31 @@ export function LinkPreview({
       }}
       className="w-64 bg-bg border border-hairline rounded-xl shadow-2xl overflow-hidden pointer-events-none"
     >
-      {data?.image && (
+      {data?.image && !imageBroken && (
         <div className="relative w-full aspect-[16/10] bg-hover-bg">
-          <Image src={data.image} alt="" fill className="object-cover" sizes="256px" />
+          {/* Plain img, not next/image: the src is already width-capped on our
+              own CDN when it's a mirrored asset, and routing arbitrary hover
+              URLs through the optimizer would both miss the warm-up above and
+              spend transformations on images most visitors never see. */}
+          <img
+            src={cdnImage(data.image, POPUP_IMAGE_WIDTH)}
+            alt=""
+            onError={() => setImageBroken(true)}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         </div>
       )}
       <div className="px-3.5 py-3 space-y-1.5">
         <div className="flex items-center gap-2">
           {data?.logo && (
             <div className="w-4 h-4 shrink-0 rounded overflow-hidden bg-hover-bg">
-              <Image src={data.logo} alt="" width={16} height={16} className="object-contain" />
+              <img
+                src={cdnImage(data.logo, POPUP_LOGO_WIDTH)}
+                alt=""
+                width={16}
+                height={16}
+                className="object-contain"
+              />
             </div>
           )}
           <p className="text-[10px] text-fg/40 uppercase tracking-wider truncate">

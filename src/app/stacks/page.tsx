@@ -1,12 +1,13 @@
 import { ArrowBendUpRight, ArrowRight } from "@phosphor-icons/react/dist/ssr";
-import { asc, eq } from "drizzle-orm";
+import { asc } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
+import ReactDOM from "react-dom";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { LinkPreview } from "@/components/LinkPreview";
 import { db } from "@/db";
 import { stacks } from "@/db/schema";
-import { fetchSiteMeta } from "@/lib/microlink";
+import { cdnImage } from "@/lib/cloudinary";
 
 export const metadata: Metadata = {
   title: "Stacks",
@@ -35,25 +36,31 @@ const CATEGORIES = [
   "Hardware",
 ];
 
-export const revalidate = 3600;
+// Cached until an admin write; all four stack actions revalidate this path.
+// Metadata repair lives in the admin `refreshMetadata()` action, not in this
+// render — it used to sit on the critical path of every cold load.
+export const revalidate = false;
 
 export default async function StacksPage() {
-  const all = await db.select().from(stacks).orderBy(asc(stacks.sortOrder));
+  const all = await db
+    .select({
+      id: stacks.id,
+      name: stacks.name,
+      url: stacks.url,
+      description: stacks.description,
+      imageUrl: stacks.imageUrl,
+      platform: stacks.platform,
+      category: stacks.category,
+      previewImage: stacks.previewImage,
+    })
+    .from(stacks)
+    .orderBy(asc(stacks.sortOrder));
 
-  // One-time backfill for rows created before previewImage was persisted (new
-  // stacks get theirs in createStack). "" marks a successful lookup with no og
-  // image, so only failed lookups retry on the next revalidation.
-  await Promise.all(
-    all
-      .filter((row) => row.previewImage === null)
-      .map(async (row) => {
-        const meta = await fetchSiteMeta(row.url);
-        if (!meta) return;
-        const previewImage = meta.image ?? "";
-        await db.update(stacks).set({ previewImage }).where(eq(stacks.id, row.id));
-        row.previewImage = previewImage;
-      }),
-  );
+  // Icons are ~0.7 KB each off our CDN, and the whole page is a couple of
+  // screens, so the top of the list is worth pulling in with the document.
+  for (const row of all.slice(0, 16)) {
+    if (row.imageUrl) ReactDOM.preload(cdnImage(row.imageUrl, 40), { as: "image" });
+  }
 
   const grouped = CATEGORIES.map((category) => ({
     category,
@@ -132,9 +139,10 @@ function StackRow({ stack }: { stack: Stack }) {
           <span className="w-5 h-5 shrink-0 flex items-center justify-center">
             {stack.imageUrl ? (
               <img
-                src={stack.imageUrl}
+                src={cdnImage(stack.imageUrl, 40)}
                 alt=""
-                loading="lazy"
+                width={20}
+                height={20}
                 className="w-full h-full object-contain"
               />
             ) : (

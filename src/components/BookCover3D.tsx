@@ -1,3 +1,5 @@
+import { cdnImage } from "@/lib/cloudinary";
+
 // A CSS-only 3D book: front cover + right page-block + spine, tilted in
 // perspective and easing toward the viewer on hover. No client JS needed.
 const W = 200;
@@ -20,7 +22,13 @@ export function BookCover3D({ coverUrl, title }: { coverUrl: string | null; titl
           style={{ transform: `translateZ(${DEPTH / 2}px)` }}
         >
           {coverUrl ? (
-            <img src={coverUrl} alt={title} className="h-full w-full object-cover" />
+            <img
+              src={cdnImage(coverUrl, W * 2)}
+              alt={title}
+              width={W}
+              height={H}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-neutral-900 p-6 text-center font-heading text-sm text-white/80">
               {title}
