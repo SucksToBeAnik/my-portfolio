@@ -223,10 +223,7 @@ export function BottomNav() {
                 sits behind its own hairline just like preferences. */}
             {/* <div className="w-px h-4 mx-1 sm:mx-2 bg-nav-border" /> */}
             <AskItem />
-          </div>
-
-          <div className="flex items-center shrink-0 ml-1">
-            <div className="w-px h-4 mx-2 bg-nav-border" />
+            <div className="w-px h-4 mx-1 sm:mx-2 bg-nav-border" />
             <PreferencesMenu open={pillPrefsOpen} onOpenChange={setPillPrefsOpen} />
           </div>
         </div>
