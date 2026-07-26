@@ -16,7 +16,13 @@ import { SelectedProjects } from "@/components/SelectedProjects";
 import { db } from "@/db";
 import { lifeEvents, microblogs, projects, publications, siteConfig } from "@/db/schema";
 
-export const revalidate = 3600;
+// Cached until an admin write calls revalidatePath("/"). Every source feeding
+// this page does: featured projects, posts, publications, work history
+// (CareerTrack), featured photos, the showcased CV, and the "working on" config.
+// Nothing here reads the clock at render time — CareerTrack and FeaturedPhotos
+// derive their years from stored dates, and SelectedProjects formats its
+// relative dates client-side.
+export const revalidate = false;
 
 export const metadata = {
   title: "Suckstobeanik",
