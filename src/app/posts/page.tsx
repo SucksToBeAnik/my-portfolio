@@ -1,9 +1,8 @@
 import { ArrowBendUpRight } from "@phosphor-icons/react/dist/ssr";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import { getHeartsCounts } from "@/actions/heart-counts";
 import { Breadcrumb } from "@/components/Breadcrumb";
-import { HeartButton } from "@/components/HeartButton";
+import { RelativeDate } from "@/components/RelativeDate";
 import { db } from "@/db";
 import { microblogs } from "@/db/schema";
 import { cardCover } from "@/lib/seo";
@@ -22,20 +21,9 @@ export const metadata = {
   },
 };
 
-export const revalidate = 3600;
-
-function relativeDate(date: Date) {
-  const diff = Date.now() - date.getTime();
-  const day = 86_400_000;
-  const days = Math.floor(diff / day);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days} days ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months} month${months > 1 ? "s" : ""} ago`;
-  const years = Math.floor(days / 365);
-  return `${years} year${years > 1 ? "s" : ""} ago`;
-}
+// Cached until an admin write calls revalidatePath("/posts") — nothing here is
+// time- or visitor-dependent, so there's nothing for a timer to refresh.
+export const revalidate = false;
 
 export default async function PostsPage() {
   const posts = await db
@@ -43,11 +31,6 @@ export default async function PostsPage() {
     .from(microblogs)
     .where(eq(microblogs.published, true))
     .orderBy(microblogs.sortOrder);
-
-  const heartCounts = await getHeartsCounts(
-    "microblog",
-    posts.map((p) => p.id),
-  );
 
   return (
     <div className="space-y-8">
@@ -68,20 +51,14 @@ export default async function PostsPage() {
           const blurb = post.microview?.trim();
           const image = cardCover(post.imageUrl, post.content);
           return (
-            // Shared subgrid row tracks (title / microview / image / footer): cards
+            // Shared subgrid row tracks (title / microview / image / date): cards
             // in the same grid row size each track to the tallest card in that row,
             // so microviews — and therefore images — line up per row.
-            <div
+            <Link
               key={post.id}
-              className="group relative row-span-4 grid grid-rows-subgrid gap-3 rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]"
+              href={`/posts/${post.id}`}
+              className="row-span-4 grid grid-rows-subgrid gap-3 rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]"
             >
-              {/* Stretched overlay link: the whole card navigates; the footer sits
-                  above it (z-10) so the heart button stays independently clickable. */}
-              <Link
-                href={`/posts/${post.id}`}
-                aria-label={post.title}
-                className="absolute inset-0 z-0 rounded-2xl"
-              />
               <h2 className="row-start-1 font-heading text-sm uppercase tracking-wide leading-snug">
                 {post.title}
               </h2>
@@ -98,17 +75,13 @@ export default async function PostsPage() {
                   />
                 </div>
               )}
-              <div className="row-start-4 relative z-10 flex items-center justify-between gap-2">
-                <span className="text-[11px] text-muted">
-                  {post.publishedAt ? relativeDate(new Date(post.publishedAt)) : ""}
-                </span>
-                <HeartButton
-                  entityType="microblog"
-                  entityId={post.id}
-                  initialCount={heartCounts[post.id] ?? 0}
+              {post.publishedAt && (
+                <RelativeDate
+                  date={post.publishedAt}
+                  className="row-start-4 self-end text-[11px] text-muted"
                 />
-              </div>
-            </div>
+              )}
+            </Link>
           );
         })}
       </div>

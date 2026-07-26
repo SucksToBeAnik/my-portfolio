@@ -13,7 +13,10 @@ import { projects } from "@/db/schema";
 import { firstImage, stripMarkdown, truncate } from "@/lib/seo";
 import { extractHeadings } from "@/lib/toc";
 
-export const revalidate = 3600;
+// Cached until an admin write revalidates this path. The heart count baked in
+// here is overwritten by HeartButton's own fetch on mount, so it going stale
+// costs nothing.
+export const revalidate = false;
 
 export async function generateStaticParams() {
   const rows = await db

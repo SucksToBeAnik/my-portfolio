@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RelativeDate } from "@/components/RelativeDate";
 import { SectionHeader } from "@/components/SectionHeader";
 
 interface ProjectItem {
@@ -10,22 +11,7 @@ interface ProjectItem {
   published: boolean | null;
 }
 
-function relativeDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "";
-  const diff = Date.now() - d.getTime();
-  const days = Math.floor(diff / 86_400_000);
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days} days ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months} month${months > 1 ? "s" : ""} ago`;
-  const years = Math.floor(days / 365);
-  return `${years} year${years > 1 ? "s" : ""} ago`;
-}
-
 function Card({ project }: { project: ProjectItem }) {
-  const date = project.workedOn ? relativeDate(project.workedOn) : "";
   const inner = (
     <>
       <h3 className="font-heading text-xs uppercase tracking-wide leading-snug">{project.title}</h3>
@@ -42,7 +28,9 @@ function Card({ project }: { project: ProjectItem }) {
           <div className="aspect-[4/3] w-full" />
         )}
       </div>
-      {date && <span className="mt-3 text-[11px] text-muted">{date}</span>}
+      {project.workedOn && (
+        <RelativeDate date={project.workedOn} className="mt-3 text-[11px] text-muted" />
+      )}
     </>
   );
 

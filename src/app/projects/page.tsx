@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import { getHeartsCounts } from "@/actions/heart-counts";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { ProjectCard } from "@/components/ProjectCard";
 import { db } from "@/db";
@@ -19,7 +18,9 @@ export const metadata = {
   },
 };
 
-export const revalidate = 3600;
+// Cached until an admin write calls revalidatePath("/projects") — nothing here
+// is time- or visitor-dependent, so there's nothing for a timer to refresh.
+export const revalidate = false;
 
 export default async function ProjectsPage() {
   const allProjects = await db
@@ -27,10 +28,6 @@ export default async function ProjectsPage() {
     .from(projects)
     .where(eq(projects.published, true))
     .orderBy(projects.sortOrder);
-  const heartCounts = await getHeartsCounts(
-    "project",
-    allProjects.map((p) => p.id),
-  );
 
   return (
     <div className="space-y-8">
@@ -42,11 +39,7 @@ export default async function ProjectsPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {allProjects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            heartCount={heartCounts[project.id] ?? 0}
-          />
+          <ProjectCard key={project.id} project={project} />
         ))}
       </div>
     </div>

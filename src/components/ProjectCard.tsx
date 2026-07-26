@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { HeartButton } from "@/components/HeartButton";
 import { cardCover } from "@/lib/seo";
 
 export interface ProjectCardItem {
@@ -17,28 +16,18 @@ function fmtDate(dateStr: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-export function ProjectCard({
-  project,
-  heartCount = 0,
-}: {
-  project: ProjectCardItem;
-  heartCount?: number;
-}) {
+export function ProjectCard({ project }: { project: ProjectCardItem }) {
   const blurb = project.microview?.trim();
   const cover = cardCover(project.imageUrl, project.content);
 
   return (
-    // Shared subgrid row tracks (title / microview / image / footer): cards in the
+    // Shared subgrid row tracks (title / microview / image / date): cards in the
     // same grid row size each track to the tallest card in that row, so microviews
     // — and therefore images — line up per row.
-    <div className="group relative row-span-4 grid grid-rows-subgrid gap-3 rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]">
-      {/* Stretched overlay link: the whole card navigates; the footer sits above
-          it (z-10) so the heart button stays independently clickable. */}
-      <Link
-        href={`/projects/${project.id}`}
-        aria-label={project.title}
-        className="absolute inset-0 z-0 rounded-2xl"
-      />
+    <Link
+      href={`/projects/${project.id}`}
+      className="row-span-4 grid grid-rows-subgrid gap-3 rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]"
+    >
       <h2 className="row-start-1 font-heading text-sm uppercase tracking-wide leading-snug">
         {project.title}
       </h2>
@@ -51,12 +40,9 @@ export function ProjectCard({
           <img src={cover} alt="" loading="lazy" className="aspect-[4/3] w-full object-fill" />
         </div>
       )}
-      <div className="row-start-4 relative z-10 flex items-center justify-between gap-2">
-        <span className="text-[11px] text-muted">
-          {project.workedOn ? fmtDate(project.workedOn) : ""}
-        </span>
-        <HeartButton entityType="project" entityId={project.id} initialCount={heartCount} />
-      </div>
-    </div>
+      <span className="row-start-4 self-end text-[11px] text-muted">
+        {project.workedOn ? fmtDate(project.workedOn) : ""}
+      </span>
+    </Link>
   );
 }
