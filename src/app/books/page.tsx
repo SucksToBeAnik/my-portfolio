@@ -23,6 +23,6 @@ export const revalidate = 3600;
 export default async function BooksPage() {
   const all = await db.select().from(books).orderBy(desc(books.sortOrder));
   return (
-    <BooksDisplay books={all} header={<Breadcrumb crumbs={[{ label: "Books I Read" }]} />} />
+    <BooksDisplay books={all} header={<Breadcrumb crumbs={[{ label: "What I Read" }]} />} />
   );
 }

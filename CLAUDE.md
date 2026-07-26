@@ -19,8 +19,9 @@ managed through an admin dashboard with login.
 - Background outside the centered column: solid black in both modes
 
 ### Typography
-- **Headings:** Space Mono via `next/font` — monospace, editorial
-- **Body:** Inter via `next/font` — clean, legible
+- **Headings:** Geist Bold (700) via `next/font` — same family as the body
+- **Body:** Geist Regular via `next/font` — clean, legible
+- **Code / counters:** Geist Mono (`font-mono`) — the only monospace on the site
 - Font size scale: `text-sm` (nav), `text-base` (body), `text-2xl` (section
   titles), `text-4xl` (page headings)
 

@@ -14,7 +14,7 @@ interface ProjectItem {
 function Card({ project }: { project: ProjectItem }) {
   const inner = (
     <>
-      <h3 className="font-heading text-xs uppercase tracking-wide leading-snug">{project.title}</h3>
+      <h3 className="font-heading text-sm leading-snug">{project.title}</h3>
       <div className="mt-3 overflow-hidden rounded-xl bg-hover-bg">
         {project.imageUrl ? (
           // Plain <img> (not next/image) so animated GIF covers keep playing.

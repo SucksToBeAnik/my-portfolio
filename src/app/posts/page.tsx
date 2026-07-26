@@ -59,9 +59,7 @@ export default async function PostsPage() {
               href={`/posts/${post.id}`}
               className="row-span-4 grid grid-rows-subgrid gap-3 rounded-2xl border border-hairline bg-fg/[0.03] p-4 transition-colors hover:bg-fg/[0.06]"
             >
-              <h2 className="row-start-1 font-heading text-sm uppercase tracking-wide leading-snug">
-                {post.title}
-              </h2>
+              <h2 className="row-start-1 font-heading text-sm leading-snug">{post.title}</h2>
               {blurb && (
                 <p className="row-start-2 text-sm text-fg/55 leading-tight line-clamp-4">{blurb}</p>
               )}

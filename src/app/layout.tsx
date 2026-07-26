@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Caveat, Inter, Space_Mono } from "next/font/google";
+import { Caveat, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { BottomNav } from "@/components/BottomNav";
@@ -12,15 +12,18 @@ import { SoundProvider } from "@/lib/SoundProvider";
 import { siteUrl } from "@/lib/seo";
 import { ThemeProvider } from "@/lib/ThemeProvider";
 
-const spaceMono = Space_Mono({
+// One typeface for the whole site: Geist. Hierarchy comes from weight and
+// tracking, not from a second family — headings are the same letters as the
+// body, just heavier. Geist Mono covers the places that must be monospaced
+// (code, line numbers, figure counters).
+const geist = Geist({
   subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-heading",
+  variable: "--font-geist",
 });
 
-const inter = Inter({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-geist-mono",
 });
 
 // Handwriting, used for the one line on the site that should read as written
@@ -81,7 +84,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceMono.variable} ${inter.variable} ${caveat.variable}`}
+      className={`${geist.variable} ${geistMono.variable} ${caveat.variable}`}
       data-theme="dark"
     >
       <head>
