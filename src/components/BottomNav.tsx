@@ -89,9 +89,11 @@ function NavItem({
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
 
+  // `data-sound` is what makes the pill audible: navigation chimes only from
+  // here, never from the links inside the page (see `SoundProvider`).
   if (!tabs) {
     return (
-      <Link href={href} onClick={onClick} aria-label={label} className={TRIGGER}>
+      <Link href={href} onClick={onClick} aria-label={label} data-sound="chime" className={TRIGGER}>
         <NavIcon icon={icon} label={label} active={isActive} />
       </Link>
     );
@@ -115,6 +117,7 @@ function NavItem({
             <button
               key={tab.href}
               type="button"
+              data-sound="chime"
               onClick={() => {
                 setOpen(false);
                 router.push(tab.href);
@@ -126,7 +129,7 @@ function NavItem({
           ))}
         </div>
       )}
-      <Link href={href} aria-label={label} className={`${TRIGGER} select-none`}>
+      <Link href={href} aria-label={label} data-sound="chime" className={`${TRIGGER} select-none`}>
         <NavIcon icon={icon} label={label} active={isActive} />
       </Link>
     </div>
@@ -156,6 +159,12 @@ export function BottomNav() {
     chatOpenRef.current = chatOpen;
   }, [chatOpen]);
   const [pillPrefsOpen, setPillPrefsOpen] = useState(false);
+
+  // The pill is hidden on /admin and detail pages, which unmounts the menu but
+  // not this state — so a menu left open before navigating would come back open.
+  useEffect(() => {
+    setPillPrefsOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const handler = () => {

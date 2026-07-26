@@ -10,6 +10,7 @@ import {
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useRef } from "react";
 import { type SegmentedOption, SegmentedToggle } from "@/components/SegmentedToggle";
@@ -85,6 +86,17 @@ export function PreferencesMenu({
   const { enabled, setEnabled } = useSound();
   const { status } = useSession();
   const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const lastPath = useRef(pathname);
+
+  // The nav (and with it this popover) stays mounted across route changes, and
+  // the Dashboard link doesn't pass through the outside-click handler — so
+  // without this the menu would still be hanging open when you come back.
+  useEffect(() => {
+    if (pathname === lastPath.current) return;
+    lastPath.current = pathname;
+    onOpenChange(false);
+  }, [pathname, onOpenChange]);
 
   useEffect(() => {
     if (!open) return;

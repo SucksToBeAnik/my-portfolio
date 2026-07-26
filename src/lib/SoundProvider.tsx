@@ -6,20 +6,19 @@ import { createContext, useContext, useEffect, useState } from "react";
 // Sound marks events, not every contact with the page. Two rules cover the
 // whole site:
 //
-//   a[href]               → chime    you went somewhere
+//   [data-sound="chime"]  → chime    you moved between sections from the nav
 //   button[type=submit]   → success  you committed something
 //
-// Everything else is silent — opening a menu, toggling a filter, an editor
-// toolbar, a modal's cancel — because operating the UI isn't an event, and
-// that's exactly what made this annoying when every button chimed.
+// Everything else is silent — every other link, opening a menu, toggling a
+// filter, an editor toolbar, a modal's cancel — because operating the UI isn't
+// an event. Chiming on every `a[href]` is what made this annoying: a page full
+// of links turned into an instrument.
 //
 // Any element can override with `data-sound="<name>"` (see `sounds` for the
 // list); that's how reactions, deletes, and the preferences toggles opt into
 // success without being submits. `data-nosound` mutes a subtree.
-const NAVIGATION = "a[href]";
 const COMMIT = 'button[type="submit"]';
-const SOUNDED = `[data-sound], ${NAVIGATION}, ${COMMIT}`;
-const NAVIGATION_SOUND: SoundName = "chime";
+const SOUNDED = `[data-sound], ${COMMIT}`;
 const COMMIT_SOUND: SoundName = "success";
 // Both sounds run past 300ms with their tails, so unthrottled double-clicks
 // would stack them on top of each other.
@@ -42,7 +41,7 @@ function soundFor(target: EventTarget | null): SoundName | null {
   if (el instanceof HTMLButtonElement && el.disabled) return null;
   const override = el.getAttribute("data-sound");
   if (isSoundName(override)) return override;
-  return el.matches(NAVIGATION) ? NAVIGATION_SOUND : COMMIT_SOUND;
+  return COMMIT_SOUND;
 }
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
