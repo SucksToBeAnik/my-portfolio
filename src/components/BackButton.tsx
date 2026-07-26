@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
+import { ArrowBendUpLeft } from "@phosphor-icons/react/dist/ssr";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { labelForPath } from "@/lib/sectionLabel";
@@ -44,7 +44,7 @@ export function BackButton({ label, fallbackHref }: { label: string; fallbackHre
       onClick={handleBack}
       className="inline-flex items-center gap-1 text-xs text-muted transition-colors hover:text-fg"
     >
-      <ArrowLeft weight="thin" className="w-3.5 h-3.5" />
+      <ArrowBendUpLeft weight="thin" className="w-3.5 h-3.5" />
       {state.label}
     </button>
   );

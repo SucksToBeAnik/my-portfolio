@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  ArrowLeft,
+  ArrowBendUpLeft,
   BookOpenText,
   Check,
   Globe,
@@ -420,7 +420,7 @@ export function QuickAdd() {
                 }}
                 className="p-1 -ml-1 text-muted hover:text-fg transition-colors cursor-pointer"
               >
-                <ArrowLeft weight="thin" className="w-4 h-4" />
+                <ArrowBendUpLeft weight="thin" className="w-4 h-4" />
               </button>
             )}
             <span className="text-sm font-heading">

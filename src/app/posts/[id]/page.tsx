@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowBendUpLeft, ArrowBendUpRight } from "@phosphor-icons/react/dist/ssr";
 import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -163,7 +163,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                 className="group flex flex-col gap-1 rounded-xl bg-fg/[0.04] p-3 hover:bg-fg/[0.08] transition-colors"
               >
                 <span className="flex items-center gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
-                  <ArrowLeft
+                  <ArrowBendUpLeft
                     weight="thin"
                     className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform"
                   />
@@ -181,7 +181,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
               >
                 <span className="flex items-center justify-end gap-1 text-[10px] font-heading uppercase tracking-wider text-muted">
                   Next
-                  <ArrowRight
+                  <ArrowBendUpRight
                     weight="thin"
                     className="w-3 h-3 group-hover:translate-x-0.5 transition-transform"
                   />

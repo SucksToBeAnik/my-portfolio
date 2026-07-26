@@ -1,4 +1,4 @@
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowBendUpRight } from "@phosphor-icons/react/dist/ssr";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { getHeartsCounts } from "@/actions/heart-counts";
@@ -57,7 +57,7 @@ export default async function PostsPage() {
           href="/til"
           className="text-xs text-muted hover:text-fg transition-colors inline-flex items-center gap-1 shrink-0"
         >
-          Today I learned <ArrowRight weight="thin" className="w-3 h-3" />
+          Today I learned <ArrowBendUpRight weight="thin" className="w-3 h-3" />
         </Link>
       </div>
 

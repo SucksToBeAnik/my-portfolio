@@ -12,7 +12,7 @@ import {
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { PreferencesMenu } from "@/components/PreferencesMenu";
 
 const ChatPopup = dynamic(() => import("@/components/ChatPopup").then((m) => m.ChatPopup), {
@@ -30,6 +30,11 @@ const navItems = [
 ];
 
 const subTabs: Record<string, { label: string; href: string }[]> = {};
+
+type RailEntry =
+  | { kind: "tile"; item: (typeof navItems)[number] }
+  | { kind: "divider" }
+  | { kind: "prefs" };
 
 function NavItem({
   href,
@@ -263,14 +268,18 @@ export function BottomNav() {
             a floating object, so it hugs its contents and stays centred. */}
         <div className="flex items-center justify-center max-w-[calc(100%-2rem)] px-1.5 py-1.5 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
           <div className="flex items-center gap-0 sm:gap-0.5">
-            {navItems.map((item) => (
-              <NavItem
-                key={item.href}
-                href={item.href}
-                label={item.label}
-                icon={item.icon}
-                isActive={pathname === item.href}
-              />
+            {navItems.map((item, i) => (
+              <Fragment key={item.href}>
+                {/* Home is its own group, so it gets the same hairline that
+                    separates the sections from preferences. */}
+                {i === 1 && <div className="w-px h-4 mx-1 sm:mx-2 bg-nav-border" />}
+                <NavItem
+                  href={item.href}
+                  label={item.label}
+                  icon={item.icon}
+                  isActive={pathname === item.href}
+                />
+              </Fragment>
             ))}
           </div>
 
@@ -288,64 +297,73 @@ export function BottomNav() {
         // open menu would slide the menu around.
         const sc = (pos: number) =>
           hoveredRail === null || railPrefsOpen ? 1 : railScale(Math.abs(pos - hoveredRail));
-        // Nav tiles kept as one continuous position sequence so the
-        // magnification reads spatially.
-        const tiles = navItems.map((item) => ({
-          key: item.href,
-          href: item.href,
-          label: item.label,
-          active: pathname === item.href,
-          onClick: undefined,
-          icon: item.icon,
-        }));
-        const dividerPos = tiles.length;
-        const prefsPos = dividerPos + 1;
+        // Three groups — home, sections, preferences — separated by hairlines.
+        // Dividers take a position in the same sequence as the tiles so the
+        // magnification still reads spatially as the cursor travels the rail.
+        const entries: RailEntry[] = [
+          { kind: "tile", item: navItems[0] },
+          { kind: "divider" },
+          ...navItems.slice(1).map((item) => ({ kind: "tile" as const, item })),
+          { kind: "divider" },
+          { kind: "prefs" },
+        ];
         return (
           <nav
             className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-50 flex-col items-start gap-2"
             onMouseLeave={() => setHoveredRail(null)}
           >
-            {tiles.map((t, i) => {
-              const Icon = t.icon;
+            {entries.map((entry, i) => {
+              if (entry.kind === "divider") {
+                return (
+                  <div
+                    key={`divider-${i}`}
+                    className="my-1 h-px w-6 self-center bg-nav-border"
+                    onMouseEnter={() => setHoveredRail(i)}
+                  />
+                );
+              }
+
+              if (entry.kind === "prefs") {
+                return (
+                  <div
+                    key="prefs"
+                    className={`flex items-center justify-center rounded-2xl transition-all duration-200 ease-out shrink-0 ${
+                      railPrefsOpen
+                        ? "bg-hover-bg text-nav-text-hover"
+                        : "bg-nav-bg text-nav-text hover:bg-hover-bg hover:text-nav-text-hover"
+                    }`}
+                    style={{
+                      width: `${RAIL_BASE * sc(i)}px`,
+                      height: `${RAIL_BASE * sc(i)}px`,
+                    }}
+                    onMouseEnter={() => setHoveredRail(i)}
+                  >
+                    <PreferencesMenu
+                      open={railPrefsOpen}
+                      onOpenChange={setRailPrefsOpen}
+                      placement="right"
+                      fill
+                    />
+                  </div>
+                );
+              }
+
+              const { item } = entry;
+              const active = pathname === item.href;
+              const Icon = item.icon;
               return (
                 <RailItem
-                  key={t.key}
-                  href={t.href}
-                  label={t.label}
-                  active={t.active}
-                  onClick={t.onClick}
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  active={active}
                   scale={sc(i)}
                   onMouseEnter={() => setHoveredRail(i)}
                 >
-                  <Icon weight={t.active ? "fill" : "thin"} className="w-5 h-5 shrink-0" />
+                  <Icon weight={active ? "fill" : "thin"} className="w-5 h-5 shrink-0" />
                 </RailItem>
               );
             })}
-
-            <div
-              className="my-1 h-px w-6 self-center bg-nav-border"
-              onMouseEnter={() => setHoveredRail(dividerPos)}
-            />
-
-            <div
-              className={`flex items-center justify-center rounded-2xl transition-all duration-200 ease-out shrink-0 ${
-                railPrefsOpen
-                  ? "bg-hover-bg text-nav-text-hover"
-                  : "bg-nav-bg text-nav-text hover:bg-hover-bg hover:text-nav-text-hover"
-              }`}
-              style={{
-                width: `${RAIL_BASE * sc(prefsPos)}px`,
-                height: `${RAIL_BASE * sc(prefsPos)}px`,
-              }}
-              onMouseEnter={() => setHoveredRail(prefsPos)}
-            >
-              <PreferencesMenu
-                open={railPrefsOpen}
-                onOpenChange={setRailPrefsOpen}
-                placement="right"
-                fill
-              />
-            </div>
           </nav>
         );
       })()}

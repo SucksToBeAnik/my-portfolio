@@ -1,4 +1,4 @@
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowBendUpRight, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { asc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -71,7 +71,7 @@ export default async function StacksPage() {
             href="/sites"
             className="text-xs text-muted hover:text-fg transition-colors inline-flex items-center gap-1 shrink-0"
           >
-            See sites I find useful <ArrowRight weight="thin" className="w-3 h-3" />
+            See sites I find useful <ArrowBendUpRight weight="thin" className="w-3 h-3" />
           </Link>
         )}
       </div>

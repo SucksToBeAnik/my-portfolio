@@ -1,8 +1,8 @@
 "use client";
 
 import {
+  ArrowBendUpLeft,
   ArrowCounterClockwise,
-  ArrowLeft,
   Check,
   CloudArrowUp,
   DownloadSimple,
@@ -538,7 +538,7 @@ export function ProjectEditor({
             onClick={() => router.push("/admin/projects")}
             className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs text-fg/60 hover:bg-hover-bg hover:text-fg transition-colors"
           >
-            <ArrowLeft weight="thin" className="h-4 w-4" />
+            <ArrowBendUpLeft weight="thin" className="h-4 w-4" />
             <span className="hidden sm:inline">Projects</span>
           </button>
           <span
