@@ -74,7 +74,7 @@ function SiteItem({ site }: { site: SiteEntry }) {
             }}
           />
         </span>
-        <h3 className="text-sm font-heading truncate">{site.title || domain}</h3>
+        <h3 className="text-sm font-semibold truncate">{site.title || domain}</h3>
 
         <ArrowRight
           weight="thin"

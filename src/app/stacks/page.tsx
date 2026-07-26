@@ -141,7 +141,7 @@ function StackRow({ stack }: { stack: Stack }) {
               <span className="text-muted text-xs">◈</span>
             )}
           </span>
-          <h3 className="text-sm font-heading whitespace-nowrap">{stack.name}</h3>
+          <h3 className="text-sm font-semibold whitespace-nowrap">{stack.name}</h3>
         </div>
 
         {stack.description && (
