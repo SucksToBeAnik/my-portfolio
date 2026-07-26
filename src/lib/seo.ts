@@ -77,7 +77,7 @@ export function ogImage(url?: string | null): string {
 }
 
 export const defaultOpenGraph = {
-  siteName: "Suckstobeanik",
+  siteName: "Anik",
   images: [{ url: DEFAULT_OG_IMAGE, width: 512, height: 512 }],
 };
 

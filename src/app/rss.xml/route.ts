@@ -7,7 +7,7 @@ import { siteUrl, stripMarkdown, truncate } from "@/lib/seo";
 export const revalidate = 3600;
 
 const SITE_TITLE = "Al Jami Islam Anik — Writing";
-const SITE_DESC = "Posts from suckstobeanik — software engineering, projects, and notes.";
+const SITE_DESC = "Writes about building softwares, machine learning, LLMs and much more.";
 
 function escapeXml(value: string): string {
   return value

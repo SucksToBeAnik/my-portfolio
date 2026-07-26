@@ -119,7 +119,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             "@type": "Article",
             headline: post.title,
             datePublished: post.publishedAt,
-            author: { "@type": "Person", name: "Suckstobeanik" },
+            author: { "@type": "Person", name: "Anik" },
             ...((post.imageUrl ?? firstImage(post.content))
               ? { image: post.imageUrl ?? firstImage(post.content) }
               : {}),

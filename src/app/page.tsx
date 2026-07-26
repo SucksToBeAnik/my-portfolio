@@ -145,7 +145,7 @@ export default async function Home() {
           <div className="flex items-start justify-between">
             <Image
               src="/profile.jpeg"
-              alt="Suckstobeanik"
+              alt="Anik"
               width={56}
               height={56}
               className="rounded-2xl object-cover w-14 h-14"
@@ -156,7 +156,7 @@ export default async function Home() {
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-4xl font-heading">@suckstobeanik</h1>
+            <h1 className="text-4xl font-heading">@anik</h1>
             <p className="text-base leading-relaxed text-fg/80 max-w-lg">
               Hey, I am Anik. I&apos;m a software engineer who loves building simple solutions. Welcome to my corner of the Internet!
             </p>

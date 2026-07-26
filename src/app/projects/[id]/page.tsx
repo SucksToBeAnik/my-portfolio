@@ -122,7 +122,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             "@type": "CreativeWork",
             name: project.title,
             description: project.microview,
-            author: { "@type": "Person", name: "Suckstobeanik" },
+            author: { "@type": "Person", name: "Anik" },
             ...(project.url ? { url: project.url } : {}),
             ...(project.imageUrl ? { image: project.imageUrl } : {}),
           }),
