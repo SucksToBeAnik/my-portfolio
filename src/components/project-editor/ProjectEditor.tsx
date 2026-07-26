@@ -32,6 +32,7 @@ import { PostToc } from "@/components/PostToc";
 import { EditorBubbleMenu } from "@/components/post-editor/EditorBubbleMenu";
 import { CodeBlockTab } from "@/components/post-editor/extensions/codeBlockTab";
 import { ImageGallery } from "@/components/post-editor/extensions/ImageGallery";
+import { PostCodeBlock } from "@/components/post-editor/extensions/PostCodeBlock";
 import { type ImageWidth, PostImage } from "@/components/post-editor/extensions/PostImage";
 import { SlashCommand } from "@/components/post-editor/extensions/slashCommand";
 import { PostPreview } from "@/components/post-editor/PostPreview";
@@ -234,8 +235,10 @@ export function ProjectEditor({
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
         link: false,
+        codeBlock: false, // replaced by PostCodeBlock (adds a language picker)
       }),
       LinkExtension.configure({ openOnClick: false }),
+      PostCodeBlock,
       PostImage,
       ImageGallery,
       Placeholder.configure({

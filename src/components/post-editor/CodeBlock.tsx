@@ -2,12 +2,16 @@ import { toJsxRuntime } from "hast-util-to-jsx-runtime";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { CopyButton } from "@/components/post-editor/CopyButton";
 import { languageLabel } from "@/lib/codeLang";
-import { canHighlight, lowlight } from "@/lib/lowlight";
+import { highlightLines } from "@/lib/codeLines";
 
 /**
- * A fenced code block styled like an editor window: a title bar with macOS
- * traffic-light dots, an optional filename, the language name, and a copy
- * button, over a line-numbered, syntax-highlighted body.
+ * A fenced code block: near-monochrome code on a tinted surface, numbered lines
+ * that wrap instead of scrolling sideways, and the language name plus a copy
+ * button above it. No window chrome, no frame, no rules — whitespace does all
+ * the separating.
+ *
+ * Each line is its own grid row (number cell + code cell) so a wrapped line
+ * pushes its own number's row down instead of drifting out of step with it.
  *
  * Deliberately NOT a client component: on public post/project pages the
  * lowlight highlighting runs on the server and only the tiny CopyButton
@@ -25,36 +29,28 @@ export function CodeBlock({
   filename?: string;
 }) {
   const label = languageLabel(lang);
-
-  const highlighted = canHighlight(lang)
-    ? toJsxRuntime(lowlight.highlight(lang as string, code), { Fragment, jsx, jsxs })
-    : code;
-
-  const lineCount = code.split("\n").length;
-  const gutter = Array.from({ length: lineCount }, (_, i) => i + 1).join("\n");
+  const lines = highlightLines(code, lang);
 
   return (
     <div className="post-code">
       <div className="post-code-bar">
-        <span className="post-code-dots" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </span>
         {filename && <span className="post-code-name">{filename}</span>}
-        <span className="post-code-meta">
-          {label && <span className="post-code-lang">{label}</span>}
-          <CopyButton code={code} />
-        </span>
+        {label && <span className="post-code-lang">{label}</span>}
+        <CopyButton code={code} />
       </div>
-      <div className="post-code-body">
-        <span className="post-code-gutter" aria-hidden="true">
-          {gutter}
-        </span>
-        <pre className="post-code-pre">
-          <code className="hljs">{highlighted}</code>
-        </pre>
-      </div>
+      <pre className="post-code-pre">
+        <code className="hljs">
+          {lines.map((line, i) => (
+            // A line has no identity beyond its position — the index is the key.
+            <Fragment key={i}>
+              <span className="post-code-num" aria-hidden="true">
+                {i + 1}
+              </span>
+              <span className="post-code-line">{toJsxRuntime(line, { Fragment, jsx, jsxs })}</span>
+            </Fragment>
+          ))}
+        </code>
+      </pre>
     </div>
   );
 }

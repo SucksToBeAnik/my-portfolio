@@ -103,7 +103,7 @@ function makeComponents(interactive: boolean, slugger: Slugger): Components {
         />
       );
     },
-    // Fenced code blocks get a header bar (filename/language + copy). The <pre>
+    // Fenced code blocks get a meta row (filename/language + copy). The <pre>
     // wraps a single <code> whose class holds the language and whose fence meta
     // (```ts app/page.tsx) holds the filename.
     pre: ({ node }) => {

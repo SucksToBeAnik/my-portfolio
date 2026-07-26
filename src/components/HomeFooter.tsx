@@ -169,7 +169,7 @@ function LocalTime() {
   }, []);
 
   return (
-    <p className="flex shrink-0 items-center gap-1.5 whitespace-nowrap font-heading text-[11px] tracking-normal text-fg/50 sm:gap-2 sm:text-xs sm:tracking-wider">
+    <p className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[11px] tracking-normal text-fg/50 sm:gap-2 sm:text-xs sm:tracking-wider">
       <Clock weight="regular" className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
       {/* min-height holds the row while the clock is still null on first paint. */}
       <span className="min-h-[1em] tabular-nums">{time && `${time} ${TIME_ZONE_LABEL}`}</span>
@@ -246,7 +246,7 @@ export function HomeFooter() {
               className="h-8 w-8 shrink-0 rounded-xl object-cover sm:h-9 sm:w-9"
             />
             {/* Phones get the short name so the row never wraps or truncates. */}
-            <span className="font-heading text-[11px] uppercase tracking-[0.1em] text-fg/50 sm:text-xs sm:tracking-[0.16em]">
+            <span className="text-[11px] uppercase tracking-[0.1em] text-fg/50 sm:text-xs sm:tracking-[0.16em]">
               <span className="sm:hidden">Anik</span>
               <span className="hidden sm:inline">Al Jami Islam Anik</span>
             </span>

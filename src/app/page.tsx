@@ -158,8 +158,7 @@ export default async function Home() {
           <div className="space-y-4">
             <h1 className="text-4xl font-heading">@suckstobeanik</h1>
             <p className="text-base leading-relaxed text-fg/80 max-w-lg">
-              I&apos;m a software engineer who loves building simple solutions. Here, I share a
-              little bit of everything that interests me.
+              Hey, I am Anik. I&apos;m a software engineer who loves building simple solutions. Welcome to my corner of the Internet!
             </p>
             {workingOn && (
               <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs">

@@ -5,7 +5,8 @@ import { NodeViewContent, NodeViewWrapper, type ReactNodeViewProps } from "@tipt
 import { CODE_LANGUAGES } from "@/lib/codeLang";
 
 /**
- * Editable code block with a language picker in its top-right corner. The
+ * Editable code block with a language picker in its meta row — the same spot
+ * where the reader ({@link CodeBlock}) prints the language name. The
  * selected language is stored on the node's `language` attribute, which
  * tiptap-markdown serializes as the fence info string (```typescript) — the
  * same value the reader's CodeBlock highlights from.
