@@ -171,14 +171,18 @@ export function FeaturedPhotos({ photos }: { photos: PhotoItem[] }) {
         })}
       </div>
 
-      <div className="flex justify-center lg:mt-2">
+      {/* A sentence rather than a "View all" button — the link is the last few
+          words of it, so it reads as prose and still lands where it should. */}
+      <p className="text-center text-sm leading-relaxed text-muted lg:mt-2">
+        A few frames I keep coming back to.{" "}
         <Link
           href="/photos"
-          className="font-heading text-xs uppercase tracking-wider text-muted transition-colors hover:text-fg"
+          className="text-fg/80 underline decoration-hairline decoration-1 underline-offset-4 transition-colors hover:text-fg hover:decoration-fg/40"
         >
-          View all
+          The rest of the roll is here
         </Link>
-      </div>
+        .
+      </p>
 
       {viewer && (
         <ImageViewer src={viewer.imageUrl} alt={viewer.title} onClose={() => setViewer(null)} />

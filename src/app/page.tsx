@@ -5,7 +5,6 @@ import Link from "next/link";
 import { getShowcasedCv } from "@/actions/cvs";
 import { getExploreSections } from "@/actions/explore";
 import { getFeaturedGallery } from "@/actions/gallery";
-import { AskButton } from "@/components/AskButton";
 import { CareerTrack } from "@/components/CareerTrack";
 import { CvLink } from "@/components/CvLink";
 import { ExploreTiles } from "@/components/ExploreTiles";
@@ -150,10 +149,9 @@ export default async function Home() {
               height={56}
               className="rounded-full object-cover w-14 h-14"
             />
-            <div className="flex items-center gap-2">
-              <AskButton />
-              <SearchBar />
-            </div>
+            {/* Ask used to sit beside search here; it lives in the nav pill now
+                so it's reachable from every page. */}
+            <SearchBar />
           </div>
 
           <div className="space-y-4">

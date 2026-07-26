@@ -16,9 +16,23 @@ const TILES: {
   noun: [string, string];
   variant: ExploreStackVariant;
 }[] = [
-  { key: "life", href: "/life", label: "Life", noun: ["event", "events"], variant: "prints" },
-  { key: "books", href: "/books", label: "Books", noun: ["book", "books"], variant: "covers" },
-  { key: "media", href: "/media", label: "Watch", noun: ["title", "titles"], variant: "posters" },
+  // Labels are all present participles — "Reading", "Watching" — so Life becomes
+  // "Living" to keep the three reading as one set of ongoing things.
+  {
+    key: "life",
+    href: "/life",
+    label: "Living",
+    noun: ["milestone", "milestones"],
+    variant: "prints",
+  },
+  { key: "books", href: "/books", label: "Reading", noun: ["book", "books"], variant: "covers" },
+  {
+    key: "media",
+    href: "/media",
+    label: "Watching",
+    noun: ["title", "titles"],
+    variant: "posters",
+  },
 ];
 
 export function ExploreTiles({

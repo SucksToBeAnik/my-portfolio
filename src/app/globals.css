@@ -44,6 +44,9 @@ html {
   --nav-hover-bg: rgba(255, 255, 255, 0.08);
   --nav-active-bg: rgb(255, 255, 255);
   --nav-active-text: rgb(0, 0, 0);
+  /* The filled icon marking the current page. Deliberately not pure #fff — a
+     solid white glyph outshouts the page it points at. */
+  --nav-active-icon: #5b5954;
   --shelf-top: #5c5c5c;
   --shelf-top-2: #4a4a4a;
   --shelf-front-1: #262626;
@@ -69,6 +72,7 @@ html {
   --nav-hover-bg: rgba(0, 0, 0, 0.08);
   --nav-active-bg: rgb(0, 0, 0);
   --nav-active-text: rgb(255, 255, 255);
+  --nav-active-icon: #b0b0af;
   --shelf-top: #f2f2f2;
   --shelf-top-2: #e0e0e0;
   --shelf-front-1: #c9c9c9;
@@ -93,6 +97,7 @@ html {
   --color-nav-hover-bg: var(--nav-hover-bg);
   --color-nav-active-bg: var(--nav-active-bg);
   --color-nav-active-text: var(--nav-active-text);
+  --color-nav-active-icon: var(--nav-active-icon);
   --font-heading: var(--font-heading);
   --font-sans: var(--font-sans);
 }

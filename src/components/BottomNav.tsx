@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, House, Quotes, Wrench } from "@phosphor-icons/react";
+import { Briefcase, ChatCircleDots, House, Quotes, Wrench } from "@phosphor-icons/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -24,10 +24,45 @@ const navItems = [
 
 const subTabs: Record<string, { label: string; href: string }[]> = {};
 
+// Shared trigger for every pill entry: just the icon, with the name revealed as
+// a tooltip above it on hover. Labels used to sit inline at `sm` and up, but with
+// Life/Books/Watch gone the pill is short enough that icons alone read cleanly —
+// and a uniform tile width keeps it from shifting as entries come and go.
+function NavIcon({
+  icon: Icon,
+  label,
+  active,
+  hint,
+}: {
+  icon: React.ElementType;
+  label: string;
+  active?: boolean;
+  /** Optional keyboard shortcut shown alongside the tooltip label. */
+  hint?: string;
+}) {
+  return (
+    <>
+      <span className="flex items-center justify-center transition-transform duration-200 ease-out group-hover/nav:scale-110">
+        <Icon
+          weight={active ? "fill" : "thin"}
+          className={`w-4 h-4 shrink-0 ${active ? "text-nav-active-icon" : ""}`}
+        />
+      </span>
+      <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 flex -translate-x-1/2 translate-y-1 items-center gap-1.5 whitespace-nowrap rounded-lg border border-nav-border bg-nav-popup-bg px-2 py-1 font-heading text-[10px] uppercase tracking-wider text-nav-text-hover opacity-0 shadow-lg transition-all duration-150 group-hover/nav:translate-y-0 group-hover/nav:opacity-100">
+        {label}
+        {hint && <kbd className="text-nav-text">{hint}</kbd>}
+      </span>
+    </>
+  );
+}
+
+const TRIGGER =
+  "group/nav relative flex items-center justify-center w-8 h-8 rounded-full text-nav-text hover:text-nav-text-hover transition-colors duration-200 shrink-0";
+
 function NavItem({
   href,
   label,
-  icon: Icon,
+  icon,
   isActive,
   onClick,
 }: {
@@ -56,13 +91,8 @@ function NavItem({
 
   if (!tabs) {
     return (
-      <Link
-        href={href}
-        onClick={onClick}
-        className="relative flex items-center gap-1.5 px-1.5 sm:px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0"
-      >
-        <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
-        <span className="hidden sm:inline">{label}</span>
+      <Link href={href} onClick={onClick} aria-label={label} className={TRIGGER}>
+        <NavIcon icon={icon} label={label} active={isActive} />
       </Link>
     );
   }
@@ -96,14 +126,25 @@ function NavItem({
           ))}
         </div>
       )}
-      <Link
-        href={href}
-        className="relative flex items-center gap-1.5 px-1.5 sm:px-2.5 py-1.5 rounded-full text-xs text-nav-text hover:text-nav-text-hover hover:scale-110 transition-all duration-200 shrink-0 select-none"
-      >
-        <Icon weight={isActive ? "fill" : "thin"} className="w-4 h-4 shrink-0" />
-        <span className="hidden sm:inline">{label}</span>
+      <Link href={href} aria-label={label} className={`${TRIGGER} select-none`}>
+        <NavIcon icon={icon} label={label} active={isActive} />
       </Link>
     </div>
+  );
+}
+
+// Ask lives in the pill rather than the homepage hero: it answers questions about
+// any page you happen to be on, so it belongs with the persistent controls.
+function AskItem() {
+  return (
+    <button
+      type="button"
+      onClick={() => window.dispatchEvent(new CustomEvent("openchat"))}
+      aria-label="Ask me anything"
+      className={`${TRIGGER} cursor-pointer`}
+    >
+      <NavIcon icon={ChatCircleDots} label="Ask Me" hint="⌘/" />
+    </button>
   );
 }
 
@@ -164,7 +205,7 @@ export function BottomNav() {
         {/* Width comes from the tiles, not the viewport — the pill should read as
             a floating object, so it hugs its contents and stays centred. */}
         <div className="flex items-center justify-center max-w-[calc(100%-2rem)] px-1.5 py-1.5 bg-nav-bg backdrop-blur-xl rounded-full border border-nav-border pointer-events-auto">
-          <div className="flex items-center gap-0 sm:gap-0.5">
+          <div className="flex items-center gap-1">
             {navItems.map((item, i) => (
               <Fragment key={item.href}>
                 {/* Home is its own group, so it gets the same hairline that
@@ -178,6 +219,10 @@ export function BottomNav() {
                 />
               </Fragment>
             ))}
+            {/* Ask closes the section group — it's an action, not a page, so it
+                sits behind its own hairline just like preferences. */}
+            {/* <div className="w-px h-4 mx-1 sm:mx-2 bg-nav-border" /> */}
+            <AskItem />
           </div>
 
           <div className="flex items-center shrink-0 ml-1">
