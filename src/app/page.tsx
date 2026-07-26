@@ -3,10 +3,12 @@ import { desc, eq } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
 import { getShowcasedCv } from "@/actions/cvs";
+import { getExploreSections } from "@/actions/explore";
 import { getFeaturedGallery } from "@/actions/gallery";
 import { AskButton } from "@/components/AskButton";
 import { CareerTrack } from "@/components/CareerTrack";
 import { CvLink } from "@/components/CvLink";
+import { ExploreTiles } from "@/components/ExploreTiles";
 import { FeaturedPhotos } from "@/components/FeaturedPhotos";
 import { HomePublications } from "@/components/HomePublications";
 import { LinkPreview } from "@/components/LinkPreview";
@@ -18,7 +20,8 @@ import { lifeEvents, microblogs, projects, publications, siteConfig } from "@/db
 
 // Cached until an admin write calls revalidatePath("/"). Every source feeding
 // this page does: featured projects, posts, publications, work history
-// (CareerTrack), featured photos, the showcased CV, and the "working on" config.
+// (CareerTrack), featured photos, the showcased CV, the "working on" config, and
+// the Life/Books/Watch counts behind the explore tiles.
 // Nothing here reads the clock at render time — CareerTrack and FeaturedPhotos
 // derive their years from stored dates, and SelectedProjects formats its
 // relative dates client-side.
@@ -52,6 +55,7 @@ export default async function Home() {
     workingOnUrlRow,
     showcasedCv,
     featuredPhotos,
+    exploreSections,
   ] = await Promise.all([
     db
       .select({
@@ -101,6 +105,7 @@ export default async function Home() {
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
     getShowcasedCv(),
     getFeaturedGallery(6),
+    getExploreSections(),
   ]);
 
   const workingOn = workingOnRow[0]?.value ?? null;
@@ -218,6 +223,7 @@ export default async function Home() {
         <HomePublications publications={allPublications} />
         <CareerTrack items={workEvents} />
         <FeaturedPhotos photos={featuredPhotos} />
+        <ExploreTiles sections={exploreSections} />
       </div>
     </>
   );

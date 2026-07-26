@@ -19,6 +19,14 @@ const schema = z.object({
   sortOrder: z.number().optional(),
 });
 
+// Books surface in three places: the admin list, /books, and the homepage
+// explore tile (which shows the count and the first few covers).
+function revalidateBooks() {
+  revalidatePath("/admin/books");
+  revalidatePath("/books");
+  revalidatePath("/");
+}
+
 export async function getBooks() {
   return db.select().from(books).orderBy(books.sortOrder);
 }
@@ -27,8 +35,7 @@ export async function createBook(data: z.infer<typeof schema>) {
   await requireAdmin();
   const parsed = schema.parse(data);
   await db.insert(books).values(parsed);
-  revalidatePath("/admin/books");
-  revalidatePath("/books");
+  revalidateBooks();
 }
 
 export async function updateBook(id: number, data: z.infer<typeof schema>) {
@@ -38,15 +45,13 @@ export async function updateBook(id: number, data: z.infer<typeof schema>) {
     .update(books)
     .set({ ...parsed, updatedAt: new Date() })
     .where(eq(books.id, id));
-  revalidatePath("/admin/books");
-  revalidatePath("/books");
+  revalidateBooks();
 }
 
 export async function deleteBook(id: number) {
   await requireAdmin();
   await db.delete(books).where(eq(books.id, id));
-  revalidatePath("/admin/books");
-  revalidatePath("/books");
+  revalidateBooks();
 }
 
 export async function reorderBooks(
@@ -62,8 +67,7 @@ export async function reorderBooks(
       })
       .where(eq(books.id, item.id));
   }
-  revalidatePath("/admin/books");
-  revalidatePath("/books");
+  revalidateBooks();
 }
 
 export async function searchBooks(query: string) {

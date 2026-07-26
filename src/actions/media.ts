@@ -22,6 +22,14 @@ const mediaSchema = z.object({
   seasons: z.number().int().positive().optional().nullable(),
 });
 
+// Media surfaces in three places: the admin list, /media, and the homepage
+// explore tile (which shows the count and the first few posters).
+function revalidateMedia() {
+  revalidatePath("/admin/media");
+  revalidatePath("/media");
+  revalidatePath("/");
+}
+
 export async function getMedia() {
   return db.select().from(media).orderBy(asc(media.sortOrder));
 }
@@ -62,23 +70,20 @@ export async function createMedia(data: z.infer<typeof mediaSchema>) {
     .then((r) => r[0]?.max ?? -1);
 
   await db.insert(media).values({ ...parsed, sortOrder: maxOrder + 1 });
-  revalidatePath("/admin/media");
-  revalidatePath("/media");
+  revalidateMedia();
 }
 
 export async function updateMedia(id: number, data: z.infer<typeof mediaSchema>) {
   await requireAdmin();
   const parsed = mediaSchema.parse(data);
   await db.update(media).set(parsed).where(eq(media.id, id));
-  revalidatePath("/admin/media");
-  revalidatePath("/media");
+  revalidateMedia();
 }
 
 export async function deleteMedia(id: number) {
   await requireAdmin();
   await db.delete(media).where(eq(media.id, id));
-  revalidatePath("/admin/media");
-  revalidatePath("/media");
+  revalidateMedia();
 }
 
 export async function reorderMedia(items: { id: number; sortOrder: number }[]) {
@@ -86,8 +91,7 @@ export async function reorderMedia(items: { id: number; sortOrder: number }[]) {
   await Promise.all(
     items.map(({ id, sortOrder }) => db.update(media).set({ sortOrder }).where(eq(media.id, id))),
   );
-  revalidatePath("/admin/media");
-  revalidatePath("/media");
+  revalidateMedia();
 }
 
 export async function lookupIMDb(imdbId: string) {
