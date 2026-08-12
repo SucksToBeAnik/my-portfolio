@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { mirrorToCloudinary } from "@/lib/cloudinary";
 
 export interface SiteMeta {
@@ -30,6 +31,20 @@ export async function fetchSiteMeta(url: string): Promise<SiteMeta | null> {
     return null;
   }
 }
+
+/**
+ * Metadata for public hover cards that are not backed by a database row.
+ *
+ * The URL argument is part of Next's cache key, so each profile is fetched at
+ * most once a week across visitors and deployments that retain the data cache.
+ * Callers should still provide a small static fallback in case Microlink is
+ * unavailable during the first lookup.
+ */
+export const fetchCachedSiteMeta = unstable_cache(
+  async (url: string) => fetchSiteMeta(url),
+  ["public-hover-preview-v1"],
+  { revalidate: 60 * 60 * 24 * 7 },
+);
 
 /** Google's favicon service — the last resort when a site exposes no logo. */
 export function faviconUrl(url: string): string {

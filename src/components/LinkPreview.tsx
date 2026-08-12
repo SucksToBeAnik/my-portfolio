@@ -19,6 +19,11 @@ interface LinkPreviewProps {
   position?: "right" | "bottom";
   /** Pre-fetched metadata; when set, no microlink request is made on hover. */
   preload?: Omit<PreviewData, "domain">;
+  /** Replaces the standard metadata card, for previews such as a PDF page. */
+  previewContent?: React.ReactNode;
+  /** Keeps an opened card in the DOM so embedded media is loaded only once. */
+  persistPreview?: boolean;
+  previewClassName?: string;
 }
 
 interface PreviewData {
@@ -43,6 +48,9 @@ export function LinkPreview({
   className = "",
   position = "right",
   preload,
+  previewContent,
+  persistPreview = false,
+  previewClassName = "w-64",
 }: LinkPreviewProps) {
   const [data, setData] = useState<PreviewData | null>(
     preload ? { ...preload, domain: getDomain(url) } : null,
@@ -51,11 +59,12 @@ export function LinkPreview({
   // so the closing frame can still be on screen while it animates out.
   const [visible, setVisible] = useState(false);
   const [shown, setShown] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
   // og-image URLs rotate and go 404; drop the frame rather than show a broken
   // image on top of an otherwise fine preview.
   const [imageBroken, setImageBroken] = useState(false);
   const [pos, setPos] = useState<React.CSSProperties>({});
-  const fetchedRef = useRef(Boolean(preload));
+  const fetchedRef = useRef(Boolean(preload || previewContent));
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const unmountTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const popupRef = useRef<HTMLDivElement>(null);
@@ -124,6 +133,7 @@ export function LinkPreview({
           setPos({ top: rect.top - 8, left: rect.left - 268 });
         }
       }
+      setHasOpened(true);
       setVisible(true);
 
       if (!fetchedRef.current) {
@@ -144,67 +154,78 @@ export function LinkPreview({
   // Two layers on purpose: the outer one is measured by the layout effect
   // above, so it has to stay free of the animation's scale/offset — otherwise
   // the viewport correction would be computed from a mid-transition box.
-  const popup = visible ? (
-    <div
-      ref={popupRef}
-      style={{
-        position: "fixed",
-        transform: position === "bottom" ? "translateX(-50%)" : undefined,
-        zIndex: 9999,
-        ...pos,
-      }}
-      className="w-64 pointer-events-none"
-    >
+  const popup =
+    visible || (persistPreview && hasOpened) ? (
       <div
+        ref={popupRef}
+        aria-hidden={!visible}
         style={{
-          opacity: shown ? 1 : 0,
-          transform: shown ? "translateY(0) scale(1)" : "translateY(4px) scale(0.97)",
-          transformOrigin: position === "bottom" ? "top center" : "left center",
-          transition: `opacity ${POPUP_TRANSITION_MS}ms ease-out, transform ${POPUP_TRANSITION_MS}ms ease-out`,
+          position: "fixed",
+          transform: position === "bottom" ? "translateX(-50%)" : undefined,
+          visibility: visible ? "visible" : "hidden",
+          zIndex: 9999,
+          ...pos,
         }}
-        className="bg-bg border border-hairline rounded-xl shadow-2xl overflow-hidden"
+        className={`${previewClassName} pointer-events-none`}
       >
-        {data?.image && !imageBroken && (
-          <div className="relative w-full aspect-[16/10] bg-hover-bg">
-            {/* Plain img, not next/image: the src is already width-capped on our
-              own CDN when it's a mirrored asset, and routing arbitrary hover
-              URLs through the optimizer would both miss the warm-up above and
-              spend transformations on images most visitors never see. */}
-            <img
-              src={cdnImage(data.image, POPUP_IMAGE_WIDTH)}
-              alt=""
-              onError={() => setImageBroken(true)}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </div>
-        )}
-        <div className="px-3.5 py-3 space-y-1.5">
-          <div className="flex items-center gap-2">
-            {data?.logo && (
-              <div className="w-4 h-4 shrink-0 rounded overflow-hidden bg-hover-bg">
-                <img
-                  src={cdnImage(data.logo, POPUP_LOGO_WIDTH)}
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="object-contain"
-                />
+        <div
+          style={{
+            opacity: shown ? 1 : 0,
+            transform: shown ? "translateY(0) scale(1)" : "translateY(4px) scale(0.97)",
+            transformOrigin: position === "bottom" ? "top center" : "left center",
+            transition: `opacity ${POPUP_TRANSITION_MS}ms ease-out, transform ${POPUP_TRANSITION_MS}ms ease-out`,
+          }}
+          className="bg-bg border border-hairline rounded-xl shadow-2xl overflow-hidden"
+        >
+          {previewContent ?? (
+            <>
+              {data?.image && !imageBroken && (
+                <div className="relative w-full aspect-[16/10] bg-hover-bg">
+                  {/* Plain img, not next/image: the src is already width-capped on our
+                  own CDN when it's a mirrored asset, and routing arbitrary hover
+                  URLs through the optimizer would both miss the warm-up above and
+                  spend transformations on images most visitors never see. */}
+                  <img
+                    src={cdnImage(data.image, POPUP_IMAGE_WIDTH)}
+                    alt=""
+                    onError={() => setImageBroken(true)}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="px-3.5 py-3 space-y-1.5">
+                <div className="flex items-center gap-2">
+                  {data?.logo && (
+                    <div className="w-4 h-4 shrink-0 rounded overflow-hidden bg-hover-bg">
+                      <img
+                        src={cdnImage(data.logo, POPUP_LOGO_WIDTH)}
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                    </div>
+                  )}
+                  <p className="text-[10px] text-fg/40 uppercase tracking-wider truncate">
+                    {data?.domain || getDomain(url)}
+                  </p>
+                </div>
+                {data?.title && (
+                  <p className="text-sm font-medium text-fg leading-snug line-clamp-2">
+                    {data.title}
+                  </p>
+                )}
+                {data?.description && (
+                  <p className="text-xs text-fg/50 leading-relaxed line-clamp-2">
+                    {data.description}
+                  </p>
+                )}
               </div>
-            )}
-            <p className="text-[10px] text-fg/40 uppercase tracking-wider truncate">
-              {data?.domain || getDomain(url)}
-            </p>
-          </div>
-          {data?.title && (
-            <p className="text-sm font-medium text-fg leading-snug line-clamp-2">{data.title}</p>
-          )}
-          {data?.description && (
-            <p className="text-xs text-fg/50 leading-relaxed line-clamp-2">{data.description}</p>
+            </>
           )}
         </div>
       </div>
-    </div>
-  ) : null;
+    ) : null;
 
   return (
     <span

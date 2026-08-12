@@ -17,11 +17,40 @@ import { SearchBar } from "@/components/SearchBar";
 import { SelectedProjects } from "@/components/SelectedProjects";
 import { db } from "@/db";
 import { lifeEvents, microblogs, projects, publications, siteConfig } from "@/db/schema";
+import { fetchCachedSiteMeta, type SiteMeta } from "@/lib/microlink";
 
-// Cached until an admin write calls revalidatePath("/"). Every source feeding
-// this page does: featured projects, posts, publications, work history
-// (CareerTrack), featured photos, the showcased CV, the "working on" config, and
-// the Life/Books/Watch counts behind the explore tiles.
+const SOCIAL_URLS = {
+  github: "https://github.com/SucksToBeAnik",
+  linkedin: "https://www.linkedin.com/in/al-jami-islam-anik-485758285",
+  x: "https://x.com/suckstobeanik",
+} as const;
+
+const SOCIAL_FALLBACKS: Record<keyof typeof SOCIAL_URLS, SiteMeta> = {
+  github: {
+    title: "SucksToBeAnik on GitHub",
+    description: "Projects and open-source work by Anik.",
+    image: null,
+    logo: null,
+  },
+  linkedin: {
+    title: "Al Jami Islam Anik on LinkedIn",
+    description: "Anik's professional profile and experience.",
+    image: null,
+    logo: null,
+  },
+  x: {
+    title: "@suckstobeanik on X",
+    description: "Posts and updates from Anik.",
+    image: null,
+    logo: null,
+  },
+};
+
+// Cached until an admin write calls revalidatePath("/"), or until the weekly
+// social-preview metadata refresh. Every database source feeding this page
+// revalidates it after a write: featured projects, posts, publications, work
+// history (CareerTrack), featured photos, the showcased CV, the "working on"
+// config, and the Life/Books/Watch counts behind the explore tiles.
 // Nothing here reads the clock at render time — CareerTrack and FeaturedPhotos
 // derive their years from stored dates, and SelectedProjects formats its
 // relative dates client-side.
@@ -56,6 +85,7 @@ export default async function Home() {
     showcasedCv,
     featuredPhotos,
     exploreSections,
+    socialMetadata,
   ] = await Promise.all([
     db
       .select({
@@ -106,10 +136,12 @@ export default async function Home() {
     getShowcasedCv(),
     getFeaturedGallery(6),
     getExploreSections(),
+    Promise.all(Object.values(SOCIAL_URLS).map(fetchCachedSiteMeta)),
   ]);
 
   const workingOn = workingOnRow[0]?.value ?? null;
   const workingOnUrl = workingOnUrlRow[0]?.value || null;
+  const [githubMeta, linkedinMeta, xMeta] = socialMetadata;
 
   return (
     <>
@@ -158,7 +190,8 @@ export default async function Home() {
           <div className="space-y-4">
             <h1 className="text-4xl font-heading">@anik</h1>
             <p className="text-base leading-relaxed text-fg/80 max-w-lg">
-              Hey, I am Anik. I&apos;m a software engineer who loves building simple solutions. Welcome to my corner of the Internet!
+              Hey, I am Anik. I&apos;m a software engineer who loves building simple solutions.
+              Welcome to my corner of the Internet!
             </p>
             {workingOn && (
               <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs">
@@ -182,9 +215,14 @@ export default async function Home() {
               near-white light background. Kept at a low opacity so the row stays
               secondary to the intro above it. */}
           <div className="flex items-center gap-3 text-fg/45">
-            <LinkPreview url="https://github.com/SucksToBeAnik" position="bottom">
+            <LinkPreview
+              url={SOCIAL_URLS.github}
+              position="bottom"
+              preload={githubMeta ?? SOCIAL_FALLBACKS.github}
+              persistPreview
+            >
               <Link
-                href="https://github.com/SucksToBeAnik"
+                href={SOCIAL_URLS.github}
                 target="_blank"
                 className="flex items-center gap-1.5 hover:text-fg transition-colors"
                 aria-label="GitHub"
@@ -195,9 +233,11 @@ export default async function Home() {
             <LinkPreview
               url="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
               position="bottom"
+              preload={linkedinMeta ?? SOCIAL_FALLBACKS.linkedin}
+              persistPreview
             >
               <Link
-                href="https://www.linkedin.com/in/al-jami-islam-anik-485758285"
+                href={SOCIAL_URLS.linkedin}
                 target="_blank"
                 className="flex items-center gap-1.5 hover:text-fg transition-colors"
                 aria-label="LinkedIn"
@@ -205,9 +245,14 @@ export default async function Home() {
                 <LinkedinLogo weight="light" className="w-5 h-5" />
               </Link>
             </LinkPreview>
-            <LinkPreview url="https://x.com/suckstobeanik" position="bottom">
+            <LinkPreview
+              url={SOCIAL_URLS.x}
+              position="bottom"
+              preload={xMeta ?? SOCIAL_FALLBACKS.x}
+              persistPreview
+            >
               <Link
-                href="https://x.com/suckstobeanik"
+                href={SOCIAL_URLS.x}
                 target="_blank"
                 className="flex items-center gap-1.5 hover:text-fg transition-colors"
                 aria-label="X / Twitter"
@@ -215,7 +260,7 @@ export default async function Home() {
                 <XLogo weight="light" className="w-5 h-5" />
               </Link>
             </LinkPreview>
-            {showcasedCv && <CvLink url={showcasedCv.fileUrl} />}
+            {showcasedCv && <CvLink url={showcasedCv.fileUrl} title={showcasedCv.title} />}
           </div>
         </section>
 
