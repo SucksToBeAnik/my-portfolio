@@ -70,6 +70,13 @@ html {
   /* The filled icon marking the current page. Deliberately not pure #fff — a
      solid white glyph outshouts the page it points at. */
   --nav-active-icon: #a9a49a;
+  /* Lifted charcoal actions separate from both the black page and the softer
+     reply bubble. The text stays soft gray instead of stark white. */
+  --contact-action: #2a2a2a;
+  --contact-action-hover: #333333;
+  --contact-action-primary: #343434;
+  --contact-action-primary-hover: #3d3d3d;
+  --contact-action-text: #d2d2d2;
   --shelf-top: #5c5c5c;
   --shelf-top-2: #4a4a4a;
   --shelf-front-1: #262626;
@@ -99,6 +106,13 @@ html {
   --nav-active-bg: rgb(0, 0, 0);
   --nav-active-text: rgb(255, 255, 255);
   --nav-active-icon: #6a6a64;
+  /* In light mode the controls become cool gray surfaces rather than carrying
+     the dark theme's charcoal across unchanged. */
+  --contact-action: #dfe1e4;
+  --contact-action-hover: #d2d5d9;
+  --contact-action-primary: #d2d5d9;
+  --contact-action-primary-hover: #c4c8cd;
+  --contact-action-text: #30343a;
   --shelf-top: #f2f2f2;
   --shelf-top-2: #e0e0e0;
   --shelf-front-1: #c9c9c9;
@@ -124,6 +138,11 @@ html {
   --color-nav-active-bg: var(--nav-active-bg);
   --color-nav-active-text: var(--nav-active-text);
   --color-nav-active-icon: var(--nav-active-icon);
+  --color-contact-action: var(--contact-action);
+  --color-contact-action-hover: var(--contact-action-hover);
+  --color-contact-action-primary: var(--contact-action-primary);
+  --color-contact-action-primary-hover: var(--contact-action-primary-hover);
+  --color-contact-action-text: var(--contact-action-text);
   --color-control-border: var(--control-border);
   /* Headings and body are the same family (Geist) — `font-heading` stays as a
      named role so the distinction survives if a display face ever comes back. */

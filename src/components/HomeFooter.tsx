@@ -29,15 +29,16 @@ const CONTACTS = [
 const BUBBLE = "max-w-[19rem] rounded-2xl px-4 py-2.5 text-sm leading-relaxed";
 const THEIRS = `${BUBBLE} bg-fg/[0.13] text-fg/90`;
 const MINE = `${BUBBLE} bg-fg/[0.05] text-fg/80`;
-/* Fields and action rows sit *inside* a tinted bubble, so they read as one more
-   step up the same tint rather than as outlined boxes. Focus and hover are
-   another step up, which works in both modes without a border. */
+/* Fields recede into the reply bubble as dark/light wells. Their inset depth,
+   not a stroke, separates them from the surrounding message. */
 const FIELD =
-  "w-full rounded-xl bg-fg/[0.09] px-3 py-2 text-[13px] text-fg placeholder:text-fg/45 transition-colors focus:bg-fg/[0.16] focus:outline-none";
-/* Buttons sit a clear step above the fields: fields recede, actions come
-   forward, so the two never read as the same control. */
+  "w-full rounded-xl bg-bg/80 px-3 py-2 text-[13px] text-fg shadow-inner placeholder:text-fg/45 transition-[background-color,box-shadow] focus:bg-bg focus:outline-none focus:ring-2 focus:ring-fg/15";
+/* Actions float above those wells with a denser translucent tint. They stay
+   softer than a full foreground fill and distinct from the visitor bubble. */
 const ROW =
-  "flex items-center justify-center gap-2 rounded-xl bg-fg/[0.13] px-3 py-2 text-[13px] text-fg/80 transition-colors hover:bg-fg/[0.2] hover:text-fg";
+  "flex items-center justify-center gap-2 rounded-xl bg-contact-action px-3 py-2 text-[13px] text-contact-action-text shadow-sm transition-[background-color,color,transform] hover:-translate-y-px hover:bg-contact-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/20";
+const PRIMARY =
+  "flex items-center justify-center gap-2 rounded-xl bg-contact-action-primary px-3 py-2 text-[13px] font-medium text-contact-action-text shadow-sm transition-[background-color,transform] hover:-translate-y-px hover:bg-contact-action-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/20";
 
 function Them({ children, tail }: { children: string; tail?: boolean }) {
   return (
@@ -109,7 +110,7 @@ function ContactForm() {
       <button
         type="submit"
         disabled={pending}
-        className={`${ROW} cursor-pointer disabled:cursor-wait disabled:opacity-50`}
+        className={`${PRIMARY} cursor-pointer disabled:cursor-wait disabled:opacity-50`}
       >
         <PaperPlaneTilt weight="regular" className="h-4 w-4 shrink-0" />
         {pending ? "Sending" : "Send"}
@@ -132,7 +133,7 @@ function AskField() {
       type="button"
       onClick={openChat}
       aria-label="Ask me anything"
-      className="group mt-3 flex w-full cursor-pointer items-center gap-2 rounded-xl bg-fg/[0.09] px-3 py-2 text-left transition-colors hover:bg-fg/[0.16]"
+      className="group mt-3 flex w-full cursor-pointer items-center gap-2 rounded-xl bg-bg/80 px-3 py-2 text-left shadow-inner transition-[background-color,box-shadow] hover:bg-bg focus-visible:bg-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/15"
     >
       <span className="flex-1 text-[13px] text-fg/45 transition-colors group-hover:text-fg/75">
         Ask me anything...
