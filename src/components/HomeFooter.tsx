@@ -1,6 +1,13 @@
 "use client";
 
-import { CalendarDots, Clock, LinkedinLogo, PaperPlaneTilt, XLogo } from "@phosphor-icons/react";
+import {
+  CalendarDots,
+  Check,
+  Clock,
+  LinkedinLogo,
+  PaperPlaneTilt,
+  XLogo,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import { type FormEvent, useEffect, useState, useTransition } from "react";
 import { sendContactMessage } from "@/actions/contact";
@@ -61,16 +68,25 @@ function ContactForm() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [note, setNote] = useState<{ text: string; ok: boolean } | null>(null);
+  const [sent, setSent] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!sent) return;
+    const id = setTimeout(() => setSent(false), 1500);
+    return () => clearTimeout(id);
+  }, [sent]);
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     setNote(null);
+    setSent(false);
     startTransition(async () => {
       const res = await sendContactMessage({ email, message });
       switch (res.status) {
         case "sent":
           setNote({ text: "Sent. I will get back to you.", ok: true });
+          setSent(true);
           setEmail("");
           setMessage("");
           break;
@@ -109,14 +125,20 @@ function ContactForm() {
       />
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || sent}
         className={`${PRIMARY} cursor-pointer disabled:cursor-wait disabled:opacity-50`}
       >
-        <PaperPlaneTilt weight="regular" className="h-4 w-4 shrink-0" />
-        {pending ? "Sending" : "Send"}
+        {sent ? (
+          <Check weight="bold" className="h-4 w-4 shrink-0" />
+        ) : (
+          <PaperPlaneTilt weight="regular" className="h-4 w-4 shrink-0" />
+        )}
+        {pending ? "Sending" : sent ? "Sent" : "Send"}
       </button>
       {note && (
-        <p className={`px-1 pt-0.5 text-[11px] ${note.ok ? "text-fg/60" : "text-fg/45"}`}>
+        <p
+          className={`px-1 pt-0.5 text-[11px] ${note.ok ? "text-center text-fg/60" : "text-fg/45"}`}
+        >
           {note.text}
         </p>
       )}
