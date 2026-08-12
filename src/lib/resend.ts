@@ -28,6 +28,9 @@ export async function sendEmail(args: {
       headers: {
         Authorization: `Bearer ${env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
+        // Resend rejects raw API requests without an explicit user agent. Node
+        // supplies one locally, but production runtimes are not guaranteed to.
+        "User-Agent": "suckstobeanik-portfolio/1.0",
       },
       body: JSON.stringify({
         from: FROM,
