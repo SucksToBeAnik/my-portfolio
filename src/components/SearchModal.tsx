@@ -3,6 +3,7 @@
 import {
   BookOpenText,
   Certificate,
+  ChatCircleDots,
   Compass,
   FolderOpen,
   Heart,
@@ -61,8 +62,8 @@ const TYPE_ALIAS: Record<string, string> = {
   stack: "stack",
   stacks: "stack",
   media: "media",
-  // The index key stays `gallery` (it's the table name); `@photos` is the
-  // label users see, with `@gallery` kept as an alias.
+  // The index key stays `gallery` because that is the table name. Both filters
+  // work, but the search guide uses `@gallery` so the syntax matches the data.
   photo: "gallery",
   photos: "gallery",
   gallery: "gallery",
@@ -79,8 +80,19 @@ const TYPE_SUGGESTIONS = [
   "@life",
   "@stacks",
   "@media",
-  "@photos",
+  "@gallery",
 ];
+
+const SEARCH_STARTERS = [
+  { filter: "gallery", description: "Photos I've taken", type: "gallery" },
+  { filter: "stacks", description: "Tools and gear I use", type: "stack" },
+  { filter: "books", description: "What I've been reading", type: "book" },
+  { filter: "til", description: "Things I've learned", type: "til" },
+] satisfies Array<{
+  filter: string;
+  description: string;
+  type: SearchIndexItem["type"];
+}>;
 
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -98,8 +110,8 @@ function highlight(text: string, query: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
   let last = 0;
   let key = 0;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(text)) !== null) {
+  let match = regex.exec(text);
+  while (match !== null) {
     if (match.index > last) {
       parts.push(<span key={key++}>{text.slice(last, match.index)}</span>);
     }
@@ -109,6 +121,7 @@ function highlight(text: string, query: string): React.ReactNode {
       </mark>,
     );
     last = regex.lastIndex;
+    match = regex.exec(text);
   }
   if (last < text.length) {
     parts.push(<span key={key}>{text.slice(last)}</span>);
@@ -130,9 +143,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
   const lastWord = query.split(/\s+/).pop() ?? "";
   const isTypePicking = lastWord.startsWith("@");
 
-  const matchingTypes = isTypePicking
-    ? TYPE_SUGGESTIONS.filter((s) => s.startsWith(lastWord))
-    : [];
+  const matchingTypes = isTypePicking ? TYPE_SUGGESTIONS.filter((s) => s.startsWith(lastWord)) : [];
 
   const activeItems: SearchIndexItem[] = isTypePicking
     ? matchingTypes.map((s, i) => {
@@ -206,7 +217,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
         const type = url.slice(9);
         const words = query.split(/\s+/);
         words[words.length - 1] = `@${type}`;
-        setQuery(words.join(" ") + " ");
+        setQuery(`${words.join(" ")} `);
         return;
       }
       onClose();
@@ -214,6 +225,11 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
     },
     [onClose, router, query],
   );
+
+  const handleAsk = useCallback(() => {
+    onClose();
+    window.dispatchEvent(new CustomEvent("openchat"));
+  }, [onClose]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -252,7 +268,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
           <input
             ref={inputRef}
             type="text"
-            placeholder='Search or use @photos, @stacks, @til...'
+            placeholder="Search for anything..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -264,6 +280,48 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
         </div>
 
         <div ref={listRef} className="max-h-[50vh] overflow-y-auto">
+          {!query && (
+            <div className="px-2 py-2">
+              <p className="px-2 pt-1 pb-2 text-xs text-muted">
+                Feeling lost? <span className="text-fg/80">Try searching for...</span>
+              </p>
+              <div className="grid gap-1 sm:grid-cols-2">
+                {SEARCH_STARTERS.map((starter) => {
+                  const config = typeConfig[starter.type];
+                  return (
+                    <button
+                      key={starter.filter}
+                      type="button"
+                      onClick={() => handleSelect(`__type__:${starter.filter}`)}
+                      className="group flex items-center gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-hover-bg cursor-pointer"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-hairline bg-hover-bg transition-transform group-hover:-rotate-3">
+                        <config.icon weight="thin" className="h-4 w-4 text-muted" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block font-mono text-xs text-fg">@{starter.filter}</span>
+                        <span className="block truncate text-[11px] text-muted">
+                          {starter.description}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mx-2 mt-2 border-t border-hairline pt-3 pb-1 text-[11px] text-muted">
+                Tip: combine a filter with a topic, like{" "}
+                <button
+                  type="button"
+                  onClick={() => setQuery("@books harry potter")}
+                  className="font-mono text-fg/75 underline decoration-fg/20 underline-offset-4 transition-colors hover:text-fg cursor-pointer"
+                >
+                  @books harry potter
+                </button>
+                .
+              </p>
+            </div>
+          )}
+
           {!loaded && query && !isTypePicking && (
             <div className="flex items-center justify-center py-8 text-xs text-muted">
               Loading...
@@ -271,8 +329,23 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
           )}
 
           {loaded && query && activeItems.length === 0 && (
-            <div className="flex items-center justify-center py-8 text-xs text-muted">
-              {isTypePicking ? "No matching type filters." : "No results found."}
+            <div className="flex flex-col items-center px-6 py-8 text-center">
+              {isTypePicking ? (
+                <p className="text-xs text-muted">No matching type filters.</p>
+              ) : (
+                <>
+                  <p className="text-sm text-fg/80">Nothing found for “{query.trim()}”.</p>
+                  <p className="mt-1 text-xs text-muted">I might still know what you&apos;re after.</p>
+                  <button
+                    type="button"
+                    onClick={handleAsk}
+                    className="mt-4 inline-flex items-center gap-2 rounded-full border border-control-border px-3 py-1.5 text-xs text-fg/80 transition-colors hover:border-fg/45 hover:text-fg cursor-pointer"
+                  >
+                    <ChatCircleDots weight="thin" className="h-4 w-4" />
+                    Ask me instead
+                  </button>
+                </>
+              )}
             </div>
           )}
 
@@ -294,7 +367,9 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
                     return (
                       <button
                         key={`${item.type}-${item.id}`}
-                        ref={(el) => { itemRefs.current[idx] = el; }}
+                        ref={(el) => {
+                          itemRefs.current[idx] = el;
+                        }}
                         onClick={() => handleSelect(item.url)}
                         onMouseEnter={() => setActiveIndex(idx)}
                         className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left transition-colors cursor-pointer ${isActive ? "bg-hover-bg" : "hover:bg-hover-bg"}`}
@@ -303,7 +378,9 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
                         <div className="min-w-0 flex-1">
                           <p className="text-sm truncate">{highlight(item.title, query)}</p>
                           {item.subtitle && (
-                            <p className="text-xs text-muted truncate">{highlight(item.subtitle, query)}</p>
+                            <p className="text-xs text-muted truncate">
+                              {highlight(item.subtitle, query)}
+                            </p>
                           )}
                         </div>
                       </button>
