@@ -175,16 +175,16 @@ export function LinkPreview({
             transformOrigin: position === "bottom" ? "top center" : "left center",
             transition: `opacity ${POPUP_TRANSITION_MS}ms ease-out, transform ${POPUP_TRANSITION_MS}ms ease-out`,
           }}
-          className="bg-bg border border-hairline rounded-xl shadow-2xl overflow-hidden"
+          className="bg-bg border border-hairline rounded-[22px] shadow-2xl overflow-hidden"
         >
           {previewContent ?? (
             <>
               {data?.image && !imageBroken && (
-                <div className="relative w-full aspect-[16/10] bg-hover-bg">
+                <div className="relative mx-3 mt-3 aspect-[16/10] overflow-hidden rounded-[16px] bg-hover-bg">
                   {/* Plain img, not next/image: the src is already width-capped on our
-                  own CDN when it's a mirrored asset, and routing arbitrary hover
-                  URLs through the optimizer would both miss the warm-up above and
-                  spend transformations on images most visitors never see. */}
+                    own CDN when it's a mirrored asset, and routing arbitrary hover
+                    URLs through the optimizer would both miss the warm-up above and
+                    spend transformations on images most visitors never see. */}
                   <img
                     src={cdnImage(data.image, POPUP_IMAGE_WIDTH)}
                     alt=""
@@ -193,7 +193,7 @@ export function LinkPreview({
                   />
                 </div>
               )}
-              <div className="px-3.5 py-3 space-y-1.5">
+              <div className="px-3 py-2.5 space-y-1">
                 <div className="flex items-center gap-2">
                   {data?.logo && (
                     <div className="w-4 h-4 shrink-0 rounded overflow-hidden bg-hover-bg">

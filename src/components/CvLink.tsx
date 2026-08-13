@@ -14,7 +14,7 @@ export function CvLink({ url, title }: { url: string; title: string }) {
       previewClassName="w-64"
       previewContent={
         <div>
-          <div className="h-48 overflow-hidden bg-white">
+          <div className="mx-3 mt-3 h-36 overflow-hidden rounded-[16px] bg-white">
             <iframe
               src={previewUrl}
               title={`Preview of ${title}`}
@@ -23,7 +23,7 @@ export function CvLink({ url, title }: { url: string; title: string }) {
               className="h-96 w-[calc(100%+18px)] max-w-none border-0 bg-white"
             />
           </div>
-          <div className="flex items-center gap-2 px-3.5 py-3">
+          <div className="flex items-center gap-2 px-3 py-2.5">
             <FilePdf weight="light" className="h-4 w-4 shrink-0 text-fg/45" />
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-fg">{title}</p>
