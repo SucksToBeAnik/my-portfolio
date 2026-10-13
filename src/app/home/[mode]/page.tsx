@@ -5,8 +5,9 @@ import Link from "next/link";
 import { getShowcasedCv } from "@/actions/cvs";
 import { getExploreSections } from "@/actions/explore";
 import { getFeaturedGallery } from "@/actions/gallery";
+import { getResearchForHome } from "@/actions/research";
 import { getHomeSettings } from "@/actions/site-config";
-import { AcademicProfileLinks } from "@/components/AcademicProfileLinks";
+import { AcademicProfileIcons } from "@/components/AcademicProfileIcons";
 import { CareerTrack } from "@/components/CareerTrack";
 import { CvLink } from "@/components/CvLink";
 import { ExploreTiles } from "@/components/ExploreTiles";
@@ -16,13 +17,14 @@ import { HomeIntro } from "@/components/HomeIntro";
 import { HomePublications } from "@/components/HomePublications";
 import { LinkPreview } from "@/components/LinkPreview";
 import { RecentPosts } from "@/components/RecentPosts";
-import { ResearchInterests } from "@/components/ResearchInterests";
+import { ResearchSection } from "@/components/research/ResearchSection";
 import { SearchBar } from "@/components/SearchBar";
 import { SelectedProjects } from "@/components/SelectedProjects";
 import { db } from "@/db";
 import { lifeEvents, microblogs, projects, publications, siteConfig } from "@/db/schema";
 import { fetchCachedSiteMeta, type SiteMeta } from "@/lib/microlink";
 import { MODES, type Mode, parseMode } from "@/lib/mode";
+import { cardCover, stripHtml } from "@/lib/seo";
 
 const SOCIAL_URLS = {
   github: "https://github.com/SucksToBeAnik",
@@ -101,6 +103,8 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
     featuredPhotos,
     exploreSections,
     socialMetadata,
+    profileMetadata,
+    research,
   ] = await Promise.all([
     db
       .select({
@@ -139,6 +143,8 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
         endDate: lifeEvents.endDate,
         current: lifeEvents.current,
         type: lifeEvents.type,
+        url: lifeEvents.url,
+        location: lifeEvents.location,
       })
       .from(lifeEvents)
       .where(inArray(lifeEvents.type, ["work", "education"])),
@@ -146,6 +152,8 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
       .select({
         id: microblogs.id,
         title: microblogs.title,
+        imageUrl: microblogs.imageUrl,
+        content: microblogs.content,
         publishedAt: microblogs.publishedAt,
       })
       .from(microblogs)
@@ -158,24 +166,44 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
     getFeaturedGallery(6),
     getExploreSections(),
     Promise.all(Object.values(SOCIAL_URLS).map(fetchCachedSiteMeta)),
+    Promise.all(settings.profiles.map((p) => fetchCachedSiteMeta(p.url))),
+    mode === "academia" ? getResearchForHome() : [],
   ]);
 
   const workingOn = workingOnRow[0]?.value ?? null;
   const workingOnUrl = workingOnUrlRow[0]?.value || null;
   const [githubMeta, linkedinMeta, xMeta] = socialMetadata;
-  const workEvents = timelineEvents.filter((e) => e.type === "work");
-  const educationEvents = timelineEvents.filter((e) => e.type === "education");
+  const academicProfiles = settings.profiles.map((p, i) => ({ ...p, meta: profileMetadata[i] }));
+  // Jobs are subtitled by their description; schools by the institution, which
+  // is the place name the location picker stores ahead of the street address.
+  const workEvents = timelineEvents
+    .filter((e) => e.type === "work")
+    .map((e) => ({ ...e, subtitle: stripHtml(e.description) }));
+  const educationEvents = timelineEvents
+    .filter((e) => e.type === "education")
+    .map((e) => ({ ...e, subtitle: e.location?.split(",")[0]?.trim() ?? "" }));
 
   const sections = {
+    research: <ResearchSection key="research" interests={research} />,
     projects: <SelectedProjects key="projects" projects={featuredProjects} />,
-    posts: <RecentPosts key="posts" posts={recentPosts} />,
+    posts: (
+      <RecentPosts
+        key="posts"
+        // Same thumbnail rule as the /posts cards: cover image, else the first
+        // image or GIF in the body.
+        posts={recentPosts.map(({ content, ...p }) => ({
+          ...p,
+          imageUrl: cardCover(p.imageUrl, content),
+        }))}
+      />
+    ),
     publications: <HomePublications key="publications" publications={allPublications} />,
-    experience: <CareerTrack key="experience" label="Experience" items={workEvents} />,
+    experience: <CareerTrack key="experience" label="Industry Experience" items={workEvents} />,
     education: <CareerTrack key="education" label="Education" items={educationEvents} />,
   };
   // Academics read research first; industry readers want what you've built.
   const order: Record<Mode, (keyof typeof sections)[]> = {
-    academia: ["publications", "education", "experience", "projects", "posts"],
+    academia: ["research", "publications", "education", "experience", "posts", "projects"],
     industry: ["projects", "posts", "publications", "experience", "education"],
   };
 
@@ -226,7 +254,7 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
           <div className="space-y-4">
             <h1 className="text-4xl font-heading">@anik</h1>
             <HomeIntro markdown={settings.intros[mode]} />
-            {workingOn && (
+            {mode === "industry" && workingOn && (
               <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs">
                 <span className="text-fg/55">Currently working on </span>
                 {workingOnUrl ? (
@@ -242,13 +270,12 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
                 )}
               </p>
             )}
-            {mode === "academia" && <ResearchInterests interests={settings.researchInterests} />}
           </div>
 
           {/* `light` weight, not `thin`: hairline strokes disappear against the
               near-white light background. Kept at a low opacity so the row stays
               secondary to the intro above it. */}
-          <div className="flex items-center gap-3 text-fg/45">
+          <div className="flex flex-wrap items-center gap-3 text-fg/45">
             <LinkPreview
               url={SOCIAL_URLS.github}
               position="bottom"
@@ -294,10 +321,8 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
                 <XLogo weight="light" className="w-5 h-5" />
               </Link>
             </LinkPreview>
+            <AcademicProfileIcons profiles={academicProfiles} />
             {showcasedCv && <CvLink url={showcasedCv.fileUrl} title={showcasedCv.title} />}
-          </div>
-          <div className="-mt-2 text-fg/55">
-            <AcademicProfileLinks profiles={settings.profiles} />
           </div>
         </section>
 

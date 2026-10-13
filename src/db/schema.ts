@@ -1,5 +1,6 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { PublicationLink, Venue } from "@/lib/publications";
+import type { RelatedRef } from "@/lib/research";
 
 export const adminUsers = sqliteTable("admin_users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -191,6 +192,21 @@ export const publications = sqliteTable("publications", {
   bibtex: text("bibtex"),
   url: text("url"),
   publishedOn: text("published_on"),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const researchInterests = sqliteTable("research_interests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  // Short Markdown write-up shown when the row is expanded.
+  summary: text("summary").notNull().default(""),
+  related: text("related", { mode: "json" }).$type<RelatedRef[]>(),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()

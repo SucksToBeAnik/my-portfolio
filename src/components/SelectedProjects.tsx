@@ -63,7 +63,7 @@ export function SelectedProjects({ projects }: { projects: ProjectItem[] }) {
 
   return (
     <section>
-      <SectionHeader label="Selected Projects" href="/projects" linkLabel="View all" />
+      <SectionHeader label="Projects I am proud of" href="/projects" linkLabel="View all" />
       {/* Mobile: horizontal swipe carousel. Desktop: 2-up grid, tight gap. */}
       <div className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain touch-auto sm:grid sm:grid-cols-2 sm:overflow-visible">
         {projects.map((project) => (

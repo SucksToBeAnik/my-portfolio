@@ -9,16 +9,13 @@ export function SectionHeader({
   label: string;
   href?: string;
   linkLabel?: string;
-  /** Hairline under the header, matching the list rows below it. */
+  /** Hairline under the header, for list sections. Boxed sections (cards) skip
+      it; their containers already frame them. */
   bordered?: boolean;
 }) {
   return (
     <div
-      className={
-        bordered
-          ? "flex items-baseline justify-between border-b border-hairline/50 pb-2.5"
-          : "flex items-baseline justify-between mb-4"
-      }
+      className={`mb-4 flex items-baseline justify-between ${bordered ? "border-b border-hairline/50 pb-2.5" : ""}`}
     >
       <h2 className="text-xs font-heading uppercase tracking-wider text-muted">{label}</h2>
       {href && (

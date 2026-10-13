@@ -2,7 +2,7 @@ import ReactMarkdown from "react-markdown";
 import { DefaultIntro } from "@/components/DefaultIntro";
 
 const components: React.ComponentProps<typeof ReactMarkdown>["components"] = {
-  p: ({ children }) => <p className="text-base leading-relaxed text-fg/80 max-w-lg">{children}</p>,
+  p: ({ children }) => <p className="text-base leading-relaxed text-fg/80">{children}</p>,
   a: ({ href, children }) => (
     <a
       href={href}

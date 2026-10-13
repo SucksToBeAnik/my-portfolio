@@ -1,5 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { getShowcasedCv } from "@/actions/cvs";
+import { getResearchForHome } from "@/actions/research";
 import { getHomeSettings } from "@/actions/site-config";
 import { db } from "@/db";
 import {
@@ -28,6 +29,7 @@ export async function loadContext() {
     allSites,
     allGallery,
     showcasedCv,
+    researchInterests,
   ] = await Promise.all([
     db
       .select({
@@ -112,6 +114,13 @@ export async function loadContext() {
       .orderBy(gallery.sortOrder),
     // The chat isn't mode-aware; it shares the CV of the default audience.
     getHomeSettings().then((s) => getShowcasedCv(s.defaultMode)),
+    getResearchForHome().then((rows) =>
+      rows.map((r) => ({
+        title: r.title,
+        summary: r.summary,
+        related: r.related.map((x) => `${x.kind}: ${x.title}`),
+      })),
+    ),
   ]);
 
   return {
@@ -126,6 +135,7 @@ export async function loadContext() {
     allSites,
     allGallery,
     showcasedCv,
+    researchInterests,
   };
 }
 

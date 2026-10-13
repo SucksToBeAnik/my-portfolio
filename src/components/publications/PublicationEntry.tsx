@@ -22,7 +22,7 @@ export function PublicationEntry({ pub, year }: { pub: PublicationView; year: st
   const deduped = links.filter((l, i) => links.findIndex((o) => o.url === l.url) === i);
 
   return (
-    <article className="flex gap-4 border-b border-hairline/50 py-4 last:border-b-0">
+    <article className="flex gap-4">
       <span className="w-9 shrink-0 pt-px font-mono text-[11px] text-muted tabular-nums">
         {year}
       </span>

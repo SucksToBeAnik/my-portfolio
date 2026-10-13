@@ -98,17 +98,6 @@ export function HomeSettingsForm({ values }: { values: Record<string, string> })
       </section>
 
       <section className={cardCls}>
-        <label className={labelCls}>Research interests (academia only)</label>
-        <textarea
-          name="research_interests"
-          defaultValue={v("research_interests")}
-          placeholder={"Multi-agent systems\nLLM evaluation"}
-          className={`${inputCls} resize-none h-24`}
-        />
-        <p className={hintCls}>One per line.</p>
-      </section>
-
-      <section className={cardCls}>
         <label className={labelCls}>Academic profiles (shown in both modes)</label>
         {ACADEMIC_PROFILES.map((p) => (
           <input

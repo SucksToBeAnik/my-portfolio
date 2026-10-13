@@ -45,21 +45,15 @@ export function HomePublications({ publications }: { publications: PublicationRo
 
   return (
     <section>
-      {types.size > 1 ? (
-        <div className="border-b border-hairline/50 pb-3">
-          <SectionHeader label="Publications" />
-          <VenueLegend types={types} />
-        </div>
-      ) : (
-        <SectionHeader label="Publications" bordered />
-      )}
-      <div>
+      <SectionHeader label="Publications" bordered />
+      {types.size > 1 && <VenueLegend types={types} />}
+      <div className="space-y-7">
         {views.map((pub) => (
           <PublicationEntry key={pub.id} pub={pub} year={pub.year} />
         ))}
       </div>
       {footnotes.length > 0 && (
-        <p className="pt-1 text-[11px] text-muted">
+        <p className="pt-6 text-[11px] text-muted">
           {footnotes.map(([mark, label]) => (
             <span key={mark} className="mr-3">
               <sup>{mark}</sup> {label}

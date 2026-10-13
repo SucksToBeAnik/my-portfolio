@@ -3,6 +3,8 @@ import { FALLBACK_MODE, MODES, type Mode } from "@/lib/mode";
 
 // Per-audience home page settings, stored as rows in `site_config`.
 
+export type AcademicProfileKey = (typeof ACADEMIC_PROFILES)[number]["key"];
+
 export const ACADEMIC_PROFILES = [
   { key: "profile_scholar", label: "Google Scholar" },
   { key: "profile_orcid", label: "ORCID" },
@@ -18,7 +20,6 @@ export const INTRO_KEYS: Record<Mode, string> = {
 
 export const HOME_SETTING_KEYS = [
   "default_mode",
-  "research_interests",
   ...Object.values(INTRO_KEYS),
   ...ACADEMIC_PROFILES.map((p) => p.key),
 ];
@@ -32,7 +33,6 @@ export const homeSettingsSchema = z.object({
   default_mode: z.enum(MODES),
   intro_academia: z.string().trim(),
   intro_industry: z.string().trim(),
-  research_interests: z.string().trim(),
   ...Object.fromEntries(ACADEMIC_PROFILES.map((p) => [p.key, optionalUrl])),
 });
 
@@ -40,8 +40,7 @@ export interface HomeSettings {
   defaultMode: Mode;
   /** Markdown; empty means "use the built-in intro". */
   intros: Record<Mode, string>;
-  researchInterests: string[];
-  profiles: { label: string; url: string }[];
+  profiles: { key: AcademicProfileKey; label: string; url: string }[];
 }
 
 export function toHomeSettings(rows: { key: string; value: string }[]): HomeSettings {
@@ -49,12 +48,10 @@ export function toHomeSettings(rows: { key: string; value: string }[]): HomeSett
   return {
     defaultMode: MODES.find((m) => m === get("default_mode")) ?? FALLBACK_MODE,
     intros: { academia: get(INTRO_KEYS.academia), industry: get(INTRO_KEYS.industry) },
-    researchInterests: get("research_interests")
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean),
-    profiles: ACADEMIC_PROFILES.map((p) => ({ label: p.label, url: get(p.key) })).filter(
-      (p) => p.url,
-    ),
+    profiles: ACADEMIC_PROFILES.map((p) => ({
+      key: p.key,
+      label: p.label,
+      url: get(p.key),
+    })).filter((p) => p.url),
   };
 }

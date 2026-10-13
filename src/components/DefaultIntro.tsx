@@ -5,7 +5,7 @@ import { LinkPreview } from "@/components/LinkPreview";
 /** The built-in intro, used when no custom intro is set for the current mode. */
 export function DefaultIntro() {
   return (
-    <p className="text-base leading-relaxed text-fg/80 max-w-lg">
+    <p className="text-base leading-relaxed text-fg/80">
       Hey, I am Anik from{" "}
       <LinkPreview
         url="https://www.google.com/maps/place/Dhaka,+Bangladesh"
