@@ -8,6 +8,7 @@ import { microblogs } from "@/db/schema";
 import { auth, requireAdmin } from "@/lib/auth";
 import { buttondownConfigured, sendBroadcast } from "@/lib/buttondown";
 import { type MicroblogDraft, microblogDraftSchema } from "@/lib/drafts";
+import { revalidateHome } from "@/lib/revalidate-home";
 import { siteUrl, stripMarkdown, truncate } from "@/lib/seo";
 
 const schema = z.object({
@@ -52,7 +53,7 @@ export async function createMicroblog(data: z.infer<typeof schema>) {
     .returning({ id: microblogs.id });
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
-  revalidatePath("/");
+  revalidateHome();
   return { id: row.id };
 }
 
@@ -81,7 +82,7 @@ export async function updateMicroblog(id: number, data: z.infer<typeof schema>) 
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
-  revalidatePath("/");
+  revalidateHome();
 }
 
 /**
@@ -112,7 +113,7 @@ export async function deleteMicroblog(id: number) {
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
-  revalidatePath("/");
+  revalidateHome();
 }
 
 /**
@@ -150,5 +151,5 @@ export async function reorderMicroblogs(items: { id: number; sortOrder: number }
   revalidatePath("/admin/microblogs");
   revalidatePath("/posts");
   revalidatePath("/posts/[id]", "page");
-  revalidatePath("/");
+  revalidateHome();
 }

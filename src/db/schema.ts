@@ -162,7 +162,12 @@ export const cvs = sqliteTable("cvs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   fileUrl: text("file_url").notNull(),
+  // Legacy single showcase flag, superseded by the per-mode flags below. Unused;
+  // kept so the additive push doesn't break the deployed build.
   showcased: integer("showcased", { mode: "boolean" }).default(false),
+  // The CV linked from the home page, chosen separately for each audience.
+  showcaseAcademia: integer("showcase_academia", { mode: "boolean" }).default(false),
+  showcaseIndustry: integer("showcase_industry", { mode: "boolean" }).default(false),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()

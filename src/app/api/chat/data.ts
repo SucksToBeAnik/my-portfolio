@@ -1,5 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { getShowcasedCv } from "@/actions/cvs";
+import { getHomeSettings } from "@/actions/site-config";
 import { db } from "@/db";
 import {
   books,
@@ -109,7 +110,8 @@ export async function loadContext() {
       .select({ title: gallery.title, takenAt: gallery.takenAt })
       .from(gallery)
       .orderBy(gallery.sortOrder),
-    getShowcasedCv(),
+    // The chat isn't mode-aware; it shares the CV of the default audience.
+    getHomeSettings().then((s) => getShowcasedCv(s.defaultMode)),
   ]);
 
   return {

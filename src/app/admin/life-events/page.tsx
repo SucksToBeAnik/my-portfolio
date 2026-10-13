@@ -494,15 +494,27 @@ export default function LifeEventsPage() {
               />
             </div>
 
-            {form.type === "work" && (
+            {(form.type === "work" || form.type === "education") && (
               <div className="space-y-1.5">
-                <label className="text-xs text-fg/50">Role</label>
+                <label className="text-xs text-fg/50">
+                  {form.type === "education" ? "Degree" : "Role"}
+                </label>
                 <input
                   value={f("role")}
                   onChange={(e) => s("role", e.target.value)}
-                  placeholder="e.g. Founder, Co-Founder/CEO"
+                  placeholder={
+                    form.type === "education"
+                      ? "e.g. B.Sc. in Computer Science"
+                      : "e.g. Founder, Co-Founder/CEO"
+                  }
                   className={inputCls}
                 />
+                {form.type === "education" && (
+                  <p className="text-[11px] text-fg/40">
+                    Shown in the Education section: title is the institution, description the
+                    subtitle (e.g. thesis or CGPA).
+                  </p>
+                )}
               </div>
             )}
 

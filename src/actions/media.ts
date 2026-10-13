@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { media } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { env } from "@/lib/env";
+import { revalidateHome } from "@/lib/revalidate-home";
 
 const mediaSchema = z.object({
   imdbId: z.string().optional().nullable(),
@@ -27,7 +28,7 @@ const mediaSchema = z.object({
 function revalidateMedia() {
   revalidatePath("/admin/media");
   revalidatePath("/media");
-  revalidatePath("/");
+  revalidateHome();
 }
 
 export async function getMedia() {

@@ -7,6 +7,7 @@ import { books, sites, stacks } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { isCloudinary, mirrorToCloudinary } from "@/lib/cloudinary";
 import { fetchPreviewImageMirrored, fetchSiteMetaMirrored } from "@/lib/microlink";
+import { revalidateHome } from "@/lib/revalidate-home";
 
 export interface RefreshReport {
   sites: number;
@@ -91,7 +92,7 @@ export async function refreshMetadata(): Promise<RefreshReport> {
   if (report.stacks) revalidatePath("/stacks");
   if (report.books) {
     revalidatePath("/books");
-    revalidatePath("/");
+    revalidateHome();
   }
   revalidatePath("/admin/dashboard");
 

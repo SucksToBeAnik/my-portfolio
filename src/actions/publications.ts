@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { publications } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { type PublicationInput, publicationInputSchema as schema } from "@/lib/publications";
+import { revalidateHome } from "@/lib/revalidate-home";
 
 export async function getPublications() {
   return db.select().from(publications).orderBy(asc(publications.sortOrder));
@@ -21,7 +22,7 @@ export async function createPublication(data: PublicationInput) {
 
   await db.insert(publications).values({ ...parsed, sortOrder: maxOrder + 1 });
   revalidatePath("/admin/publications");
-  revalidatePath("/");
+  revalidateHome();
 }
 
 export async function updatePublication(id: number, data: PublicationInput) {
@@ -32,14 +33,14 @@ export async function updatePublication(id: number, data: PublicationInput) {
     .set({ ...parsed, updatedAt: new Date() })
     .where(eq(publications.id, id));
   revalidatePath("/admin/publications");
-  revalidatePath("/");
+  revalidateHome();
 }
 
 export async function deletePublication(id: number) {
   await requireAdmin();
   await db.delete(publications).where(eq(publications.id, id));
   revalidatePath("/admin/publications");
-  revalidatePath("/");
+  revalidateHome();
 }
 
 export async function reorderPublications(items: { id: number; sortOrder: number }[]) {
@@ -50,5 +51,5 @@ export async function reorderPublications(items: { id: number; sortOrder: number
     ),
   );
   revalidatePath("/admin/publications");
-  revalidatePath("/");
+  revalidateHome();
 }

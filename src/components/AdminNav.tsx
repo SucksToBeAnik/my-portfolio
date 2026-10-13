@@ -6,6 +6,7 @@ import {
   FileText,
   FilmStrip,
   FolderOpen,
+  GearSix,
   Globe,
   Heart,
   Image,
@@ -30,6 +31,7 @@ const navItems = [
   { href: "/admin/photos", label: "Photos", icon: Image },
   { href: "/admin/tils", label: "TIL", icon: Lightbulb },
   { href: "/admin/cvs", label: "CVs", icon: FileText },
+  { href: "/admin/settings", label: "Settings", icon: GearSix },
 ];
 
 export function AdminNav({ variant }: { variant?: "sidebar" | "bottom" }) {

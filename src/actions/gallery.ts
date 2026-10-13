@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { gallery } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { MAX_FEATURED_PHOTOS } from "@/lib/photos";
+import { revalidateHome } from "@/lib/revalidate-home";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -22,7 +23,7 @@ const schema = z.object({
 function revalidateGallery() {
   revalidatePath("/admin/photos");
   revalidatePath("/photos");
-  revalidatePath("/");
+  revalidateHome();
 }
 
 export async function getGallery() {

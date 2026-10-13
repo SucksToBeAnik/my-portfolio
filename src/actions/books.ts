@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { books } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { mirrorToCloudinary } from "@/lib/cloudinary";
+import { revalidateHome } from "@/lib/revalidate-home";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -26,7 +27,7 @@ const schema = z.object({
 function revalidateBooks(id?: number) {
   revalidatePath("/admin/books");
   revalidatePath("/books");
-  revalidatePath("/");
+  revalidateHome();
   if (id !== undefined) revalidatePath(`/books/${id}`);
 }
 

@@ -23,7 +23,8 @@ function yearRange(item: WorkItem): string {
   return end && end !== start ? `${start}–${end}` : start;
 }
 
-export function CareerTrack({ items }: { items: WorkItem[] }) {
+/** A dated list of life events — work history as "Experience", degrees as "Education". */
+export function CareerTrack({ items, label }: { items: WorkItem[]; label: string }) {
   if (items.length === 0) return null;
 
   const sorted = [...items].sort((a, b) => {
@@ -34,7 +35,7 @@ export function CareerTrack({ items }: { items: WorkItem[] }) {
 
   return (
     <section>
-      <SectionHeader label="Experience" />
+      <SectionHeader label={label} />
       <div className="overflow-hidden rounded-2xl border border-hairline bg-fg/[0.03]">
         {sorted.map((item) => {
           const subtitle = item.description ? stripHtml(item.description) : "";

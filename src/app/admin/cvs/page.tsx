@@ -1,6 +1,6 @@
 "use client";
 
-import { DownloadSimple, Eye, PencilSimple, Plus, Star, Trash } from "@phosphor-icons/react";
+import { DownloadSimple, Eye, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -10,13 +10,17 @@ import { Drawer } from "@/components/Drawer";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Spinner } from "@/components/Spinner";
 import { cloudinaryDownloadUrl, uploadToCloudinary } from "@/lib/cloudinary";
+import { MODES, type Mode } from "@/lib/mode";
 
 interface Item {
   id: number;
   title: string;
   fileUrl: string;
-  showcased: boolean | null;
+  showcaseAcademia: boolean | null;
+  showcaseIndustry: boolean | null;
 }
+
+const showcaseKey = { academia: "showcaseAcademia", industry: "showcaseIndustry" } as const;
 
 const empty = { title: "", fileUrl: "" };
 
@@ -57,36 +61,24 @@ export default function CvsPage() {
     onSettled: () => qc.invalidateQueries({ queryKey: ["cvs"] }),
   });
 
+  // One CV per audience, so turning a mode on for one CV turns it off elsewhere.
   const showcaseMut = useMutation({
-    mutationFn: (id: number) => setShowcasedCv(id),
-    onMutate: async (id) => {
+    mutationFn: ({ id, mode, on }: { id: number; mode: Mode; on: boolean }) =>
+      on ? setShowcasedCv(id, mode) : unshowcaseCv(id, mode),
+    onMutate: async ({ id, mode, on }) => {
       await qc.cancelQueries({ queryKey: ["cvs"] });
       const prev = qc.getQueryData<Item[]>(["cvs"]);
+      const key = showcaseKey[mode];
       qc.setQueryData<Item[]>(["cvs"], (old) =>
-        old?.map((item) => ({ ...item, showcased: item.id === id })),
+        old?.map((item) =>
+          item.id === id ? { ...item, [key]: on } : on ? { ...item, [key]: false } : item,
+        ),
       );
       return { prev };
     },
-    onError: (_err, _id, ctx) => {
+    onError: (_err, _vars, ctx) => {
       if (ctx?.prev) qc.setQueryData(["cvs"], ctx.prev);
-      toast.error("Failed to set showcase");
-    },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["cvs"] }),
-  });
-
-  const unshowcaseMut = useMutation({
-    mutationFn: (id: number) => unshowcaseCv(id),
-    onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: ["cvs"] });
-      const prev = qc.getQueryData<Item[]>(["cvs"]);
-      qc.setQueryData<Item[]>(["cvs"], (old) =>
-        old?.map((item) => (item.id === id ? { ...item, showcased: false } : item)),
-      );
-      return { prev };
-    },
-    onError: (_err, _id, ctx) => {
-      if (ctx?.prev) qc.setQueryData(["cvs"], ctx.prev);
-      toast.error("Failed to unshowcase");
+      toast.error("Failed to update showcase");
     },
     onSettled: () => qc.invalidateQueries({ queryKey: ["cvs"] }),
   });
@@ -122,16 +114,26 @@ export default function CvsPage() {
             key={item.id}
             className="flex items-center px-4 py-3 border border-hairline rounded-xl hover:bg-hover-bg transition-colors"
           >
-            <button
-              onClick={() =>
-                item.showcased ? unshowcaseMut.mutate(item.id) : showcaseMut.mutate(item.id)
-              }
-              className={`mr-3 p-1.5 rounded-full text-[11px] font-medium transition-all cursor-pointer shrink-0 ${item.showcased ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"}`}
-            >
-              <Star weight={item.showcased ? "fill" : "thin"} className="w-3 h-3" />
-            </button>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 space-y-1.5">
               <p className="text-sm font-medium truncate">{item.title}</p>
+              <div className="flex gap-1.5">
+                {MODES.map((mode) => {
+                  const on = Boolean(item[showcaseKey[mode]]);
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => showcaseMut.mutate({ id: item.id, mode, on: !on })}
+                      title={
+                        on ? `Shown on the ${mode} home page` : `Show on the ${mode} home page`
+                      }
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-medium capitalize transition-all cursor-pointer ${on ? "bg-fg text-bg" : "bg-hover-bg text-fg/50 hover:text-fg"}`}
+                    >
+                      {mode}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div className="flex gap-1.5 shrink-0 ml-3">
               <a

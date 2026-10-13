@@ -1,24 +1,28 @@
 import { GithubLogo, LinkedinLogo, XLogo } from "@phosphor-icons/react/dist/ssr";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
 import { getShowcasedCv } from "@/actions/cvs";
 import { getExploreSections } from "@/actions/explore";
 import { getFeaturedGallery } from "@/actions/gallery";
+import { getHomeSettings } from "@/actions/site-config";
+import { AcademicProfileLinks } from "@/components/AcademicProfileLinks";
 import { CareerTrack } from "@/components/CareerTrack";
 import { CvLink } from "@/components/CvLink";
 import { ExploreTiles } from "@/components/ExploreTiles";
 import { FeaturedPhotos } from "@/components/FeaturedPhotos";
-import { GithubActivityPreview } from "@/components/GithubActivityPreview";
 import { HomeFooter } from "@/components/HomeFooter";
+import { HomeIntro } from "@/components/HomeIntro";
 import { HomePublications } from "@/components/HomePublications";
 import { LinkPreview } from "@/components/LinkPreview";
 import { RecentPosts } from "@/components/RecentPosts";
+import { ResearchInterests } from "@/components/ResearchInterests";
 import { SearchBar } from "@/components/SearchBar";
 import { SelectedProjects } from "@/components/SelectedProjects";
 import { db } from "@/db";
 import { lifeEvents, microblogs, projects, publications, siteConfig } from "@/db/schema";
 import { fetchCachedSiteMeta, type SiteMeta } from "@/lib/microlink";
+import { MODES, type Mode, parseMode } from "@/lib/mode";
 
 const SOCIAL_URLS = {
   github: "https://github.com/SucksToBeAnik",
@@ -47,15 +51,22 @@ const SOCIAL_FALLBACKS: Record<keyof typeof SOCIAL_URLS, SiteMeta> = {
   },
 };
 
-// Cached until an admin write calls revalidatePath("/"), or until the weekly
+// Cached until an admin write calls revalidateHome(), or until the weekly
 // social-preview metadata refresh. Every database source feeding this page
 // revalidates it after a write: featured projects, posts, publications, work
-// history (CareerTrack), featured photos, the showcased CV, the "working on"
+// and education history (CareerTrack), the home settings, featured photos, the showcased CV, the "working on"
 // config, and the Life/Books/Watch counts behind the explore tiles.
 // Nothing here reads the clock at render time — CareerTrack and FeaturedPhotos
 // derive their years from stored dates, and SelectedProjects formats its
 // relative dates client-side.
 export const revalidate = false;
+
+// One pre-rendered page per audience, plus "default", which follows the admin
+// setting. src/proxy.ts rewrites `/` to one of these.
+export const dynamicParams = false;
+export function generateStaticParams() {
+  return [...MODES, "default"].map((mode) => ({ mode }));
+}
 
 export const metadata = {
   title: "Suckstobeanik",
@@ -75,11 +86,14 @@ export const metadata = {
   },
 };
 
-export default async function Home() {
+export default async function Home({ params }: { params: Promise<{ mode: string }> }) {
+  const settings = await getHomeSettings();
+  const mode: Mode = parseMode((await params).mode) ?? settings.defaultMode;
+
   const [
     featuredProjects,
     allPublications,
-    workEvents,
+    timelineEvents,
     recentPosts,
     workingOnRow,
     workingOnUrlRow,
@@ -124,9 +138,10 @@ export default async function Home() {
         startDate: lifeEvents.startDate,
         endDate: lifeEvents.endDate,
         current: lifeEvents.current,
+        type: lifeEvents.type,
       })
       .from(lifeEvents)
-      .where(eq(lifeEvents.type, "work")),
+      .where(inArray(lifeEvents.type, ["work", "education"])),
     db
       .select({
         id: microblogs.id,
@@ -139,7 +154,7 @@ export default async function Home() {
       .limit(4),
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on")).limit(1),
     db.select().from(siteConfig).where(eq(siteConfig.key, "working_on_url")).limit(1),
-    getShowcasedCv(),
+    getShowcasedCv(mode),
     getFeaturedGallery(6),
     getExploreSections(),
     Promise.all(Object.values(SOCIAL_URLS).map(fetchCachedSiteMeta)),
@@ -148,6 +163,21 @@ export default async function Home() {
   const workingOn = workingOnRow[0]?.value ?? null;
   const workingOnUrl = workingOnUrlRow[0]?.value || null;
   const [githubMeta, linkedinMeta, xMeta] = socialMetadata;
+  const workEvents = timelineEvents.filter((e) => e.type === "work");
+  const educationEvents = timelineEvents.filter((e) => e.type === "education");
+
+  const sections = {
+    projects: <SelectedProjects key="projects" projects={featuredProjects} />,
+    posts: <RecentPosts key="posts" posts={recentPosts} />,
+    publications: <HomePublications key="publications" publications={allPublications} />,
+    experience: <CareerTrack key="experience" label="Experience" items={workEvents} />,
+    education: <CareerTrack key="education" label="Education" items={educationEvents} />,
+  };
+  // Academics read research first; industry readers want what you've built.
+  const order: Record<Mode, (keyof typeof sections)[]> = {
+    academia: ["publications", "education", "experience", "projects", "posts"],
+    industry: ["projects", "posts", "publications", "experience", "education"],
+  };
 
   return (
     <>
@@ -195,54 +225,7 @@ export default async function Home() {
 
           <div className="space-y-4">
             <h1 className="text-4xl font-heading">@anik</h1>
-            <p className="text-base leading-relaxed text-fg/80 max-w-lg">
-              Hey, I am Anik from{" "}
-              <LinkPreview
-                url="https://www.google.com/maps/place/Dhaka,+Bangladesh"
-                position="bottom"
-                previewClassName="w-72"
-                previewContent={
-                  <div className="px-3 py-3">
-                    <div className="flex items-center gap-3">
-                      <svg
-                        viewBox="0 0 100 128"
-                        className="h-[72px] w-14 shrink-0 text-[#006a4e]"
-                        aria-label="Map of Bangladesh"
-                        role="img"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M42 5l13 5 5 9 12 3 5 9-3 10 8 8-5 10 5 10-8 10 1 12-9 8-1 14-11 4-3 13-10-1-5-11-11-5-1-12-9-7 3-11-5-10 7-10-3-11 8-8-1-11 11-5 2-10z"
-                        />
-                        <circle cx="48" cy="57" r="13" fill="#f42a41" />
-                        <path
-                          d="M25 104l-4 7 5 7 3-10-4-4zm29 12l5 2-1 7-4-2v-5z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      <div className="min-w-0 space-y-1">
-                        <p className="text-sm font-semibold text-fg">Bangladesh</p>
-                        <p className="text-xs leading-relaxed text-fg/55">
-                          A river-laced South Asian country known for its Bengali culture, warmth,
-                          and resilience.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                }
-              >
-                <Link
-                  href="https://www.google.com/maps/place/Dhaka,+Bangladesh"
-                  target="_blank"
-                  className="cursor-pointer font-semibold text-fg transition-opacity hover:opacity-70"
-                  aria-label="Open Dhaka, Bangladesh in Google Maps"
-                >
-                  Bangladesh
-                </Link>
-              </LinkPreview>
-              . I am a <GithubActivityPreview /> learning and building simple softwares. Welcome to
-              my corner of the Internet!
-            </p>
+            <HomeIntro markdown={settings.intros[mode]} />
             {workingOn && (
               <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs">
                 <span className="text-fg/55">Currently working on </span>
@@ -259,6 +242,7 @@ export default async function Home() {
                 )}
               </p>
             )}
+            {mode === "academia" && <ResearchInterests interests={settings.researchInterests} />}
           </div>
 
           {/* `light` weight, not `thin`: hairline strokes disappear against the
@@ -312,12 +296,12 @@ export default async function Home() {
             </LinkPreview>
             {showcasedCv && <CvLink url={showcasedCv.fileUrl} title={showcasedCv.title} />}
           </div>
+          <div className="-mt-2 text-fg/55">
+            <AcademicProfileLinks profiles={settings.profiles} />
+          </div>
         </section>
 
-        <SelectedProjects projects={featuredProjects} />
-        <RecentPosts posts={recentPosts} />
-        <HomePublications publications={allPublications} />
-        <CareerTrack items={workEvents} />
+        {order[mode].map((key) => sections[key])}
         <FeaturedPhotos photos={featuredPhotos} />
         <ExploreTiles sections={exploreSections} />
         <HomeFooter />

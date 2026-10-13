@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { type ProjectDraft, projectDraftSchema } from "@/lib/drafts";
+import { revalidateHome } from "@/lib/revalidate-home";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -54,7 +55,7 @@ export async function createProject(data: z.infer<typeof schema>) {
     .returning({ id: projects.id });
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
-  revalidatePath("/");
+  revalidateHome();
   return { id: row.id };
 }
 
@@ -69,7 +70,7 @@ export async function updateProject(id: number, data: z.infer<typeof schema>) {
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   revalidatePath(`/projects/${id}`);
-  revalidatePath("/");
+  revalidateHome();
 }
 
 /**
@@ -100,7 +101,7 @@ export async function deleteProject(id: number) {
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   revalidatePath(`/projects/${id}`);
-  revalidatePath("/");
+  revalidateHome();
 }
 
 export async function reorderProjects(items: { id: number; sortOrder: number }[]) {
@@ -111,5 +112,5 @@ export async function reorderProjects(items: { id: number; sortOrder: number }[]
   revalidatePath("/admin/projects");
   revalidatePath("/projects");
   revalidatePath("/projects/[id]", "page");
-  revalidatePath("/");
+  revalidateHome();
 }
