@@ -106,6 +106,11 @@ export default async function Home() {
         id: publications.id,
         title: publications.title,
         url: publications.url,
+        authors: publications.authors,
+        venues: publications.venues,
+        links: publications.links,
+        bibtex: publications.bibtex,
+        description: publications.description,
         publishedOn: publications.publishedOn,
       })
       .from(publications)

@@ -41,7 +41,8 @@ export async function loadContext() {
       .select({
         title: publications.title,
         description: publications.description,
-        venue: publications.venue,
+        authors: publications.authors,
+        venues: publications.venues,
         url: publications.url,
         publishedOn: publications.publishedOn,
       })

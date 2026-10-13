@@ -1,4 +1,5 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import type { PublicationLink, Venue } from "@/lib/publications";
 
 export const adminUsers = sqliteTable("admin_users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -175,7 +176,14 @@ export const publications = sqliteTable("publications", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   description: text("description"),
+  // Legacy single-venue field, superseded by `venues`. Unused; kept so the
+  // additive push doesn't break the deployed build. Drop after the next deploy.
   venue: text("venue"),
+  // Comma-separated byline; see parseAuthors in @/lib/publications.
+  authors: text("authors"),
+  venues: text("venues", { mode: "json" }).$type<Venue[]>(),
+  links: text("links", { mode: "json" }).$type<PublicationLink[]>(),
+  bibtex: text("bibtex"),
   url: text("url"),
   publishedOn: text("published_on"),
   sortOrder: integer("sort_order").default(0),

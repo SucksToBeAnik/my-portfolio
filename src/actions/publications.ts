@@ -2,24 +2,16 @@
 
 import { asc, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { db } from "@/db";
 import { publications } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
-
-const schema = z.object({
-  title: z.string().min(1),
-  description: z.string().optional().nullable(),
-  venue: z.string().optional().nullable(),
-  url: z.string().optional().nullable(),
-  publishedOn: z.string().optional().nullable(),
-});
+import { type PublicationInput, publicationInputSchema as schema } from "@/lib/publications";
 
 export async function getPublications() {
   return db.select().from(publications).orderBy(asc(publications.sortOrder));
 }
 
-export async function createPublication(data: z.infer<typeof schema>) {
+export async function createPublication(data: PublicationInput) {
   await requireAdmin();
   const parsed = schema.parse(data);
   const maxOrder = await db
@@ -32,7 +24,7 @@ export async function createPublication(data: z.infer<typeof schema>) {
   revalidatePath("/");
 }
 
-export async function updatePublication(id: number, data: z.infer<typeof schema>) {
+export async function updatePublication(id: number, data: PublicationInput) {
   await requireAdmin();
   const parsed = schema.parse(data);
   await db

@@ -14,6 +14,7 @@ import {
   tils,
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { venueTitle } from "@/lib/publications";
 
 export interface SearchIndexItem {
   id: number;
@@ -137,7 +138,7 @@ export async function getSearchIndex() {
       .from(projects)
       .orderBy(desc(projects.sortOrder)),
     db
-      .select({ id: publications.id, title: publications.title, venue: publications.venue })
+      .select({ id: publications.id, title: publications.title, venues: publications.venues })
       .from(publications)
       .orderBy(desc(publications.sortOrder)),
     db
@@ -182,7 +183,7 @@ export async function getSearchIndex() {
     ...allPublications.map((p) => ({
       id: p.id,
       title: p.title,
-      subtitle: p.venue ?? "",
+      subtitle: (p.venues ?? []).map(venueTitle).filter(Boolean).join(", "),
       url: "/?tab=publications",
       type: "publication" as const,
     })),
