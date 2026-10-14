@@ -1,6 +1,6 @@
 "use client";
 
-import { DownloadSimple, Eye, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
+import { DownloadSimple, Eye, FileCode, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -16,13 +16,14 @@ interface Item {
   id: number;
   title: string;
   fileUrl: string;
+  latexSource: string | null;
   showcaseAcademia: boolean | null;
   showcaseIndustry: boolean | null;
 }
 
 const showcaseKey = { academia: "showcaseAcademia", industry: "showcaseIndustry" } as const;
 
-const empty = { title: "", fileUrl: "" };
+const empty = { title: "", fileUrl: "", latexSource: "" };
 
 export default function CvsPage() {
   const qc = useQueryClient();
@@ -145,6 +146,22 @@ export default function CvsPage() {
               >
                 <Eye weight="thin" className="w-4 h-4" />
               </a>
+              {item.latexSource && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigator.clipboard
+                      .writeText(item.latexSource ?? "")
+                      .then(() => toast.success("LaTeX copied"))
+                      .catch(() => toast.error("Failed to copy"))
+                  }
+                  className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"
+                  aria-label="Copy LaTeX source"
+                  title="Copy LaTeX source"
+                >
+                  <FileCode weight="thin" className="w-4 h-4" />
+                </button>
+              )}
               <a
                 href={cloudinaryDownloadUrl(item.fileUrl)}
                 className="p-2.5 text-fg/60 hover:text-fg hover:bg-hover-bg rounded-lg transition-all"
@@ -281,6 +298,19 @@ export default function CvsPage() {
                 accept="application/pdf"
                 resourceType="raw"
               />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">LaTeX source (optional)</label>
+              <textarea
+                value={f("latexSource")}
+                onChange={(e) => s("latexSource", e.target.value)}
+                placeholder="\documentclass{article} ..."
+                spellCheck={false}
+                className={`${inputCls} resize-y h-64 font-mono leading-relaxed`}
+              />
+              <p className="text-[11px] text-fg/40">
+                Kept for reference only, never shown publicly.
+              </p>
             </div>
           </form>
         </Drawer>

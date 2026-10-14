@@ -12,9 +12,16 @@ import { revalidateHome } from "@/lib/revalidate-home";
 const schema = z.object({
   title: z.string().min(1),
   fileUrl: z.string().min(1),
+  // Blank source is stored as null.
+  latexSource: z
+    .string()
+    .nullish()
+    .transform((v) => (v?.trim() ? v : null)),
 });
 
+// Admin-only: rows carry the LaTeX source, which isn't public.
 export async function getCvs() {
+  await requireAdmin();
   return db.select().from(cvs).orderBy(desc(cvs.createdAt));
 }
 
@@ -28,7 +35,7 @@ export async function getShowcasedCv(mode: Mode) {
   return rows[0] ?? null;
 }
 
-export async function createCv(data: z.infer<typeof schema>) {
+export async function createCv(data: z.input<typeof schema>) {
   await requireAdmin();
   const parsed = schema.parse(data);
   const [maxOrderRow, academiaCv, industryCv] = await Promise.all([
@@ -50,7 +57,7 @@ export async function createCv(data: z.infer<typeof schema>) {
   revalidateHome();
 }
 
-export async function updateCv(id: number, data: z.infer<typeof schema>) {
+export async function updateCv(id: number, data: z.input<typeof schema>) {
   await requireAdmin();
   const parsed = schema.parse(data);
   await db

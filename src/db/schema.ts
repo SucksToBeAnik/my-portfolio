@@ -163,6 +163,8 @@ export const cvs = sqliteTable("cvs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   fileUrl: text("file_url").notNull(),
+  // Optional LaTeX source the PDF was compiled from, kept for reference only.
+  latexSource: text("latex_source"),
   // Legacy single showcase flag, superseded by the per-mode flags below. Unused;
   // kept so the additive push doesn't break the deployed build.
   showcased: integer("showcased", { mode: "boolean" }).default(false),
