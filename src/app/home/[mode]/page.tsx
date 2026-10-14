@@ -16,6 +16,7 @@ import { HomeFooter } from "@/components/HomeFooter";
 import { HomeIntro } from "@/components/HomeIntro";
 import { HomePublications } from "@/components/HomePublications";
 import { LinkPreview } from "@/components/LinkPreview";
+import { OffTheClock } from "@/components/OffTheClock";
 import { RecentPosts } from "@/components/RecentPosts";
 import { ResearchSection } from "@/components/research/ResearchSection";
 import { SearchBar } from "@/components/SearchBar";
@@ -327,6 +328,7 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
         </section>
 
         {order[mode].map((key) => sections[key])}
+        <OffTheClock />
         <FeaturedPhotos photos={featuredPhotos} />
         <ExploreTiles sections={exploreSections} />
         <HomeFooter />
