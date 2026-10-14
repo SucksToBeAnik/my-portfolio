@@ -14,7 +14,7 @@ function getProfile() {
   return profileCache;
 }
 
-function fmt(label: string, data: any[]) {
+function fmt(label: string, data: unknown[]) {
   if (!data.length) return "";
   return `\n### ${label}\n${JSON.stringify(data, null, 0)}\n`;
 }
@@ -40,7 +40,24 @@ export function buildSystemPrompt(ctx: SiteContext, isAdmin = false): string {
     ? `\n### CV / Resume\n- "${ctx.showcasedCv.title}": ${ctx.showcasedCv.fileUrl}\n`
     : "";
 
-  const data = `${fmt("Projects", ctx.allProjects)}${fmt("Research Interests", ctx.researchInterests)}${fmt("Publications", ctx.allPublications)}${tilSection}${mediaSection}${fmt("Books", ctx.allBooks)}${fmt("Recent Posts", ctx.recentPosts)}${fmt("Life Events", ctx.allLifeEvents)}${fmt("Tools & Stack", ctx.allStacks)}${sitesSection}${gallerySection}${cvSection}`;
+  // The two home-page intros frame the same person for different audiences.
+  const introSection = [
+    ctx.intros.academia && `#### For academic visitors\n${ctx.intros.academia}`,
+    ctx.intros.industry && `#### For industry visitors\n${ctx.intros.industry}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+  const aboutSection = introSection ? `\n### Home Page Intro\n${introSection}\n` : "";
+
+  const workingOnSection = ctx.workingOn
+    ? `\n### Currently Working On\n- ${ctx.workingOn.what}${ctx.workingOn.url ? ` (${ctx.workingOn.url})` : ""}\n`
+    : "";
+
+  const profilesSection = ctx.academicProfiles.length
+    ? `\n### Academic Profiles\n${ctx.academicProfiles.map((p) => `- ${p.name}: ${p.url}`).join("\n")}\n`
+    : "";
+
+  const data = `${aboutSection}${workingOnSection}${fmt("Projects", ctx.allProjects)}${fmt("Research Interests", ctx.researchInterests)}${fmt("Publications", ctx.allPublications)}${tilSection}${mediaSection}${fmt("Books", ctx.allBooks)}${fmt("Recent Posts", ctx.recentPosts)}${fmt("Life Events", ctx.allLifeEvents)}${fmt("Tools & Stack", ctx.allStacks)}${sitesSection}${gallerySection}${cvSection}${profilesSection}`;
 
   if (isAdmin) {
     return `You are a personal site assistant for Anik (the site owner). The person asking IS Anik — respond as a helpful assistant, not impersonating him.
@@ -62,6 +79,7 @@ ${data}`;
 - Use "I"/"me" — you are Anik, not an assistant
 - Be concise and direct; end with a short follow-up question
 - Clean markdown only (no HTML). Lists: "- ", code: \`backticks\`
+- Links to pages on this site ("page" fields) are relative paths — write them as markdown links, e.g. [title](/posts/12)
 - Answers about my TILs, media, books, projects etc. MUST come from the data below — never fabricate or assume
 
 ## Profile

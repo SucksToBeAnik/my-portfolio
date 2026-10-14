@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { getShowcasedCv } from "@/actions/cvs";
 import { getResearchForHome } from "@/actions/research";
 import { getHomeSettings } from "@/actions/site-config";
@@ -11,10 +11,12 @@ import {
   microblogs,
   projects,
   publications,
+  siteConfig,
   sites,
   stacks,
   tils,
 } from "@/db/schema";
+import { stripHtml } from "@/lib/seo";
 
 export async function loadContext() {
   const [
@@ -30,12 +32,18 @@ export async function loadContext() {
     allGallery,
     showcasedCv,
     researchInterests,
+    homeSettings,
+    workingOnRows,
   ] = await Promise.all([
     db
       .select({
         title: projects.title,
         description: projects.microview,
+        tags: projects.tags,
         url: projects.url,
+        githubUrl: projects.githubUrl,
+        published: projects.published,
+        id: projects.id,
         workedOn: projects.workedOn,
       })
       .from(projects)
@@ -47,6 +55,7 @@ export async function loadContext() {
         authors: publications.authors,
         venues: publications.venues,
         url: publications.url,
+        links: publications.links,
         publishedOn: publications.publishedOn,
       })
       .from(publications)
@@ -79,15 +88,25 @@ export async function loadContext() {
       .orderBy(desc(media.updatedAt))
       .limit(20),
     db
-      .select({ title: microblogs.title, publishedAt: microblogs.publishedAt })
+      .select({
+        id: microblogs.id,
+        title: microblogs.title,
+        summary: microblogs.microview,
+        tags: microblogs.tags,
+        publishedAt: microblogs.publishedAt,
+      })
       .from(microblogs)
       .where(eq(microblogs.published, true))
       .orderBy(desc(microblogs.publishedAt))
-      .limit(5),
+      .limit(10),
     db
       .select({
         title: lifeEvents.title,
         description: lifeEvents.description,
+        // Job title for work, degree for education.
+        role: lifeEvents.role,
+        location: lifeEvents.location,
+        url: lifeEvents.url,
         startDate: lifeEvents.startDate,
         endDate: lifeEvents.endDate,
         type: lifeEvents.type,
@@ -121,21 +140,38 @@ export async function loadContext() {
         related: r.related.map((x) => `${x.kind}: ${x.title}`),
       })),
     ),
+    getHomeSettings(),
+    db
+      .select()
+      .from(siteConfig)
+      .where(inArray(siteConfig.key, ["working_on", "working_on_url"])),
   ]);
 
+  const config = (key: string) => workingOnRows.find((r) => r.key === key)?.value.trim() || null;
+
   return {
-    allProjects,
+    // Visitors know projects and posts by their pages on this site.
+    allProjects: allProjects.map(({ id, published, ...p }) => ({
+      ...p,
+      page: published ? `/projects/${id}` : null,
+    })),
     allPublications,
     allBooks,
     recentTils,
     recentMedia,
-    recentPosts,
-    allLifeEvents,
+    recentPosts: recentPosts.map(({ id, ...p }) => ({ ...p, page: `/posts/${id}` })),
+    // Descriptions are rich-text HTML; tags only cost tokens.
+    allLifeEvents: allLifeEvents.map((e) => ({ ...e, description: stripHtml(e.description) })),
     allStacks,
     allSites,
     allGallery,
     showcasedCv,
     researchInterests,
+    intros: homeSettings.intros,
+    academicProfiles: homeSettings.profiles.map((p) => ({ name: p.label, url: p.url })),
+    workingOn: config("working_on")
+      ? { what: config("working_on"), url: config("working_on_url") }
+      : null,
   };
 }
 
