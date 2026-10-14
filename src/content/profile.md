@@ -1,37 +1,44 @@
 # About Al Jami Islam Anik
 
+<!--
+Only what the site's database doesn't already hold. Jobs, education dates,
+research interests, publications, projects, posts, books and the rest are
+passed to the chat live from the database — don't repeat them here, or the
+two will drift apart.
+-->
+
 ## Basics
 - **Name:** Al Jami Islam Anik (also known as Suckstobeanik online)
-- **Role:** Software Engineer
+- **Role:** Software engineer and AI researcher
 - **Location:** Dhaka, Bangladesh
 - **Website:** [suckstobeanik.vercel.app](https://suckstobeanik.vercel.app)
-- **GitHub:** [github.com/SucksToBeAnik](https://github.com/SucksToBeAnik)
-- **LinkedIn:** [linkedin.com/in/al-jami-islam-anik-485758285](https://www.linkedin.com/in/al-jami-islam-anik-485758285)
 
 ## Bio
-I am Al Jami Islam Anik, a software engineer from Dhaka, Bangladesh. I build frontend systems from scratch — from project structure to full-fledged apps used by real users. I'm deeply interested in AI/ML, both theoretical and applied. Outside of code, I love watching series and movies, reading, photography, and writing. I also love to travel whenever I get the opportunity.
-
-## Experience
-- **Software Engineer** at AskTuring.ai — Worked on RAG systems and built multiple frontend systems from scratch
-- **Open Source** — Building CLI tools, AI agents, and developer utilities
+I am Al Jami Islam Anik, a software engineer and researcher from Dhaka, Bangladesh. On the
+engineering side I build frontend systems from scratch — from project structure to full-fledged
+apps used by real users. On the research side I work on AI, mainly how multi-agent systems behave
+and how to evaluate them, and multimodal small language models. My research interests and
+publications are listed in the site data below. Outside of work, I love watching series and
+movies, reading, photography, and writing, and I travel whenever I get the opportunity.
 
 ## Education
-- **Completed B.Sc. in Computer Science** — BRAC University (2022-2026), CGPA 3.72
-- **Higher Secondary** — 2018-2020
+- **B.Sc. in Computer Science** — BRAC University, CGPA 3.72
+- **Higher Secondary**
 
 ## Hobbies
-- **Writing** — I enjoy writing in my free time, whether it's technical content or personal thoughts
-- **Photography** — I take photos of places I visit and moments from my life; some are featured in my site's gallery
-- **Reading** — I maintain a catalog of books I've read, am reading, or want to read
-- **Movies & Series** — I keep track of everything I watch with ratings and reviews on my site
+- **Writing** — technical content and personal thoughts, published as posts on this site
+- **Photography** — photos of places I visit and moments from my life; some are in the site's gallery
+- **Reading** — I keep a catalog of books I've read, am reading, or want to read
+- **Movies & Series** — I track everything I watch, with ratings, on this site
 
 ## Interests
+- AI research: multi-agent systems, evaluation, multimodal models
 - Building things for the web
 - Minimalist design
-- AI/ML and agentic systems
 - CLI tools and developer experience
 - Learning new programming paradigms
 
 ## Contact
-- **GitHub:** github.com/SucksToBeAnik
-- **LinkedIn:** linkedin.com/in/al-jami-islam-anik-485758285
+- **GitHub:** [github.com/SucksToBeAnik](https://github.com/SucksToBeAnik)
+- **LinkedIn:** [linkedin.com/in/al-jami-islam-anik-485758285](https://www.linkedin.com/in/al-jami-islam-anik-485758285)
+- Academic profiles (Google Scholar, OpenReview, etc.) are listed in the site data below.
