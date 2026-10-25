@@ -218,8 +218,8 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
             "@type": "Person",
             name: "Al Jami Islam Anik",
             alternateName: "Suckstobeanik",
-            url: "https://suckstobeanik.vercel.app",
-            image: "https://suckstobeanik.vercel.app/profile.jpeg",
+            url: "https://www.anik.fyi",
+            image: "https://www.anik.fyi/profile.jpeg",
             jobTitle: "Software Engineer",
             address: {
               "@type": "PostalAddress",

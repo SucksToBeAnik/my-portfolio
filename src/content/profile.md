@@ -11,7 +11,7 @@ two will drift apart.
 - **Name:** Al Jami Islam Anik (also known as Suckstobeanik online)
 - **Role:** Software engineer and AI researcher
 - **Location:** Dhaka, Bangladesh
-- **Website:** [suckstobeanik.vercel.app](https://suckstobeanik.vercel.app)
+- **Website:** [anik.fyi](https://www.anik.fyi)
 
 ## Bio
 I am Al Jami Islam Anik, a software engineer and researcher from Dhaka, Bangladesh. On the
