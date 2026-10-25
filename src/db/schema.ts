@@ -206,9 +206,17 @@ export const publications = sqliteTable("publications", {
 export const researchInterests = sqliteTable("research_interests", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
-  // Short Markdown write-up shown when the row is expanded.
+  // The open question this interest chases; the homepage headline. Falls back
+  // to the title when empty.
+  question: text("question").notNull().default(""),
+  keywords: text("keywords", { mode: "json" }).$type<string[]>(),
+  // Short Markdown write-up, collapsed under "Why this matters".
   summary: text("summary").notNull().default(""),
   related: text("related", { mode: "json" }).$type<RelatedRef[]>(),
+  // Featured interests lead the homepage; the rest sit behind "+ N more".
+  // Nullable like gallery.featured: drizzle-kit reads a `false` default as no
+  // default and wants to rebuild the table for a NOT NULL column.
+  featured: integer("featured", { mode: "boolean" }).default(false),
   sortOrder: integer("sort_order").default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()

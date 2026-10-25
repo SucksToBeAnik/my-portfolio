@@ -136,6 +136,8 @@ export async function loadContext() {
     getResearchForHome().then((rows) =>
       rows.map((r) => ({
         title: r.title,
+        question: r.question,
+        keywords: r.keywords,
         summary: r.summary,
         related: r.related.map((x) => `${x.kind}: ${x.title}`),
       })),

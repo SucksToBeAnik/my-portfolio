@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { microblogs, projects, publications, researchInterests } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import {
+  MAX_FEATURED_INTERESTS,
   type RelatedItem,
   type RelatedKind,
   type ResearchInterestInput,
@@ -92,7 +93,10 @@ export async function getResearchForHome() {
   return interests.map((r) => ({
     id: r.id,
     title: r.title,
+    question: r.question,
+    keywords: r.keywords ?? [],
     summary: r.summary,
+    featured: r.featured ?? false,
     related: (r.related ?? [])
       .map((ref) => resolve[ref.kind](ref.id))
       .filter((x): x is RelatedItem => x !== null),
@@ -117,6 +121,25 @@ export async function updateResearchInterest(id: number, data: ResearchInterestI
     .update(researchInterests)
     .set({ ...parsed, updatedAt: new Date() })
     .where(eq(researchInterests.id, id));
+  revalidateResearch();
+}
+
+export async function toggleResearchFeatured(id: number, featured: boolean) {
+  await requireAdmin();
+
+  // The homepage leads with a few interests, so featuring is capped.
+  if (featured) {
+    const count = await db
+      .select({ n: sql<number>`count(*)` })
+      .from(researchInterests)
+      .where(eq(researchInterests.featured, true))
+      .then((r) => r[0]?.n ?? 0);
+    if (count >= MAX_FEATURED_INTERESTS) {
+      throw new Error(`Only ${MAX_FEATURED_INTERESTS} interests can be featured at once.`);
+    }
+  }
+
+  await db.update(researchInterests).set({ featured }).where(eq(researchInterests.id, id));
   revalidateResearch();
 }
 

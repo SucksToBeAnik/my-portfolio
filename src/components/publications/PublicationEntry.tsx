@@ -20,6 +20,8 @@ export function PublicationEntry({ pub, year }: { pub: PublicationView; year: st
     ? [{ kind: "pdf", url: pub.url }, ...pub.links]
     : pub.links;
   const deduped = links.filter((l, i) => links.findIndex((o) => o.url === l.url) === i);
+  const venue = sortVenues(pub.venues)[0];
+  const venueLabel = venue ? [venue.name, venue.year].filter(Boolean).join(" ") : "";
 
   return (
     <article className="flex gap-4">
@@ -49,7 +51,12 @@ export function PublicationEntry({ pub, year }: { pub: PublicationView; year: st
             ))}
           </div>
         )}
-        <PublicationActions links={deduped} abstract={pub.description} bibtex={pub.bibtex} />
+        <PublicationActions
+          links={deduped}
+          abstract={pub.description}
+          abstractFooter={venueLabel || year}
+          bibtex={pub.bibtex}
+        />
       </div>
     </article>
   );

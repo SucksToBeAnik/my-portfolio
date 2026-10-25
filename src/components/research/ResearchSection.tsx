@@ -1,17 +1,22 @@
+import { Note } from "@phosphor-icons/react/dist/ssr";
 import ReactMarkdown from "react-markdown";
+import { Peek } from "@/components/Peek";
 import { RelatedLink } from "@/components/research/RelatedLink";
 import { SectionHeader } from "@/components/SectionHeader";
-import type { RelatedItem } from "@/lib/research";
+import { MAX_FEATURED_INTERESTS, type RelatedItem } from "@/lib/research";
 
 interface Interest {
   id: number;
   title: string;
+  question: string;
+  keywords: string[];
   summary: string;
+  featured: boolean;
   related: RelatedItem[];
 }
 
 const mdComponents: React.ComponentProps<typeof ReactMarkdown>["components"] = {
-  p: ({ children }) => <p className="text-sm leading-relaxed text-fg/75">{children}</p>,
+  p: ({ children }) => <p>{children}</p>,
   a: ({ href, children }) => (
     <a
       href={href}
@@ -24,24 +29,27 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>["components"] = {
   ),
 };
 
-// Numbered rows laid out like the Publications entries below them: a mono
-// counter where the year sits, everything visible at once.
-export function ResearchSection({ interests }: { interests: Interest[] }) {
-  if (interests.length === 0) return null;
-
+function InterestRow({ r, n }: { r: Interest; n: number }) {
   return (
-    <section>
-      <SectionHeader label="Research Interests" bordered />
-      <ol className="space-y-7">
-        {interests.map((r, i) => (
-          <li key={r.id} className="flex gap-4">
-            <span className="w-9 shrink-0 pt-px font-mono text-[11px] text-muted tabular-nums">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <div className="min-w-0 flex-1 space-y-2">
-              <h3 className="text-sm font-medium leading-snug text-fg">{r.title}</h3>
-              {r.summary && (
-                <div className="space-y-2">
+    <li className="flex gap-4">
+      <span className="w-9 shrink-0 pt-1 font-mono text-[11px] text-muted tabular-nums">
+        {String(n).padStart(2, "0")}
+      </span>
+      <div className="min-w-0 flex-1 space-y-2.5">
+        <div className="space-y-1.5">
+          {/* The heading stays inline so the note icon follows its last word,
+              and the dialog lives outside the <h3>. */}
+          <div className="text-base font-medium leading-snug text-fg text-balance">
+            <h3 className="inline">{r.question || r.title}</h3>
+            {r.summary && (
+              <Peek
+                ariaLabel={`Read the note on ${r.title}`}
+                icon={<Note weight="light" className="h-4 w-4" />}
+                title={r.title}
+                footer={`note · ${String(n).padStart(2, "0")}`}
+                className="ml-1.5 inline-flex translate-y-[3px] cursor-pointer rounded-md p-0.5 text-muted transition-colors hover:bg-hover-bg hover:text-fg aria-expanded:bg-hover-bg aria-expanded:text-fg"
+              >
+                <div className="space-y-3">
                   <ReactMarkdown
                     allowedElements={["p", "a", "strong", "em"]}
                     unwrapDisallowed
@@ -50,20 +58,58 @@ export function ResearchSection({ interests }: { interests: Interest[] }) {
                     {r.summary}
                   </ReactMarkdown>
                 </div>
-              )}
-              {r.related.length > 0 && (
-                <ul className="-mx-2 pt-1">
-                  {r.related.map((item) => (
-                    <li key={`${item.kind}-${item.title}`}>
-                      <RelatedLink item={item} />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </li>
+              </Peek>
+            )}
+          </div>
+          {r.keywords.length > 0 && (
+            <p className="font-mono text-[11px] text-muted">{r.keywords.join(" · ")}</p>
+          )}
+        </div>
+        {r.related.length > 0 && (
+          <ul className="-mx-2">
+            {r.related.map((item) => (
+              <li key={`${item.kind}-${item.title}`}>
+                <RelatedLink item={item} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </li>
+  );
+}
+
+// Each interest leads with the question it chases; the write-up is a peek away.
+// Featured interests come first, and the rest wait behind "+ N more" so a long
+// list never buries the current direction.
+export function ResearchSection({ interests }: { interests: Interest[] }) {
+  if (interests.length === 0) return null;
+
+  const featured = interests.filter((r) => r.featured);
+  const lead = featured.length > 0 ? featured : interests.slice(0, MAX_FEATURED_INTERESTS);
+  const rest = interests.filter((r) => !lead.includes(r));
+
+  return (
+    <section>
+      <SectionHeader label="Research Interests" bordered />
+      <ol className="space-y-8">
+        {lead.map((r, i) => (
+          <InterestRow key={r.id} r={r} n={i + 1} />
         ))}
       </ol>
+      {rest.length > 0 && (
+        <details className="group/more mt-8">
+          {/* Hidden once open: the list it reveals takes its place. */}
+          <summary className="ml-13 inline-flex cursor-pointer list-none text-xs text-muted transition-colors hover:text-fg group-open/more:hidden [&::-webkit-details-marker]:hidden">
+            + {rest.length} more {rest.length === 1 ? "interest" : "interests"}
+          </summary>
+          <ol className="space-y-8">
+            {rest.map((r, i) => (
+              <InterestRow key={r.id} r={r} n={lead.length + i + 1} />
+            ))}
+          </ol>
+        </details>
+      )}
     </section>
   );
 }

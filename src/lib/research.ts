@@ -12,8 +12,12 @@ export const relatedRefSchema = z.object({
 });
 export type RelatedRef = z.infer<typeof relatedRefSchema>;
 
+export const MAX_FEATURED_INTERESTS = 3;
+
 export const researchInterestInputSchema = z.object({
   title: z.string().trim().min(1),
+  question: z.string().trim().default(""),
+  keywords: z.array(z.string().trim().min(1)).max(6).default([]),
   summary: z.string().trim().default(""),
   related: z.array(relatedRefSchema).default([]),
 });

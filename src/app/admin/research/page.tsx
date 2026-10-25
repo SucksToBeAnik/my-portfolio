@@ -1,7 +1,7 @@
 "use client";
 
 import { DragDropContext, Draggable, Droppable, type DropResult } from "@hello-pangea/dnd";
-import { DotsSixVertical, PencilSimple, Plus, Trash } from "@phosphor-icons/react";
+import { DotsSixVertical, PencilSimple, Plus, Star, Trash } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -11,23 +11,35 @@ import {
   getRelatableContent,
   getResearchInterests,
   reorderResearchInterests,
+  toggleResearchFeatured,
   updateResearchInterest,
 } from "@/actions/research";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { Drawer } from "@/components/Drawer";
 import { RelatedPicker } from "@/components/research/RelatedPicker";
 import { Spinner } from "@/components/Spinner";
-import type { RelatedRef } from "@/lib/research";
+import { MAX_FEATURED_INTERESTS, type RelatedRef } from "@/lib/research";
 
 type Item = Awaited<ReturnType<typeof getResearchInterests>>[number];
 
 interface Form {
   title: string;
+  question: string;
+  // Comma-separated while editing; split into a list on save.
+  keywords: string;
   summary: string;
   related: RelatedRef[];
 }
 
-const empty: Form = { title: "", summary: "", related: [] };
+const empty: Form = { title: "", question: "", keywords: "", summary: "", related: [] };
+
+const toInput = (f: Form) => ({
+  ...f,
+  keywords: f.keywords
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean),
+});
 
 export default function ResearchPage() {
   const qc = useQueryClient();
@@ -54,7 +66,7 @@ export default function ResearchPage() {
 
   const saveMut = useMutation({
     mutationFn: ({ id, data }: { id: number | null; data: Form }) =>
-      id ? updateResearchInterest(id, data) : createResearchInterest(data),
+      id ? updateResearchInterest(id, toInput(data)) : createResearchInterest(toInput(data)),
     onSuccess: (_r, { id }) => {
       toast.success(id ? "Updated" : "Created");
       close();
@@ -78,6 +90,36 @@ export default function ResearchPage() {
     onSuccess: () => toast.success("Deleted"),
     onSettled: settle,
   });
+
+  const featureMut = useMutation({
+    mutationFn: ({ id, featured }: { id: number; featured: boolean }) =>
+      toggleResearchFeatured(id, featured),
+    onMutate: async ({ id, featured }) => {
+      await qc.cancelQueries({ queryKey: ["research"] });
+      const prev = qc.getQueryData<Item[]>(["research"]);
+      qc.setQueryData<Item[]>(["research"], (old) =>
+        old?.map((item) => (item.id === id ? { ...item, featured } : item)),
+      );
+      return { prev };
+    },
+    onError: (_err, _data, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["research"], ctx.prev);
+      toast.error("Failed to update");
+    },
+    onSettled: settle,
+  });
+
+  const featuredCount = items.filter((item) => item.featured).length;
+
+  function toggleFeatured(item: Item) {
+    // Checked here as well as server-side so the admin gets a real explanation
+    // instead of a generic action failure.
+    if (!item.featured && featuredCount >= MAX_FEATURED_INTERESTS) {
+      toast.error(`Only ${MAX_FEATURED_INTERESTS} interests can be featured at once`);
+      return;
+    }
+    featureMut.mutate({ id: item.id, featured: !item.featured });
+  }
 
   const reorderMut = useMutation({
     mutationFn: (updates: { id: number; sortOrder: number }[]) => reorderResearchInterests(updates),
@@ -125,7 +167,10 @@ export default function ResearchPage() {
       <div className="sticky top-0 z-10 -mx-4 md:-mx-6 px-4 md:px-6 pt-5 md:pt-2 pb-3 bg-bg/70 backdrop-blur-md flex items-center justify-between">
         <div>
           <h1 className="text-lg font-heading">Research Interests</h1>
-          <p className="text-[11px] text-fg/40">Shown on the academia home page.</p>
+          <p className="text-[11px] text-fg/40">
+            Shown on the academia home page. Star up to {MAX_FEATURED_INTERESTS} to lead; the rest
+            fold under “more”.
+          </p>
         </div>
         <button
           type="button"
@@ -160,6 +205,9 @@ export default function ResearchPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{item.title}</p>
+                        {item.question && (
+                          <p className="text-xs text-fg/60 truncate">{item.question}</p>
+                        )}
                         <p className="text-xs text-fg/50 truncate">
                           {(item.related ?? []).length} related
                         </p>
@@ -167,9 +215,19 @@ export default function ResearchPage() {
                       <div className="flex gap-1.5 shrink-0 ml-3">
                         <button
                           type="button"
+                          onClick={() => toggleFeatured(item)}
+                          title={item.featured ? "Stop leading with this" : "Lead with this"}
+                          className={`p-2.5 rounded-lg transition-all hover:bg-hover-bg ${item.featured ? "text-fg" : "text-fg/30 hover:text-fg/60"}`}
+                        >
+                          <Star weight={item.featured ? "fill" : "thin"} className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => {
                             setForm({
                               title: item.title,
+                              question: item.question,
+                              keywords: (item.keywords ?? []).join(", "),
                               summary: item.summary,
                               related: item.related ?? [],
                             });
@@ -232,11 +290,33 @@ export default function ResearchPage() {
               />
             </div>
             <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Question</label>
+              <input
+                value={form.question}
+                onChange={(e) => s("question", e.target.value)}
+                placeholder="Why do good agents make bad collaborators?"
+                className={inputCls}
+              />
+              <p className="text-[11px] text-fg/40">
+                The open question you're chasing — the homepage headline. Empty shows the title.
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-fg/50">Keywords</label>
+              <input
+                value={form.keywords}
+                onChange={(e) => s("keywords", e.target.value)}
+                placeholder="multi-agent systems, coordination, reliability"
+                className={inputCls}
+              />
+              <p className="text-[11px] text-fg/40">Comma-separated, up to 6.</p>
+            </div>
+            <div className="space-y-1.5">
               <label className="text-xs text-fg/50">Write-up</label>
               <textarea
                 value={form.summary}
                 onChange={(e) => s("summary", e.target.value)}
-                placeholder="What draws you to it, what you've done, what you want to find out."
+                placeholder="What draws you to it, what you've done, what you want to find out. Shown under “Why this matters”."
                 className={`${inputCls} resize-none h-32`}
               />
               <p className="text-[11px] text-fg/40">
