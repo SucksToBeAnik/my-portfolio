@@ -31,8 +31,8 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>["components"] = {
 
 function InterestRow({ r, n }: { r: Interest; n: number }) {
   return (
-    <li className="flex gap-4">
-      <span className="w-9 shrink-0 pt-1 font-mono text-[11px] text-muted tabular-nums">
+    <li className="flex gap-2.5 sm:gap-4">
+      <span className="w-5 shrink-0 pt-1 font-mono text-[11px] text-muted tabular-nums sm:w-9">
         {String(n).padStart(2, "0")}
       </span>
       <div className="min-w-0 flex-1 space-y-2.5">
@@ -100,7 +100,7 @@ export function ResearchSection({ interests }: { interests: Interest[] }) {
       {rest.length > 0 && (
         <details className="group/more mt-8">
           {/* Hidden once open: the list it reveals takes its place. */}
-          <summary className="ml-13 inline-flex cursor-pointer list-none text-xs text-muted transition-colors hover:text-fg group-open/more:hidden [&::-webkit-details-marker]:hidden">
+          <summary className="ml-7.5 inline-flex sm:ml-13 cursor-pointer list-none text-xs text-muted transition-colors hover:text-fg group-open/more:hidden [&::-webkit-details-marker]:hidden">
             + {rest.length} more {rest.length === 1 ? "interest" : "interests"}
           </summary>
           <ol className="space-y-8">

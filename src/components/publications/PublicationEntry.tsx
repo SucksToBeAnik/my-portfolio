@@ -24,8 +24,10 @@ export function PublicationEntry({ pub, year }: { pub: PublicationView; year: st
   const venueLabel = venue ? [venue.name, venue.year].filter(Boolean).join(" ") : "";
 
   return (
-    <article className="flex gap-4">
-      <span className="w-9 shrink-0 pt-px font-mono text-[11px] text-muted tabular-nums">
+    // Small screens: the year sits on its own line above the title with the
+    // actions across from it, so neither eats a column or a row of their own.
+    <article className="relative flex flex-col gap-1.5 sm:flex-row sm:gap-4">
+      <span className="shrink-0 pt-px font-mono text-[11px] text-muted tabular-nums sm:w-9">
         {year}
       </span>
       <div className="min-w-0 flex-1 space-y-3">
@@ -56,12 +58,14 @@ export function PublicationEntry({ pub, year }: { pub: PublicationView; year: st
               ))}
             </div>
           )}
-          <PublicationActions
-            links={deduped}
-            abstract={pub.description}
-            abstractFooter={venueLabel || year}
-            bibtex={pub.bibtex}
-          />
+          <div className="absolute -top-1 right-0 sm:static">
+            <PublicationActions
+              links={deduped}
+              abstract={pub.description}
+              abstractFooter={venueLabel || year}
+              bibtex={pub.bibtex}
+            />
+          </div>
         </div>
       </div>
     </article>

@@ -5,7 +5,7 @@ import { Peek } from "@/components/Peek";
 import type { PublicationLink } from "@/lib/publications";
 
 const linkCls =
-  "cursor-pointer text-muted underline-offset-[3px] transition-colors hover:text-fg hover:underline";
+  "cursor-pointer py-1 text-muted underline-offset-[3px] transition-colors hover:text-fg hover:underline sm:py-0";
 
 /** Resource links plus the abstract peek and BibTeX copy. */
 export function PublicationActions({
@@ -35,7 +35,7 @@ export function PublicationActions({
   }
 
   return (
-    <div className="flex shrink-0 flex-wrap gap-x-3 gap-y-1 font-mono text-[11px]">
+    <div className="flex shrink-0 flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] sm:gap-x-3">
       {links.map((l) => (
         <a
           key={`${l.kind}-${l.url}`}
