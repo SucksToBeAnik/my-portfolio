@@ -62,7 +62,24 @@ function InterestRow({ r, n }: { r: Interest; n: number }) {
             )}
           </div>
           {r.keywords.length > 0 && (
-            <p className="font-mono text-[11px] text-muted">{r.keywords.join(" · ")}</p>
+            // A handwritten "on" opens the row, like the "by" on publication
+            // bylines; wrapped lines hang under the first term, and a term
+            // never breaks across lines.
+            <p className="pl-[22px] -indent-[22px] text-[13px] leading-relaxed text-fg/70">
+              <span
+                aria-hidden
+                className="mr-1.5 inline-block w-4 indent-0 font-hand text-[16px] leading-none text-muted"
+              >
+                on
+              </span>
+              <span className="sr-only">Keywords: </span>
+              {r.keywords.map((k, i) => (
+                <span key={k}>
+                  {i > 0 && <span className="text-muted/60"> · </span>}
+                  <span className="whitespace-nowrap">{k}</span>
+                </span>
+              ))}
+            </p>
           )}
         </div>
         {r.related.length > 0 && (
