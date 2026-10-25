@@ -45,9 +45,12 @@ export function HomePublications({ publications }: { publications: PublicationRo
 
   return (
     <section>
-      <SectionHeader label="Publications" bordered />
-      {types.size > 1 && <VenueLegend types={types} />}
-      <div className="space-y-7">
+      <SectionHeader
+        label="Publications"
+        bordered
+        aside={types.size > 1 && <VenueLegend types={types} />}
+      />
+      <div className="space-y-7 pt-2">
         {views.map((pub) => (
           <PublicationEntry key={pub.id} pub={pub} year={pub.year} />
         ))}

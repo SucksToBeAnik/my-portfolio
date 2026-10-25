@@ -24,12 +24,20 @@ function visibleIndices(authors: Author[]): number[] | null {
 function Name({ author }: { author: Author }) {
   if (author.ellipsis) return <span>…</span>;
   return (
-    <span className={author.self ? "font-medium text-fg" : undefined}>
+    <span className={author.self ? "text-fg/80" : undefined}>
       {author.name}
       {author.marks && <sup className="ml-px text-[0.7em]">{author.marks}</sup>}
     </span>
   );
 }
+
+// A handwritten "by" opens the byline, like a quote's attribution, so it doesn't
+// start on the same edge as the title and venue rows.
+const By = () => (
+  <span aria-hidden className="mr-1.5 font-hand text-[15px] leading-none text-muted">
+    by
+  </span>
+);
 
 export function AuthorList({ authors }: { authors: Author[] }) {
   const [expanded, setExpanded] = useState(false);
@@ -39,7 +47,8 @@ export function AuthorList({ authors }: { authors: Author[] }) {
 
   if (!visible) {
     return (
-      <p className="text-xs leading-relaxed text-muted">
+      <p className="pl-[18px] -indent-[18px] text-xs leading-relaxed text-muted/80">
+        <By />
         {authors.map((a, i) => (
           <Fragment key={`${a.name}-${i}`}>
             {i > 0 && ", "}
@@ -51,7 +60,8 @@ export function AuthorList({ authors }: { authors: Author[] }) {
   }
 
   return (
-    <p className="text-xs leading-relaxed text-muted">
+    <p className="pl-[18px] -indent-[18px] text-xs leading-relaxed text-muted/80">
+      <By />
       {visible.map((idx, pos) => {
         const hidden = pos > 0 ? idx - visible[pos - 1] - 1 : 0;
         return (
@@ -65,7 +75,7 @@ export function AuthorList({ authors }: { authors: Author[] }) {
                   className="cursor-pointer underline decoration-dotted underline-offset-2 hover:text-fg"
                   aria-label={`Show ${hidden} more authors`}
                 >
-                  +{hidden} more
+                  +{hidden}
                 </button>
                 {", "}
               </>

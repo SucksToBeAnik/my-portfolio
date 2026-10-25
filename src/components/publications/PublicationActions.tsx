@@ -35,7 +35,7 @@ export function PublicationActions({
   }
 
   return (
-    <div className="flex flex-wrap gap-x-3.5 gap-y-1 text-xs">
+    <div className="flex shrink-0 flex-wrap gap-x-3 gap-y-1 font-mono text-[11px]">
       {links.map((l) => (
         <a
           key={`${l.kind}-${l.url}`}
@@ -44,7 +44,7 @@ export function PublicationActions({
           rel="noopener noreferrer"
           className={linkCls}
         >
-          {l.kind}
+          {l.kind} ↗
         </a>
       ))}
       {abstract && (

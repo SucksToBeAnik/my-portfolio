@@ -10,5 +10,5 @@ const SHAPES: Record<VenueType, string> = {
 };
 
 export function VenueMarker({ type }: { type: VenueType }) {
-  return <span aria-hidden className={`inline-block size-[7px] shrink-0 ${SHAPES[type]}`} />;
+  return <span aria-hidden className={`inline-block size-[8px] shrink-0 ${SHAPES[type]}`} />;
 }

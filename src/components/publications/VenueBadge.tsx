@@ -1,36 +1,41 @@
 import { VenueMarker } from "@/components/publications/VenueMarker";
 import { VENUE_TYPE_LABELS, type Venue, venueTitle } from "@/lib/publications";
 
+// One line per venue: the marker shape says what kind, the name says which one.
+// No border — the name carries the weight, everything after it stays muted.
 export function VenueBadge({ venue }: { venue: Venue }) {
   const pending = venue.status === "under_review";
-  const name = venueTitle(venue);
-  const label = pending ? (name ? `Under review · ${name}` : "Under review") : name;
-  const extras = [venue.track, venue.note, venue.status === "accepted" ? "to appear" : ""].filter(
-    Boolean,
-  );
+  const name = venueTitle(venue) || "Under review";
+  const extras = [venue.track, venue.note].filter(Boolean);
+  const tag =
+    pending && venueTitle(venue) ? "under review" : venue.status === "accepted" ? "to appear" : "";
 
-  // Under review gets a dashed outline and dimmer text: visible, but clearly
-  // not claiming the same weight as an accepted paper.
-  const cls = `inline-flex max-w-full items-center gap-1.5 rounded-md border px-2 py-[3px] text-[11px] leading-tight ${
-    pending ? "border-dashed border-fg/25 text-muted" : "border-hairline bg-fg/[0.04] text-fg/85"
-  } ${venue.url ? "transition-colors hover:border-fg/40 hover:text-fg" : ""}`;
-
-  const inner = (
-    <>
-      <VenueMarker type={venue.type} />
-      <span className="sr-only">{VENUE_TYPE_LABELS[venue.type]}:</span>
-      <span className="min-w-0">
-        <span className="font-medium">{label}</span>
-        {extras.length > 0 && <span className="text-muted"> · {extras.join(" · ")}</span>}
+  return (
+    <p className="flex min-w-0 items-baseline gap-2 text-[13px] leading-snug">
+      <span className="flex h-[1lh] items-center text-fg">
+        <VenueMarker type={venue.type} />
       </span>
-    </>
-  );
-
-  return venue.url ? (
-    <a href={venue.url} target="_blank" rel="noopener noreferrer" className={cls}>
-      {inner}
-    </a>
-  ) : (
-    <span className={cls}>{inner}</span>
+      <span className="min-w-0">
+        <span className="sr-only">{VENUE_TYPE_LABELS[venue.type]}:</span>
+        {venue.url ? (
+          <a
+            href={venue.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-fg decoration-fg/30 underline-offset-[3px] hover:underline"
+          >
+            {name}
+          </a>
+        ) : (
+          <span className="font-medium text-fg">{name}</span>
+        )}
+        {extras.length > 0 && <span className="text-xs text-muted"> · {extras.join(" · ")}</span>}
+        {tag && (
+          <span className="ml-2 font-mono text-[10px] uppercase tracking-wider text-muted">
+            {tag}
+          </span>
+        )}
+      </span>
+    </p>
   );
 }

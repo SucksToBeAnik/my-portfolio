@@ -28,35 +28,41 @@ export function PublicationEntry({ pub, year }: { pub: PublicationView; year: st
       <span className="w-9 shrink-0 pt-px font-mono text-[11px] text-muted tabular-nums">
         {year}
       </span>
-      <div className="min-w-0 flex-1 space-y-2">
-        <h3 className="text-sm leading-snug text-fg">
-          {pub.url ? (
-            <a
-              href={pub.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline-offset-[3px] decoration-fg/30 hover:underline"
-            >
-              {pub.title}
-            </a>
-          ) : (
-            pub.title
+      <div className="min-w-0 flex-1 space-y-3">
+        {/* Title and byline read as one unit; the gap below sets the venue apart. */}
+        <div className="space-y-1">
+          <h3 className="text-sm font-medium leading-snug text-fg">
+            {pub.url ? (
+              <a
+                href={pub.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-[3px] decoration-fg/30 hover:underline"
+              >
+                {pub.title}
+              </a>
+            ) : (
+              pub.title
+            )}
+          </h3>
+          <AuthorList authors={pub.authors} />
+        </div>
+        {/* Venues on the left, actions pinned to the right of the first one. */}
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1.5">
+          {pub.venues.length > 0 && (
+            <div className="min-w-0 space-y-1">
+              {sortVenues(pub.venues).map((v, i) => (
+                <VenueBadge key={`${v.name}-${v.year}-${i}`} venue={v} />
+              ))}
+            </div>
           )}
-        </h3>
-        <AuthorList authors={pub.authors} />
-        {pub.venues.length > 0 && (
-          <div className="flex flex-col items-start gap-1.5">
-            {sortVenues(pub.venues).map((v, i) => (
-              <VenueBadge key={`${v.name}-${v.year}-${i}`} venue={v} />
-            ))}
-          </div>
-        )}
-        <PublicationActions
-          links={deduped}
-          abstract={pub.description}
-          abstractFooter={venueLabel || year}
-          bibtex={pub.bibtex}
-        />
+          <PublicationActions
+            links={deduped}
+            abstract={pub.description}
+            abstractFooter={venueLabel || year}
+            bibtex={pub.bibtex}
+          />
+        </div>
       </div>
     </article>
   );
