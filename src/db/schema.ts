@@ -1,4 +1,4 @@
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { PublicationLink, Venue } from "@/lib/publications";
 import type { RelatedRef } from "@/lib/research";
 
@@ -257,3 +257,16 @@ export const media = sqliteTable("media", {
     .notNull()
     .$defaultFn(() => new Date()),
 });
+
+// One row per anonymous visitor per day; the composite key makes recording a
+// visit an idempotent insert and a day's unique count a plain COUNT(*).
+// `visitorHash` is an HMAC of IP + user agent keyed per day, so it can't be
+// reversed to an IP or linked across days.
+export const dailyVisitors = sqliteTable(
+  "daily_visitors",
+  {
+    day: text("day").notNull(),
+    visitorHash: text("visitor_hash").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.day, t.visitorHash] })],
+);

@@ -27,6 +27,10 @@ export const env = cleanEnv(process.env, {
     docs: "https://api.github.com/users/<username>",
     desc: "Numeric GitHub account id allowed to sign in (the `id` field, not the username)",
   }),
+  VERCEL_ENV: str({
+    desc: "Set by Vercel (production / preview / development). Unset locally.",
+    default: "",
+  }),
   OMDB_API_KEY: str({
     desc: "OMDb API key for IMDb metadata lookup",
     default: "",

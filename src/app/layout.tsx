@@ -7,6 +7,7 @@ import { NavHistoryTracker } from "@/components/NavHistoryTracker";
 import { PageShell } from "@/components/PageShell";
 import { QuickAddGate } from "@/components/QuickAddGate";
 import { SearchOverlay } from "@/components/SearchOverlay";
+import { VisitBeacon } from "@/components/VisitBeacon";
 import { QueryProvider } from "@/lib/QueryProvider";
 import { SoundProvider } from "@/lib/SoundProvider";
 import { siteUrl } from "@/lib/seo";
@@ -118,6 +119,7 @@ export default function RootLayout({
                 <BottomNav />
                 <SearchOverlay />
                 <QuickAddGate />
+                <VisitBeacon />
               </QueryProvider>
             </SoundProvider>
           </ThemeProvider>

@@ -4,6 +4,7 @@ import { updateWorkingOn } from "@/actions/site-config";
 import { LogoutButton } from "@/components/LogoutButton";
 import { RefreshMetadataButton } from "@/components/RefreshMetadataButton";
 import UserEmail from "@/components/UserEmail";
+import { VisitorStats } from "@/components/VisitorStats";
 import { db } from "@/db";
 import {
   books,
@@ -79,6 +80,8 @@ export default async function DashboardPage() {
           </kbd>
         </span>
       </div>
+
+      <VisitorStats />
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {sections.map((s) => (
