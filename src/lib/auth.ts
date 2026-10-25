@@ -1,29 +1,27 @@
 import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
+import GitHub from "next-auth/providers/github";
 import { env } from "@/lib/env";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   providers: [
-    Credentials({
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const email = credentials?.email as string;
-        const password = credentials?.password as string;
-
-        if (email === env.ADMIN_EMAIL && password === env.ADMIN_PASSWORD) {
-          return { id: "1", email, name: "Admin" };
-        }
-
-        return null;
-      },
+    GitHub({
+      clientId: env.AUTH_GITHUB_ID,
+      clientSecret: env.AUTH_GITHUB_SECRET,
     }),
   ],
+  session: { maxAge: 60 * 60 * 24 * 7 },
+  callbacks: {
+    // Any GitHub account can complete OAuth; only the owner's gets a session.
+    // Matched on the numeric account id, which survives username changes and
+    // can't be claimed by someone registering a freed-up username.
+    signIn({ profile }) {
+      return profile?.id != null && String(profile.id) === env.ADMIN_GITHUB_ID;
+    },
+  },
   pages: {
-    signIn: "/admin",
+    signIn: "/login",
+    error: "/login",
   },
 });
 

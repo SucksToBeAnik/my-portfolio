@@ -44,8 +44,9 @@ TURSO_DATABASE_URL=
 TURSO_AUTH_TOKEN=
 AUTH_SECRET=
 GROQ_API_KEY=
-ADMIN_EMAIL=
-ADMIN_PASSWORD=
+AUTH_GITHUB_ID=
+AUTH_GITHUB_SECRET=
+ADMIN_GITHUB_ID=
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
 ```
 
@@ -64,4 +65,4 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
 
 Connected to Vercel via GitHub — every push to `main` auto-deploys.
 
-Production: https://suckstobeanik.vercel.app
+Production: https://www.anik.fyi

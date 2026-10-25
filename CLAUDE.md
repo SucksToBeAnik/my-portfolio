@@ -126,12 +126,13 @@ All tables defined in `src/db/schema.ts`.
 
 ## Auth
 
-- Use `next-auth` v5 with a credentials provider
-- Single admin user stored in `admin_users` table
-- Password hashed with `bcryptjs`
-- Session stored in a JWT cookie
-- Protect `/admin/*` routes with a middleware check
-- Login page at `/admin` redirects to `/admin/dashboard` on success
+- Use `next-auth` v5 with the GitHub OAuth provider — no passwords
+- Only the GitHub account whose numeric id matches `ADMIN_GITHUB_ID` gets a
+  session (checked in the `signIn` callback)
+- Session stored in a JWT cookie, 7-day max age
+- Protect `/admin/*` routes with a middleware check; mutating server actions call
+  `requireAdmin()`
+- Login page at `/login` redirects to `/admin/dashboard` on success
 
 ## AI Chat (Ask About Me)
 
@@ -167,7 +168,7 @@ All components in `src/components/`:
 - `ChatInput` — text input + send button
 
 ### Admin components (in `src/app/admin/`)
-- `LoginForm` — email + password form
+- `LoginForm` — "Continue with GitHub" button
 - `AdminLayout` — shared admin layout with sidebar
 - `ContentForm` — generic form for creating/editing any content type
 - `ContentList` — generic list view for managing content
@@ -193,8 +194,7 @@ Grouped by domain:
 ## Dependencies to Add
 
 ```
-pnpm add @phosphor-icons/react ai @ai-sdk/openai next-auth@beta bcryptjs
-pnpm add -D @types/bcryptjs
+pnpm add @phosphor-icons/react ai @ai-sdk/openai next-auth@beta
 ```
 
 ## Environment Variables (add to `src/lib/env.ts` and `.env.example`)
@@ -202,8 +202,9 @@ pnpm add -D @types/bcryptjs
 ```
 AUTH_SECRET=                # next-auth encryption secret
 XAI_API_KEY=                # xAI API key for Grok chat
-ADMIN_EMAIL=                # admin login email
-ADMIN_PASSWORD=             # admin login password
+AUTH_GITHUB_ID=             # GitHub OAuth app client ID
+AUTH_GITHUB_SECRET=         # GitHub OAuth app client secret
+ADMIN_GITHUB_ID=            # numeric GitHub id allowed to sign in
 ```
 
 ## Development Workflow

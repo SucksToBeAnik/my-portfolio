@@ -15,11 +15,17 @@ export const env = cleanEnv(process.env, {
   GROQ_API_KEY: str({
     desc: "Groq API key for AI chat",
   }),
-  ADMIN_EMAIL: str({
-    desc: "Admin login email",
+  AUTH_GITHUB_ID: str({
+    docs: "https://authjs.dev/getting-started/providers/github",
+    desc: "GitHub OAuth app client ID for admin sign-in",
   }),
-  ADMIN_PASSWORD: str({
-    desc: "Admin login password",
+  AUTH_GITHUB_SECRET: str({
+    docs: "https://authjs.dev/getting-started/providers/github",
+    desc: "GitHub OAuth app client secret",
+  }),
+  ADMIN_GITHUB_ID: str({
+    docs: "https://api.github.com/users/<username>",
+    desc: "Numeric GitHub account id allowed to sign in (the `id` field, not the username)",
   }),
   OMDB_API_KEY: str({
     desc: "OMDb API key for IMDb metadata lookup",
