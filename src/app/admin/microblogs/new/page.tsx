@@ -3,7 +3,15 @@ import { PostEditor } from "@/components/post-editor/PostEditor";
 export default function NewPostPage() {
   return (
     <PostEditor
-      initial={{ title: "", content: "", microview: "", tags: "", imageUrl: "", published: false }}
+      initial={{
+        title: "",
+        content: "",
+        microview: "",
+        tags: "",
+        imageUrl: "",
+        sources: [],
+        published: false,
+      }}
     />
   );
 }

@@ -20,6 +20,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
         microview: post.microview ?? "",
         tags: post.tags ?? "",
         imageUrl: post.imageUrl ?? "",
+        sources: post.sources ?? [],
         published: post.published ?? false,
         draft: draft
           ? {
@@ -28,6 +29,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
               microview: draft.microview ?? "",
               tags: draft.tags ?? "",
               imageUrl: draft.imageUrl ?? "",
+              sources: draft.sources ?? [],
             }
           : null,
       }}

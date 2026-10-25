@@ -7,6 +7,10 @@ export interface SiteMeta {
   description: string | null;
   image: string | null;
   logo: string | null;
+  publisher?: string | null;
+  author?: string | null;
+  /** ISO date the page reports as published, when it does. */
+  date?: string | null;
 }
 
 /**
@@ -26,6 +30,9 @@ export async function fetchSiteMeta(url: string): Promise<SiteMeta | null> {
       description: json.data.description || null,
       image: json.data.image?.url || null,
       logo: json.data.logo?.url || null,
+      publisher: json.data.publisher || null,
+      author: json.data.author || null,
+      date: json.data.date || null,
     };
   } catch {
     return null;

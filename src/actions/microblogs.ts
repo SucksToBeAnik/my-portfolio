@@ -7,9 +7,12 @@ import { db } from "@/db";
 import { microblogs } from "@/db/schema";
 import { auth, requireAdmin } from "@/lib/auth";
 import { buttondownConfigured, sendBroadcast } from "@/lib/buttondown";
+import { mirrorToCloudinary } from "@/lib/cloudinary";
 import { type MicroblogDraft, microblogDraftSchema } from "@/lib/drafts";
+import { faviconUrl, fetchSiteMeta } from "@/lib/microlink";
 import { revalidateHome } from "@/lib/revalidate-home";
 import { siteUrl, stripMarkdown, truncate } from "@/lib/seo";
+import { sourceHost, sourcesSchema } from "@/lib/sources";
 
 const schema = z.object({
   title: z.string().min(1),
@@ -17,6 +20,7 @@ const schema = z.object({
   microview: z.string().max(180).optional().nullable(),
   tags: z.string().optional().nullable(),
   imageUrl: z.string().optional().nullable(),
+  sources: sourcesSchema.optional().nullable(),
   published: z.boolean().optional(),
   til: z.boolean().optional(),
   publishedAt: z.date().optional().nullable(),
@@ -105,6 +109,41 @@ export async function discardMicroblogDraft(id: number) {
   await requireAdmin();
   await db.update(microblogs).set({ draft: null }).where(eq(microblogs.id, id));
   revalidatePath("/admin/microblogs");
+}
+
+// Pages without a published date often report the time they were scraped, so a
+// "date" from the last couple of days says nothing about the work itself.
+function publishedYear(date: string | null | undefined): string | null {
+  if (!date) return null;
+  const t = Date.parse(date);
+  if (Number.isNaN(t) || Date.now() - t < 2 * 24 * 60 * 60 * 1000) return null;
+  return String(new Date(t).getUTCFullYear());
+}
+
+/**
+ * Prefill a source from its URL: page title, site name, author, year and a
+ * mirrored favicon. Every field is a best guess the author can overwrite.
+ */
+export async function lookupSource(url: string): Promise<{
+  title: string | null;
+  publisher: string;
+  author: string | null;
+  year: string | null;
+  icon: string | null;
+}> {
+  await requireAdmin();
+  const href = z.string().url().parse(url.trim());
+  const [meta, icon] = await Promise.all([
+    fetchSiteMeta(href),
+    mirrorToCloudinary(faviconUrl(href)),
+  ]);
+  return {
+    title: meta?.title ?? null,
+    publisher: meta?.publisher ?? sourceHost(href),
+    author: meta?.author ?? null,
+    year: publishedYear(meta?.date),
+    icon,
+  };
 }
 
 export async function deleteMicroblog(id: number) {

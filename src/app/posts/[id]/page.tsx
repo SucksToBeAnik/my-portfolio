@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getHeartsCounts } from "@/actions/heart-counts";
 import { BackButton } from "@/components/BackButton";
 import { HeartButton } from "@/components/HeartButton";
+import { PostSources } from "@/components/PostSources";
 import { PostToc } from "@/components/PostToc";
 import { PostPreview } from "@/components/post-editor/PostPreview";
 import { SubscribeForm } from "@/components/SubscribeForm";
@@ -88,6 +89,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const [heartCounts] = await Promise.all([getHeartsCounts("microblog", [post.id])]);
   const heartCount = heartCounts[post.id] ?? 0;
   const headings = extractHeadings(post.content);
+  const sources = post.sources ?? [];
 
   const prev =
     (
@@ -120,6 +122,17 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             headline: post.title,
             datePublished: post.publishedAt,
             author: { "@type": "Person", name: "Anik" },
+            ...(sources.length > 0
+              ? {
+                  citation: sources.map((s) => ({
+                    "@type": "CreativeWork",
+                    name: s.title,
+                    url: s.url,
+                    ...(s.author ? { author: s.author } : {}),
+                    ...(s.year ? { datePublished: s.year } : {}),
+                  })),
+                }
+              : {}),
             ...((post.imageUrl ?? firstImage(post.content))
               ? { image: post.imageUrl ?? firstImage(post.content) }
               : {}),
@@ -143,6 +156,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           </div>
 
           <PostPreview content={post.content} className="mt-12 text-fg/80" />
+          <PostSources sources={sources} />
         </article>
       </div>
 

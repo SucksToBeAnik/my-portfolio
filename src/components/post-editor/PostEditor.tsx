@@ -28,6 +28,7 @@ import {
 } from "@/actions/microblogs";
 import { EditPreviewToggle } from "@/components/EditPreviewToggle";
 import { ImageUpload } from "@/components/ImageUpload";
+import { PostSources } from "@/components/PostSources";
 import { PostToc } from "@/components/PostToc";
 import { EditorBubbleMenu } from "@/components/post-editor/EditorBubbleMenu";
 import { CodeBlockTab } from "@/components/post-editor/extensions/codeBlockTab";
@@ -36,8 +37,15 @@ import { PostCodeBlock } from "@/components/post-editor/extensions/PostCodeBlock
 import { type ImageWidth, PostImage } from "@/components/post-editor/extensions/PostImage";
 import { SlashCommand } from "@/components/post-editor/extensions/slashCommand";
 import { PostPreview } from "@/components/post-editor/PostPreview";
+import {
+  type EditableSource,
+  SourcesEditor,
+  toEditable,
+  toSources,
+} from "@/components/post-editor/SourcesEditor";
 import { TagPicker } from "@/components/TagPicker";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import type { Source } from "@/lib/sources";
 import { extractHeadings } from "@/lib/toc";
 
 const microblogTags = [
@@ -59,6 +67,7 @@ export interface PostEditorInitial {
   microview: string;
   tags: string;
   imageUrl: string;
+  sources: Source[];
   published: boolean;
   /**
    * Buffered, not-yet-published edits to a published post. When present the
@@ -71,6 +80,7 @@ export interface PostEditorInitial {
     microview: string;
     tags: string;
     imageUrl: string;
+    sources: Source[];
   } | null;
 }
 
@@ -96,6 +106,7 @@ function normalizePost(s: {
   microview: string;
   tags: string;
   imageUrl: string;
+  sources: EditableSource[];
 }) {
   return {
     title: s.title.trim() || "Untitled",
@@ -103,6 +114,7 @@ function normalizePost(s: {
     microview: s.microview.trim() || null,
     tags: s.tags || null,
     imageUrl: s.imageUrl || null,
+    sources: toSources(s.sources),
   };
 }
 
@@ -121,6 +133,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   const [microview, setMicroview] = useState(start.microview);
   const [tags, setTags] = useState(start.tags);
   const [imageUrl, setImageUrl] = useState(start.imageUrl);
+  const [sources, setSources] = useState(() => start.sources.map(toEditable));
   const [published, setPublished] = useState(initial.published);
   // True when a published post has buffered edits not yet pushed live.
   const [hasDraft, setHasDraft] = useState(!!initial.draft);
@@ -152,8 +165,8 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   }, [preview, title, growTitle]);
 
   // Keep the newest values reachable from debounced callbacks without stale closures.
-  const stateRef = useRef({ id, title, content, microview, tags, imageUrl, published });
-  stateRef.current = { id, title, content, microview, tags, imageUrl, published };
+  const stateRef = useRef({ id, title, content, microview, tags, imageUrl, sources, published });
+  stateRef.current = { id, title, content, microview, tags, imageUrl, sources, published };
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
   // Set to skip the next debounced autosave — used after discarding a draft so
@@ -162,7 +175,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
   // The last-published (live) snapshot, updated on every live write. Editing a
   // published post back to these values means there are no real changes to
   // buffer, so the draft is cleared.
-  const baseRef = useRef(normalizePost(base));
+  const baseRef = useRef(normalizePost({ ...base, sources: base.sources.map(toEditable) }));
   const hasDraftRef = useRef(!!initial.draft);
 
   // Images and videos ride the same node/markdown pipeline — a video is just an
@@ -345,7 +358,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-  }, [title, content, microview, tags, imageUrl, doSave]);
+  }, [title, content, microview, tags, imageUrl, sources, doSave]);
 
   useEffect(() => {
     return () => {
@@ -388,6 +401,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
     setMicroview(base.microview);
     setTags(base.tags);
     setImageUrl(base.imageUrl);
+    setSources(base.sources.map(toEditable));
     editor?.commands.setContent(base.content);
     hasDraftRef.current = false;
     setHasDraft(false);
@@ -621,6 +635,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
             <article>
               <h1 className="m-0 p-0 font-heading text-3xl leading-tight">{title || "Untitled"}</h1>
               <PostPreview content={content} className="mt-6 text-fg/80" interactive={false} />
+              <PostSources sources={toSources(sources) ?? []} />
             </article>
           ) : (
             <>
@@ -641,6 +656,7 @@ export function PostEditor({ postId, initial }: { postId?: number; initial: Post
               <div className="mt-6">
                 <EditorContent editor={editor} />
               </div>
+              <SourcesEditor value={sources} onChange={setSources} />
             </>
           )}
         </div>

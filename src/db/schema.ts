@@ -1,6 +1,7 @@
 import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { PublicationLink, Venue } from "@/lib/publications";
 import type { RelatedRef } from "@/lib/research";
+import type { Source } from "@/lib/sources";
 
 export const adminUsers = sqliteTable("admin_users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -88,6 +89,8 @@ export const microblogs = sqliteTable("microblogs", {
   microview: text("microview"),
   tags: text("tags"),
   imageUrl: text("image_url"),
+  // Listed at the end of the post; see @/lib/sources.
+  sources: text("sources", { mode: "json" }).$type<Source[]>(),
   published: integer("published", { mode: "boolean" }).default(false),
   publishedAt: integer("published_at", { mode: "timestamp" }),
   // JSON snapshot of unpublished edits to a published post — see projects.draft.

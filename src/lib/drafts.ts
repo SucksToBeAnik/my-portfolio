@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { sourcesSchema } from "@/lib/sources";
 
 /**
  * Draft payloads buffer the editable content of an already-published item while
@@ -13,6 +14,7 @@ export const microblogDraftSchema = z.object({
   microview: z.string().nullable().optional(),
   tags: z.string().nullable().optional(),
   imageUrl: z.string().nullable().optional(),
+  sources: sourcesSchema.nullable().optional(),
 });
 export type MicroblogDraft = z.infer<typeof microblogDraftSchema>;
 
