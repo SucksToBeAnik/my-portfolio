@@ -39,7 +39,7 @@ function InterestRow({ r, n }: { r: Interest; n: number }) {
         <div className="space-y-1.5">
           {/* The heading stays inline so the note icon follows its last word,
               and the dialog lives outside the <h3>. */}
-          <div className="text-base font-medium leading-snug text-fg text-balance">
+          <div className="text-base font-medium leading-snug text-fg text-pretty">
             <h3 className="inline">{r.question || r.title}</h3>
             {r.summary && (
               <Peek
