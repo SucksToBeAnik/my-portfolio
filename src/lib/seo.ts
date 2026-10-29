@@ -2,11 +2,13 @@ import { getYouTubeId, isVideoSrc } from "@/components/post-editor/imageTitle";
 
 // VERCEL_URL is the per-deployment preview host, so it must not be used here:
 // canonical and og:url would point at one immutable build instead of the site.
-const BASE_URL =
+// Trailing slashes are stripped so `siteUrl("/x")` never yields "//x".
+const BASE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3000");
+    : "http://localhost:3000")
+).replace(/\/+$/, "");
 
 const DEFAULT_OG_IMAGE = `${BASE_URL}/profile.jpeg`;
 
