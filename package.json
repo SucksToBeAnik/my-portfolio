@@ -32,6 +32,7 @@
     "@tiptap/starter-kit": "^3.27.0",
     "@tiptap/suggestion": "^3.28.0",
     "ai": "^6.0.207",
+    "bowser": "^2.15.0",
     "cuelume": "^0.1.2",
     "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.2",

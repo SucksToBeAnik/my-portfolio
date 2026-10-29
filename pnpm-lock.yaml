@@ -53,6 +53,9 @@ importers:
       ai:
         specifier: ^6.0.207
         version: 6.0.207(zod@4.4.3)
+      bowser:
+        specifier: ^2.15.0
+        version: 2.15.0
       cuelume:
         specifier: ^0.1.2
         version: 0.1.2
@@ -1415,6 +1418,9 @@ packages:
     resolution: {integrity: sha512-girxaJ7WZssDOFhzCGZTDKoTa1gk6A1TbflaYTpykLJ4UU9Fz9kx1aREM8JCuoVHbL8X8T/mJg7w2oYSq72Oig==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+
+  bowser@2.15.0:
+    resolution: {integrity: sha512-xic6KSZglg/I4ymp45fdM4GWfYpBK79Fxd/TOvJktlaPgQqqDxvmGwOPZl2V0dyeS3Lj5c180bLhXF43iyAjZQ==}
 
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
@@ -3200,6 +3206,8 @@ snapshots:
   bail@2.0.2: {}
 
   baseline-browser-mapping@2.10.37: {}
+
+  bowser@2.15.0: {}
 
   buffer-from@1.1.2: {}
 

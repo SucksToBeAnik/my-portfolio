@@ -1,4 +1,4 @@
-import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { PublicationLink, Venue } from "@/lib/publications";
 import type { RelatedRef } from "@/lib/research";
 import type { Source } from "@/lib/sources";
@@ -272,12 +272,49 @@ export const media = sqliteTable("media", {
 // One row per anonymous visitor per day; the composite key makes recording a
 // visit an idempotent insert and a day's unique count a plain COUNT(*).
 // `visitorHash` is an HMAC of IP + user agent keyed per day, so it can't be
-// reversed to an IP or linked across days.
+// reversed to an IP or linked across days. The rest is what the first beacon
+// of the day saw — coarse location from Vercel's geo headers, where they came
+// from, and the parsed browser — plus the pages they went on to open. All of it
+// is null on rows recorded before these columns existed.
 export const dailyVisitors = sqliteTable(
   "daily_visitors",
   {
     day: text("day").notNull(),
     visitorHash: text("visitor_hash").notNull(),
+    firstSeenAt: integer("first_seen_at", { mode: "timestamp" }),
+    lastSeenAt: integer("last_seen_at", { mode: "timestamp" }),
+    country: text("country"),
+    region: text("region"),
+    city: text("city"),
+    timezone: text("timezone"),
+    latitude: real("latitude"),
+    longitude: real("longitude"),
+    referrer: text("referrer"),
+    pages: text("pages", { mode: "json" }).$type<string[]>(),
+    browser: text("browser"),
+    os: text("os"),
+    device: text("device"),
   },
   (t) => [primaryKey({ columns: [t.day, t.visitorHash] })],
+);
+
+// What a visitor did on a page, keyed to their `daily_visitors` row. `time` is
+// how long a page was visible (one row per stretch, so a page that was tabbed
+// away from and back to gets several); `click` is an outbound link or download.
+export const visitEvents = sqliteTable(
+  "visit_events",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    day: text("day").notNull(),
+    visitorHash: text("visitor_hash").notNull(),
+    type: text("type", { enum: ["time", "click"] }).notNull(),
+    path: text("path").notNull(),
+    durationMs: integer("duration_ms"),
+    href: text("href"),
+    label: text("label"),
+    at: integer("at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [index("visit_events_visitor_idx").on(t.day, t.visitorHash)],
 );

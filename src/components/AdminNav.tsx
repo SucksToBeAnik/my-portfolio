@@ -14,6 +14,7 @@ import {
   Lightbulb,
   Quotes,
   SquaresFour,
+  Users,
   Wrench,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
@@ -21,6 +22,7 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: SquaresFour },
+  { href: "/admin/visitors", label: "Visitors", icon: Users },
   { href: "/admin/projects", label: "Projects", icon: FolderOpen },
   { href: "/admin/publications", label: "Publications", icon: Certificate },
   { href: "/admin/research", label: "Research Interests", icon: Flask },

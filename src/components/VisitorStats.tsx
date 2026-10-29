@@ -1,4 +1,5 @@
 import { format, parseISO } from "date-fns";
+import type { ReactNode } from "react";
 import { getDailyVisitors, TRACKING_STARTED } from "@/lib/visitors";
 
 const DAYS = 30;
@@ -15,7 +16,8 @@ function tooltipAlign(i: number) {
   return "left-1/2 -translate-x-1/2";
 }
 
-export async function VisitorStats() {
+/** `children` renders as a footer row inside the card. */
+export async function VisitorStats({ children }: { children?: ReactNode }) {
   const data = await getDailyVisitors(DAYS);
   const tracked = data.flatMap((d) => (d.visitors === null ? [] : [d.visitors]));
   const today = data[data.length - 1].visitors ?? 0;
@@ -109,6 +111,7 @@ export async function VisitorStats() {
           </tbody>
         </table>
       </div>
+      {children}
     </section>
   );
 }

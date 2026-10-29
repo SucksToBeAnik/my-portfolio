@@ -1,6 +1,7 @@
 import { count, eq } from "drizzle-orm";
 import Link from "next/link";
 import { updateWorkingOn } from "@/actions/site-config";
+import { LatestVisitor } from "@/components/LatestVisitor";
 import { LogoutButton } from "@/components/LogoutButton";
 import { RefreshMetadataButton } from "@/components/RefreshMetadataButton";
 import UserEmail from "@/components/UserEmail";
@@ -81,7 +82,9 @@ export default async function DashboardPage() {
         </span>
       </div>
 
-      <VisitorStats />
+      <VisitorStats>
+        <LatestVisitor />
+      </VisitorStats>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {sections.map((s) => (
