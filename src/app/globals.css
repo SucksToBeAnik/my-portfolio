@@ -1597,3 +1597,26 @@ body {
     transform: none !important;
   }
 }
+
+/* Leaflet maps on OSM tiles (see @/lib/map-tiles): only the tile layer is
+   filtered, so markers keep the theme's own colours. Dark mode inverts the
+   greyscale map so land sits near the page background. */
+.map-mono .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(0.85) contrast(0.9);
+}
+[data-theme="light"] .map-mono .leaflet-tile-pane {
+  filter: grayscale(1) contrast(0.9) brightness(1.05);
+}
+.map-mono .leaflet-control-attribution {
+  background: transparent;
+  color: var(--muted);
+  font-size: 9px;
+}
+.map-mono .leaflet-control-attribution a {
+  color: inherit;
+}
+/* CSS beats the SVG presentation attributes Leaflet writes on the path. */
+.map-mono .visitor-dot {
+  fill: var(--fg);
+  stroke: var(--bg);
+}

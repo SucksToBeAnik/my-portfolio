@@ -2,6 +2,7 @@
 
 import { MapPin } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { MAP_TILE_ATTRIBUTION, MAP_TILE_URL } from "@/lib/map-tiles";
 
 interface NominatimResult {
   display_name: string;
@@ -68,9 +69,11 @@ export function LocationPicker({ location, latitude, longitude, onSelect }: Loca
         scrollWheelZoom: false,
       }).setView([latitude, longitude], 10);
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 19,
-      }).addTo(mapInstance.current);
+      L.tileLayer(MAP_TILE_URL, { maxZoom: 19 }).addTo(mapInstance.current);
+      L.control
+        .attribution({ prefix: false })
+        .addAttribution(MAP_TILE_ATTRIBUTION)
+        .addTo(mapInstance.current);
 
       const icon = L.divIcon({
         className: "",
@@ -163,7 +166,7 @@ export function LocationPicker({ location, latitude, longitude, onSelect }: Loca
       {location && (
         <div
           ref={mapRef}
-          className="w-full max-w-sm aspect-video rounded-lg overflow-hidden"
+          className="map-mono w-full max-w-sm aspect-video rounded-lg overflow-hidden"
           style={{ background: "var(--hover-bg)" }}
         />
       )}
