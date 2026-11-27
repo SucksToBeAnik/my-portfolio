@@ -55,7 +55,6 @@ export const metadata: Metadata = {
     "Al Jami Islam Anik",
     "Al Jami Islam",
     "Anik",
-    "Suckstobeanik",
     "software engineer",
     "frontend engineer",
     "Dhaka",

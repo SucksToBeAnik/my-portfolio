@@ -64,7 +64,7 @@ export default async function TilDetailPage({ params }: { params: Promise<{ id: 
             "@type": "Article",
             headline: til.title,
             datePublished: til.createdAt,
-            author: { "@type": "Person", name: "Suckstobeanik" },
+            author: { "@type": "Person", name: "Al Jami Islam Anik" },
             ...(firstImage(til.content) ? { image: firstImage(til.content) } : {}),
           }),
         }}
