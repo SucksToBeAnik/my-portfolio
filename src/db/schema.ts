@@ -183,6 +183,23 @@ export const cvs = sqliteTable("cvs", {
     .$defaultFn(() => new Date()),
 });
 
+export const awards = sqliteTable("awards", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  // Who gave it and for what: "Hugging Face & Gradio Build Small Hackathon 2026".
+  detail: text("detail"),
+  // Free-form so a multi-term honor can read "2022–2024" as well as "2026".
+  year: text("year"),
+  url: text("url"),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export const publications = sqliteTable("publications", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),

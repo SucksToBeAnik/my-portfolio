@@ -14,6 +14,7 @@ import {
   Lightbulb,
   Quotes,
   SquaresFour,
+  Trophy,
   Users,
   Wrench,
 } from "@phosphor-icons/react/dist/ssr";
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/admin/projects", label: "Projects", icon: FolderOpen },
   { href: "/admin/publications", label: "Publications", icon: Certificate },
   { href: "/admin/research", label: "Research Interests", icon: Flask },
+  { href: "/admin/awards", label: "Awards", icon: Trophy },
   { href: "/admin/life-events", label: "Life Events", icon: Heart },
   { href: "/admin/books", label: "Books", icon: BookOpenText },
   { href: "/admin/microblogs", label: "Microblog", icon: Quotes },

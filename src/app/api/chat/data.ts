@@ -1,4 +1,5 @@
 import { desc, eq, inArray } from "drizzle-orm";
+import { getAwards } from "@/actions/awards";
 import { getShowcasedCv } from "@/actions/cvs";
 import { getResearchForHome } from "@/actions/research";
 import { getHomeSettings } from "@/actions/site-config";
@@ -34,6 +35,7 @@ export async function loadContext() {
     researchInterests,
     homeSettings,
     workingOnRows,
+    allAwards,
   ] = await Promise.all([
     db
       .select({
@@ -147,6 +149,9 @@ export async function loadContext() {
       .select()
       .from(siteConfig)
       .where(inArray(siteConfig.key, ["working_on", "working_on_url"])),
+    getAwards().then((rows) =>
+      rows.map(({ title, detail, year, url }) => ({ title, detail, year, url })),
+    ),
   ]);
 
   const config = (key: string) => workingOnRows.find((r) => r.key === key)?.value.trim() || null;
@@ -169,6 +174,7 @@ export async function loadContext() {
     allGallery,
     showcasedCv,
     researchInterests,
+    allAwards,
     intros: homeSettings.intros,
     academicProfiles: homeSettings.profiles.map((p) => ({ name: p.label, url: p.url })),
     workingOn: config("working_on")

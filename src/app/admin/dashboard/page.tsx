@@ -8,6 +8,7 @@ import UserEmail from "@/components/UserEmail";
 import { VisitorStats } from "@/components/VisitorStats";
 import { db } from "@/db";
 import {
+  awards,
   books,
   cvs,
   lifeEvents,
@@ -34,6 +35,7 @@ export default async function DashboardPage() {
   const session = await auth();
   const [projectCount] = await db.select({ c: count() }).from(projects);
   const [publicationCount] = await db.select({ c: count() }).from(publications);
+  const [awardCount] = await db.select({ c: count() }).from(awards);
   const [lifeCount] = await db.select({ c: count() }).from(lifeEvents);
   const [bookCount] = await db.select({ c: count() }).from(books);
   const [microblogCount] = await db.select({ c: count() }).from(microblogs);
@@ -60,6 +62,7 @@ export default async function DashboardPage() {
   const sections = [
     { label: "Projects", count: projectCount.c, href: "/admin/projects" },
     { label: "Publications", count: publicationCount.c, href: "/admin/publications" },
+    { label: "Awards", count: awardCount.c, href: "/admin/awards" },
     { label: "Life Events", count: lifeCount.c, href: "/admin/life-events" },
     { label: "Books", count: bookCount.c, href: "/admin/books" },
     { label: "Microblogs", count: microblogCount.c, href: "/admin/microblogs" },

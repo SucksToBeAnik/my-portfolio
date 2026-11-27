@@ -2,12 +2,14 @@ import { GithubLogo, LinkedinLogo, XLogo } from "@phosphor-icons/react/dist/ssr"
 import { desc, eq, inArray } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
+import { getAwards } from "@/actions/awards";
 import { getShowcasedCv } from "@/actions/cvs";
 import { getExploreSections } from "@/actions/explore";
 import { getFeaturedGallery } from "@/actions/gallery";
 import { getResearchForHome } from "@/actions/research";
 import { getHomeSettings } from "@/actions/site-config";
 import { AcademicProfileIcons } from "@/components/AcademicProfileIcons";
+import { AwardsList } from "@/components/AwardsList";
 import { CareerTrack } from "@/components/CareerTrack";
 import { CvLink } from "@/components/CvLink";
 import { ExploreTiles } from "@/components/ExploreTiles";
@@ -35,7 +37,7 @@ const SOCIAL_URLS = {
 
 const SOCIAL_FALLBACKS: Record<keyof typeof SOCIAL_URLS, SiteMeta> = {
   github: {
-    title: "SucksToBeAnik on GitHub",
+    title: "Anik on GitHub",
     description: "Projects and open-source work by Anik.",
     image: null,
     logo: null,
@@ -47,7 +49,7 @@ const SOCIAL_FALLBACKS: Record<keyof typeof SOCIAL_URLS, SiteMeta> = {
     logo: null,
   },
   x: {
-    title: "@suckstobeanik on X",
+    title: "Anik on X",
     description: "Posts and updates from Anik.",
     image: null,
     logo: null,
@@ -57,7 +59,7 @@ const SOCIAL_FALLBACKS: Record<keyof typeof SOCIAL_URLS, SiteMeta> = {
 // Cached until an admin write calls revalidateHome(), or until the weekly
 // social-preview metadata refresh. Every database source feeding this page
 // revalidates it after a write: featured projects, posts, publications, work
-// and education history (CareerTrack), the home settings, featured photos, the showcased CV, the "working on"
+// and education history (CareerTrack), awards, the home settings, featured photos, the showcased CV, the "working on"
 // config, and the Life/Books/Watch counts behind the explore tiles.
 // Nothing here reads the clock at render time — CareerTrack and FeaturedPhotos
 // derive their years from stored dates, and SelectedProjects formats its
@@ -72,20 +74,20 @@ export function generateStaticParams() {
 }
 
 export const metadata = {
-  title: "Suckstobeanik",
+  title: "Al Jami Islam Anik — Software Engineer",
   description:
-    "Suckstobeanik — a software engineer from Dhaka, Bangladesh who loves building simple solutions. Projects, books, microblog, and more.",
+    "Al Jami Islam Anik — a software engineer and researcher from Dhaka, Bangladesh. Research, publications, projects, writing, and more.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Suckstobeanik",
+    title: "Al Jami Islam Anik — Software Engineer",
     description:
-      "Suckstobeanik — a software engineer from Dhaka, Bangladesh who loves building simple solutions. Projects, books, microblog, and more.",
+      "Al Jami Islam Anik — a software engineer and researcher from Dhaka, Bangladesh. Research, publications, projects, writing, and more.",
     url: "/",
   },
   twitter: {
-    title: "Suckstobeanik",
+    title: "Al Jami Islam Anik — Software Engineer",
     description:
-      "Suckstobeanik — a software engineer from Dhaka, Bangladesh who loves building simple solutions.",
+      "Al Jami Islam Anik — a software engineer and researcher from Dhaka, Bangladesh.",
   },
 };
 
@@ -106,6 +108,7 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
     socialMetadata,
     profileMetadata,
     research,
+    allAwards,
   ] = await Promise.all([
     db
       .select({
@@ -169,6 +172,7 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
     Promise.all(Object.values(SOCIAL_URLS).map(fetchCachedSiteMeta)),
     Promise.all(settings.profiles.map((p) => fetchCachedSiteMeta(p.url))),
     mode === "academia" ? getResearchForHome() : [],
+    getAwards(),
   ]);
 
   const workingOn = workingOnRow[0]?.value ?? null;
@@ -201,11 +205,20 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
     publications: <HomePublications key="publications" publications={allPublications} />,
     experience: <CareerTrack key="experience" label="Industry Experience" items={workEvents} />,
     education: <CareerTrack key="education" label="Education" items={educationEvents} />,
+    awards: <AwardsList key="awards" awards={allAwards} />,
   };
   // Academics read research first; industry readers want what you've built.
   const order: Record<Mode, (keyof typeof sections)[]> = {
-    academia: ["research", "publications", "education", "experience", "posts", "projects"],
-    industry: ["projects", "posts", "publications", "experience", "education"],
+    academia: [
+      "research",
+      "publications",
+      "awards",
+      "education",
+      "experience",
+      "posts",
+      "projects",
+    ],
+    industry: ["projects", "posts", "publications", "experience", "education", "awards"],
   };
 
   return (
@@ -217,7 +230,6 @@ export default async function Home({ params }: { params: Promise<{ mode: string 
             "@context": "https://schema.org",
             "@type": "Person",
             name: "Al Jami Islam Anik",
-            alternateName: "Suckstobeanik",
             url: "https://www.anik.fyi",
             image: "https://www.anik.fyi/profile.jpeg",
             jobTitle: "Software Engineer",
