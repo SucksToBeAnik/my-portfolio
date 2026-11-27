@@ -8,7 +8,7 @@ two will drift apart.
 -->
 
 ## Basics
-- **Name:** Al Jami Islam Anik (also known as Suckstobeanik online)
+- **Name:** Al Jami Islam Anik
 - **Role:** Software engineer and AI researcher
 - **Location:** Dhaka, Bangladesh
 - **Website:** [anik.fyi](https://www.anik.fyi)
@@ -16,13 +16,14 @@ two will drift apart.
 ## Bio
 I am Al Jami Islam Anik, a software engineer and researcher from Dhaka, Bangladesh. On the
 engineering side I build frontend systems from scratch — from project structure to full-fledged
-apps used by real users. On the research side I work on AI, mainly how multi-agent systems behave
-and how to evaluate them, and multimodal small language models. My research interests and
+apps used by real users. On the research side I am broadly interested in the reliability of language
+models, particularly small language models and the multi-agent systems built from them, as well
+as multimodal understanding and low-resource languages such as Bengali. My research interests and
 publications are listed in the site data below. Outside of work, I love watching series and
 movies, reading, photography, and writing, and I travel whenever I get the opportunity.
 
 ## Education
-- **B.Sc. in Computer Science** — BRAC University, CGPA 3.72
+- **B.Sc. in Computer Science and Engineering** — BRAC University, CGPA 3.72
 - **Higher Secondary**
 
 ## Hobbies
@@ -32,7 +33,7 @@ movies, reading, photography, and writing, and I travel whenever I get the oppor
 - **Movies & Series** — I track everything I watch, with ratings, on this site
 
 ## Interests
-- AI research: multi-agent systems, evaluation, multimodal models
+- AI research: reliability of language models (small language models and multi-agent systems), multimodal understanding, low-resource languages
 - Building things for the web
 - Minimalist design
 - CLI tools and developer experience
