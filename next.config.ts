@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     // cache in .next/dev/cache shows up directly as dev-server RSS (it hit
     // 7.5 GB / 7 GB resident here). Off: slower warm restarts, bounded memory.
     turbopackFileSystemCacheForDev: false,
+    agentUpgrade: "security",
   },
   images: {
     remotePatterns: [
